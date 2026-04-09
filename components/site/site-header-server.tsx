@@ -14,16 +14,23 @@ export async function SiteHeaderServer() {
   };
 
   if (hasSupabaseEnv) {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const supabase = await createSupabaseServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (user) {
-      const profile = await getWorkspaceAccountProfile(supabase, user.id);
+      if (user) {
+        const profile = await getWorkspaceAccountProfile(supabase, user.id);
+        account = {
+          authenticated: true,
+          plan: profile?.plan ?? "free",
+        };
+      }
+    } catch {
       account = {
-        authenticated: true,
-        plan: profile?.plan ?? "free",
+        authenticated: false,
+        plan: null,
       };
     }
   }
