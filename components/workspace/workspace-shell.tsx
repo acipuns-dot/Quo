@@ -1,0 +1,46 @@
+import type { ReactNode } from "react";
+import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
+import { BusinessSwitcher } from "./business-switcher";
+import { BusinessPanel } from "./business-panel";
+import { CustomerPanel } from "./customer-panel";
+import { DocumentHistoryPanel } from "./document-history-panel";
+import { WorkspaceSidebar } from "./workspace-sidebar";
+
+type WorkspaceShellProps = {
+  activeBusiness: BusinessRecord;
+  businesses: BusinessRecord[];
+  customers: CustomerRecord[];
+  documents: SavedDocumentRecord[];
+  children: ReactNode;
+};
+
+export function WorkspaceShell({
+  activeBusiness,
+  businesses,
+  customers,
+  documents,
+  children,
+}: WorkspaceShellProps) {
+  return (
+    <div className="flex h-screen flex-col overflow-hidden bg-[#111111] text-[#faf9f7]">
+      <header className="flex-shrink-0 border-b border-white/[0.07] bg-[#111111]">
+        <div className="flex items-center justify-between px-5 py-3">
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-extrabold tracking-[0.06em] text-[#faf9f7]">QUO<span className="text-[#d4901e]">.</span></div>
+            <span className="rounded-full border border-[#d4901e]/25 bg-[#d4901e]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d4901e]">Premium</span>
+          </div>
+          <BusinessSwitcher businesses={businesses} activeBusinessId={activeBusiness.id} />
+        </div>
+      </header>
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <aside className="flex w-[220px] flex-shrink-0 flex-col gap-3 overflow-y-auto border-r border-white/[0.07] p-4">
+          <WorkspaceSidebar />
+          <BusinessPanel businesses={businesses} />
+          <CustomerPanel customers={customers} />
+          <DocumentHistoryPanel documents={documents} />
+        </aside>
+        <main className="flex flex-1 flex-col min-h-0 overflow-hidden">{children}</main>
+      </div>
+    </div>
+  );
+}

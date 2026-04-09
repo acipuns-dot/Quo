@@ -1,0 +1,32 @@
+# Ignore everything by default.
+*
+
+# Keep the ignore file itself.
+!.gitignore
+
+# Keep the web app source.
+!app/
+!app/**
+!components/
+!components/**
+!lib/
+!lib/**
+!supabase/
+!supabase/**
+!types/
+!types/**
+!tests/
+!tests/**
+
+# Keep web project config and package metadata.
+!.env.example
+!package.json
+!package-lock.json
+!next-env.d.ts
+!next.config.ts
+!tailwind.config.ts
+!postcss.config.js
+!tsconfig.json
+!eslint.config.mjs
+!playwright.config.ts
+!vitest.config.ts
