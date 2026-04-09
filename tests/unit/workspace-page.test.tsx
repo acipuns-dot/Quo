@@ -20,6 +20,8 @@ const { getWorkspaceAccountProfile } = vi.hoisted(() => ({
 }));
 const redirect = vi.fn();
 const notFound = vi.fn();
+const routerPush = vi.fn();
+const routerRefresh = vi.fn();
 
 vi.mock("../../lib/supabase/server", () => ({
   createSupabaseServerClient,
@@ -51,6 +53,10 @@ vi.mock("../../lib/workspace/account-profiles", () => ({
 vi.mock("next/navigation", () => ({
   redirect,
   notFound,
+  useRouter: () => ({
+    push: routerPush,
+    refresh: routerRefresh,
+  }),
 }));
 
 vi.mock("../../components/workspace/workspace-shell", () => ({
@@ -232,7 +238,7 @@ describe("workspace page", () => {
     expect(redirect).toHaveBeenCalledWith("/invoice?upsell=workspace");
   });
 
-  it("shows the premium empty state when a premium user has no businesses", async () => {
+  it("shows first-business onboarding for premium users with no businesses", async () => {
     createSupabaseServerClient.mockResolvedValue({
       auth: {
         getUser: vi.fn().mockResolvedValue({
@@ -258,7 +264,13 @@ describe("workspace page", () => {
       searchParams: Promise.resolve({}),
     });
 
-    const { container } = render(view);
-    expect(container).toHaveTextContent("Create your first business to start using Quo Premium.");
+    render(view);
+
+    expect(
+      screen.getByRole("heading", { name: /set up your first business/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/business name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/default currency/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /create business/i })).toBeInTheDocument();
   });
 });

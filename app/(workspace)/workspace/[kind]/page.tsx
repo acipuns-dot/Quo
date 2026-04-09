@@ -2,6 +2,7 @@ import React from "react";
 import { notFound, redirect } from "next/navigation";
 import { DocumentGenerator } from "../../../../components/generator/document-generator";
 import { BusinessDefaultsBanner } from "../../../../components/workspace/business-defaults-banner";
+import { FirstBusinessOnboarding } from "../../../../components/workspace/first-business-onboarding";
 import { WorkspaceShell } from "../../../../components/workspace/workspace-shell";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 import type { DocumentKind } from "../../../../lib/documents/types";
@@ -95,7 +96,7 @@ export default async function WorkspaceKindPage({
   const activeBusiness = resolveActiveBusiness(businesses, resolvedSearchParams?.businessId);
 
   if (!activeBusiness) {
-    return <main className="p-6">Create your first business to start using Quo Premium.</main>;
+    return <FirstBusinessOnboarding kind={kind as DocumentKind} />;
   }
 
   const [customers, documents] = await Promise.all([
