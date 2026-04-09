@@ -17,6 +17,8 @@ vi.mock("../../lib/supabase/server", () => ({
 
 vi.mock("../../lib/workspace/account-profiles", () => ({
   getWorkspaceAccountProfile,
+  resolvePostAuthPath: (plan: "free" | "premium", kind = "invoice") =>
+    plan === "premium" ? `/workspace/${kind}` : `/${kind}`,
 }));
 
 vi.mock("../../components/site/site-header", () => ({
@@ -67,6 +69,7 @@ describe("profile page", () => {
     expect(screen.getByText(/owner@example.com/i)).toBeInTheDocument();
     expect(screen.getByText(/free plan/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /upgrade to premium/i })).toHaveAttribute("href", "/upgrade");
+    expect(screen.getByRole("link", { name: /back to documents/i })).toHaveAttribute("href", "/invoice");
     expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
   });
 
@@ -87,6 +90,10 @@ describe("profile page", () => {
 
     expect(screen.getByText(/premium plan/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /open workspace/i })).toHaveAttribute("href", "/workspace/invoice");
+    expect(screen.getByRole("link", { name: /back to documents/i })).toHaveAttribute(
+      "href",
+      "/workspace/invoice",
+    );
     expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
   });
 });

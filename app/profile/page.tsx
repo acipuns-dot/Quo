@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "../../components/site/site-header";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
-import { getWorkspaceAccountProfile } from "../../lib/workspace/account-profiles";
+import { getWorkspaceAccountProfile, resolvePostAuthPath } from "../../lib/workspace/account-profiles";
 
 export default async function ProfilePage() {
   const supabase = await createSupabaseServerClient();
@@ -29,6 +29,7 @@ export default async function ProfilePage() {
 
   const profile = await getWorkspaceAccountProfile(supabase, user.id);
   const plan = profile?.plan ?? "free";
+  const documentsHref = resolvePostAuthPath(plan, "invoice");
 
   return (
     <>
@@ -84,7 +85,7 @@ export default async function ProfilePage() {
               )}
 
               <Link
-                href="/invoice"
+                href={documentsHref}
                 className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/75"
               >
                 Back to documents
