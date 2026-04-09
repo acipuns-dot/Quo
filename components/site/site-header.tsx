@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,49 +9,14 @@ const navLinks = [
   { href: "/#faq", label: "FAQ" },
 ] as const;
 
-type HeaderAccountState = {
+export type SiteHeaderAccount = {
   authenticated: boolean;
   plan: "free" | "premium" | null;
 };
 
-export function SiteHeader() {
+export function SiteHeader({ account }: { account: SiteHeaderAccount }) {
   const pathname = usePathname();
-  const [account, setAccount] = useState<HeaderAccountState | null>(null);
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadAccount() {
-      try {
-        const response = await fetch("/api/account", { method: "GET" });
-
-        if (!response.ok) {
-          throw new Error("Unable to load account");
-        }
-
-        const payload = (await response.json()) as HeaderAccountState & { redirectTo: string };
-
-        if (active) {
-          setAccount({
-            authenticated: payload.authenticated,
-            plan: payload.plan,
-          });
-        }
-      } catch {
-        if (active) {
-          setAccount({ authenticated: false, plan: null });
-        }
-      }
-    }
-
-    void loadAccount();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const isAuthenticated = account?.authenticated ?? false;
+  const isAuthenticated = account.authenticated;
 
   return (
     <header className="quo-site-header sticky top-0 z-10 border-b">

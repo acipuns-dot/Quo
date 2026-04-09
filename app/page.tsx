@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { SiteHeader } from "../components/site/site-header";
+import { SiteHeaderServer } from "../components/site/site-header-server";
 
 const docTypes = [
   {
@@ -69,7 +69,7 @@ const faqs = [
 export default function HomePage() {
   return (
     <>
-      <SiteHeader />
+      <SiteHeaderServer />
 
       {/* ── 1. Hero — centered minimal ── */}
       <section className="quo-hero relative overflow-hidden text-center">

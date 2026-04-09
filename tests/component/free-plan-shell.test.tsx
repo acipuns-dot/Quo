@@ -14,7 +14,7 @@ vi.mock("../../components/site/site-header", () => ({
 }));
 
 describe("FreePlanShell", () => {
-  it("opens the premium upsell modal with shared benefits and an upgrade link", async () => {
+  it("shows a compact premium notice for free users and opens the upsell modal from the single CTA", async () => {
     const user = userEvent.setup();
 
     render(
@@ -25,15 +25,16 @@ describe("FreePlanShell", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /saved customers/i }));
+    expect(screen.getByText(/free plan/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/save repeat customer details, reopen document history, and manage multiple businesses/i),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /upgrade now/i }));
 
     const dialog = screen.getByRole("dialog", { name: /unlock quo premium/i });
 
     expect(dialog).toBeInTheDocument();
-    expect(within(dialog).getByText(/save repeat customer details once/i)).toBeInTheDocument();
-    expect(within(dialog).getByText(/multi-business workspace/i)).toBeInTheDocument();
-    expect(within(dialog).getByText(/document history/i)).toBeInTheDocument();
-    expect(within(dialog).getByText(/continue work across devices/i)).toBeInTheDocument();
     expect(within(dialog).getByRole("link", { name: /upgrade to premium/i })).toHaveAttribute("href", "/upgrade");
   });
 });

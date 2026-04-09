@@ -21,7 +21,7 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader account={{ authenticated: true, plan }} />
       <main className="min-h-screen bg-[linear-gradient(180deg,#111111_0%,#1e1408_100%)] px-6 py-16 text-white">
         <section className="mx-auto max-w-4xl rounded-[32px] border border-[#d4901e]/20 bg-[#18120d] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-12">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#d4901e]/30 bg-[#d4901e]/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#d4901e]">

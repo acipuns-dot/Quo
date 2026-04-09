@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SiteHeader } from "../../components/site/site-header";
+import { SiteHeaderServer } from "../../components/site/site-header-server";
 
 const premiumBenefits = [
   "Multi-business workspace",
@@ -11,7 +11,7 @@ const premiumBenefits = [
 export default function UpgradePage() {
   return (
     <>
-      <SiteHeader />
+      <SiteHeaderServer />
       <main className="min-h-screen bg-[#120d08] px-6 py-16 text-[#faf9f7]">
         <section className="mx-auto max-w-4xl rounded-[32px] border border-[#d4901e]/20 bg-[#18120d] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-12">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#d4901e]">Upgrade</p>
