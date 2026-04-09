@@ -13,17 +13,21 @@ export default async function LoginPage() {
   );
 
   if (hasSupabaseEnv) {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const supabase = await createSupabaseServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (user) {
-      const profile = await getWorkspaceAccountProfile(supabase, user.id);
+      if (user) {
+        const profile = await getWorkspaceAccountProfile(supabase, user.id);
 
-      if (profile?.plan === "premium") {
-        redirect(resolvePostAuthPath(profile.plan, "invoice"));
+        if (profile?.plan === "premium") {
+          redirect(resolvePostAuthPath(profile.plan, "invoice"));
+        }
       }
+    } catch {
+      // If Supabase is temporarily unavailable, keep the login page reachable.
     }
   }
 

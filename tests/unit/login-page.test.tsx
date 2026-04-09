@@ -83,10 +83,30 @@ describe("login page", () => {
 
     render(view);
 
-  expect(
-    screen.getByText(/premium login needs supabase environment variables/i),
-  ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Create account tab" })).toBeDisabled();
-});
+    expect(
+      screen.getByText(/premium login needs supabase environment variables/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Create account tab" })).toBeDisabled();
+  });
+
+  it("renders the login page instead of crashing when Supabase user lookup throws", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
+
+    createSupabaseServerClient.mockResolvedValue({
+      auth: {
+        getUser: vi.fn().mockRejectedValue(new Error("supabase unavailable")),
+      },
+    });
+
+    const loginPageModule = await import("../../app/(auth)/login/page");
+    const view = await loginPageModule.default();
+
+    render(view);
+
+    expect(redirect).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: /sign in to quo premium/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled();
+  });
 });
