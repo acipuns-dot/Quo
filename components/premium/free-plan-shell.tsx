@@ -25,8 +25,8 @@ export function FreePlanShell({
     setFeature(initialUpsellFeature);
   }, [initialUpsellFeature]);
 
-  const isSignedInFree = account.authenticated && account.plan === "free";
   const isPremium = account.authenticated && account.plan === "premium";
+  const shouldShowUpsellBanner = !isPremium;
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID;
   const shouldShowAds = !isPremium && Boolean(publisherId);
 
@@ -34,7 +34,7 @@ export function FreePlanShell({
     <div className="flex h-screen flex-col overflow-hidden bg-[#120d08]">
       {shouldShowAds ? <GoogleAdSenseAutoAds publisherId={publisherId!} /> : null}
       <SiteHeader account={account} />
-      {isSignedInFree ? (
+      {shouldShowUpsellBanner ? (
         <div className="border-b border-[#3a2a18] bg-[linear-gradient(90deg,#1c140d_0%,#24170f_100%)] px-6 py-3 text-[#faf9f7]">
           <div className="mx-auto flex max-w-6xl flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-3">

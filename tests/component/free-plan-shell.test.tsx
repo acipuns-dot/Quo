@@ -53,7 +53,9 @@ describe("FreePlanShell", () => {
     expect(within(dialog).getByRole("link", { name: /upgrade to premium/i })).toHaveAttribute("href", "/upgrade");
   });
 
-  it("shows the AdSense script for logged-out users", () => {
+  it("shows the premium banner and AdSense script for logged-out users", async () => {
+    const user = userEvent.setup();
+
     render(
       <FreePlanShell
         kind="quotation"
@@ -62,8 +64,18 @@ describe("FreePlanShell", () => {
       />,
     );
 
-    expect(screen.queryByText(/free plan/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/free plan/i)).toBeInTheDocument();
     expect(screen.getByTestId("adsense-auto-ads")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /upgrade now/i }));
+
+    const dialog = screen.getByRole("dialog", { name: /unlock quo premium/i });
+
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByRole("link", { name: /upgrade to premium/i })).toHaveAttribute(
+      "href",
+      "/upgrade",
+    );
   });
 
   it("hides the AdSense script for signed-in premium users", () => {
