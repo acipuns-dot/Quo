@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import type { DocumentKind } from "../../lib/documents/types";
 import { DocumentGenerator } from "../generator/document-generator";
+import { GoogleAdSenseAutoAds } from "../ads/google-adsense-auto-ads";
 import { SiteHeader } from "../site/site-header";
 import type { SiteHeaderAccount } from "../site/site-header";
 import { PremiumUpsellModal } from "./premium-upsell-modal";
@@ -25,9 +26,13 @@ export function FreePlanShell({
   }, [initialUpsellFeature]);
 
   const isSignedInFree = account.authenticated && account.plan === "free";
+  const isPremium = account.authenticated && account.plan === "premium";
+  const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID;
+  const shouldShowAds = !isPremium && Boolean(publisherId);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#120d08]">
+      {shouldShowAds ? <GoogleAdSenseAutoAds publisherId={publisherId!} /> : null}
       <SiteHeader account={account} />
       {isSignedInFree ? (
         <div className="border-b border-[#3a2a18] bg-[linear-gradient(90deg,#1c140d_0%,#24170f_100%)] px-6 py-3 text-[#faf9f7]">
