@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
+import Link from "next/link";
 import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
 import { BusinessSwitcher } from "./business-switcher";
 import { BusinessPanel } from "./business-panel";
@@ -29,7 +30,15 @@ export function WorkspaceShell({
             <div className="text-sm font-extrabold tracking-[0.06em] text-[#faf9f7]">QUO<span className="text-[#d4901e]">.</span></div>
             <span className="rounded-full border border-[#d4901e]/25 bg-[#d4901e]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d4901e]">Premium</span>
           </div>
-          <BusinessSwitcher businesses={businesses} activeBusinessId={activeBusiness.id} />
+          <div className="flex items-center gap-3">
+            <BusinessSwitcher businesses={businesses} activeBusinessId={activeBusiness.id} />
+            <Link
+              href="/profile"
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-white/75 transition hover:border-white/20 hover:text-white"
+            >
+              Profile
+            </Link>
+          </div>
         </div>
       </header>
       <div className="flex flex-1 min-h-0 overflow-hidden">
