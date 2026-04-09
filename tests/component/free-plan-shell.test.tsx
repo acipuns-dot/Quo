@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { FreePlanShell } from "../../components/premium/free-plan-shell";
@@ -14,7 +14,7 @@ vi.mock("../../components/site/site-header", () => ({
 }));
 
 describe("FreePlanShell", () => {
-  it("opens the premium upsell modal when a locked feature is clicked", async () => {
+  it("opens the premium upsell modal with shared benefits and an upgrade link", async () => {
     const user = userEvent.setup();
 
     render(
@@ -27,7 +27,13 @@ describe("FreePlanShell", () => {
 
     await user.click(screen.getByRole("button", { name: /saved customers/i }));
 
-    expect(screen.getByRole("dialog", { name: /unlock quo premium/i })).toBeInTheDocument();
-    expect(screen.getByText(/reusable saved customers/i)).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: /unlock quo premium/i });
+
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText(/save repeat customer details once/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/multi-business workspace/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/document history/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/continue work across devices/i)).toBeInTheDocument();
+    expect(within(dialog).getByRole("link", { name: /upgrade to premium/i })).toHaveAttribute("href", "/upgrade");
   });
 });
