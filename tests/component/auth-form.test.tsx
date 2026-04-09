@@ -9,7 +9,6 @@ const push = vi.fn();
 const refresh = vi.fn();
 const signInWithPassword = vi.fn();
 const signUp = vi.fn();
-const signInWithOAuth = vi.fn();
 const fetchMock = vi.fn();
 
 vi.mock("../../lib/supabase/client", () => ({
@@ -17,7 +16,6 @@ vi.mock("../../lib/supabase/client", () => ({
     auth: {
       signInWithPassword,
       signUp,
-      signInWithOAuth,
     },
   }),
 }));
@@ -35,7 +33,6 @@ describe("AuthForm", () => {
     vi.stubGlobal("fetch", fetchMock);
     signInWithPassword.mockResolvedValue({ data: {}, error: null });
     signUp.mockResolvedValue({ data: { session: null }, error: null });
-    signInWithOAuth.mockResolvedValue({ data: {}, error: null });
   });
 
   it("signs in with email and password in sign-in mode", async () => {
@@ -79,18 +76,10 @@ describe("AuthForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("starts Google sign-in with the auth callback route", async () => {
-    const user = userEvent.setup();
+  it("does not render a Google sign-in button", () => {
     render(<AuthForm />);
 
-    await user.click(screen.getByRole("button", { name: /continue with google/i }));
-
-    expect(signInWithOAuth).toHaveBeenCalledWith({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=%2Fworkspace%2Finvoice`,
-      },
-    });
+    expect(screen.queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
   });
 
   it("routes signed-in free users into the free invoice flow", async () => {
@@ -119,7 +108,7 @@ describe("AuthForm", () => {
     expect(
       screen.getByText("Premium login needs Supabase environment variables."),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /continue with google/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Create account tab" })).toBeDisabled();
   });
 });

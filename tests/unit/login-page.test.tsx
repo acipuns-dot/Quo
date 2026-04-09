@@ -83,10 +83,10 @@ describe("login page", () => {
 
     render(view);
 
-    expect(
-      screen.getByText(/premium login needs supabase environment variables/i),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /continue with google/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
-  });
+  expect(
+    screen.getByText(/premium login needs supabase environment variables/i),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Sign in" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Create account tab" })).toBeDisabled();
+});
 });

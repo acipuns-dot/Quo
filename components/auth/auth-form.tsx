@@ -92,35 +92,6 @@ export function AuthForm({
     }
   }
 
-  async function handleGoogleAuth() {
-    setIsSubmitting(true);
-    setError(null);
-    setMessage(null);
-
-    try {
-      if (!supabase) {
-        throw new Error(reason ?? "Premium login is currently unavailable.");
-      }
-
-      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent("/workspace/invoice")}`;
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-        },
-      });
-
-      if (oauthError) {
-        throw oauthError;
-      }
-    } catch (caughtError) {
-      const nextError =
-        caughtError instanceof Error ? caughtError.message : "Something went wrong. Please try again.";
-      setError(nextError);
-      setIsSubmitting(false);
-    }
-  }
-
   return (
     <div className="w-full rounded-[28px] border border-white/10 bg-[#18120d]/95 p-8 text-[#faf9f7] shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur">
       <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#d4901e]/30 bg-[#d4901e]/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#d4901e]">
@@ -179,25 +150,7 @@ export function AuthForm({
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={handleGoogleAuth}
-        disabled={disabled || isSubmitting}
-        className="mt-6 flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white px-4 py-3.5 text-sm font-semibold text-[#111111] transition hover:bg-[#f4efe7] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f1f1f1] text-xs font-bold text-[#111111]">
-          G
-        </span>
-        Continue with Google
-      </button>
-
-      <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.22em] text-white/30">
-        <div className="h-px flex-1 bg-white/10" />
-        or
-        <div className="h-px flex-1 bg-white/10" />
-      </div>
-
-      <form className="space-y-4" onSubmit={handleEmailAuth}>
+      <form className="mt-6 space-y-4" onSubmit={handleEmailAuth}>
         <label className="block">
           <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
             Email
