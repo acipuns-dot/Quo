@@ -70,6 +70,9 @@ describe("AuthForm", () => {
     expect(signUp).toHaveBeenCalledWith({
       email: "owner@example.com",
       password: "super-secret",
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=%2Fworkspace%2Finvoice`,
+      },
     });
     expect(
       screen.getByText(/check your email for a confirmation link/i),

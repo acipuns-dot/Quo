@@ -66,9 +66,13 @@ export function AuthForm({
         return;
       }
 
+      const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent("/workspace/invoice")}`;
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo,
+        },
       });
 
       if (signUpError) {
