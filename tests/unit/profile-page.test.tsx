@@ -49,7 +49,7 @@ describe("profile page", () => {
     expect(redirect).toHaveBeenCalledWith("/login");
   });
 
-  it("renders the free plan profile state with an upgrade CTA", async () => {
+  it("renders the free plan profile state with upgrade and logout actions", async () => {
     createSupabaseServerClient.mockResolvedValue({
       auth: {
         getUser: vi.fn().mockResolvedValue({
@@ -67,9 +67,10 @@ describe("profile page", () => {
     expect(screen.getByText(/owner@example.com/i)).toBeInTheDocument();
     expect(screen.getByText(/free plan/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /upgrade to premium/i })).toHaveAttribute("href", "/upgrade");
+    expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
   });
 
-  it("renders the premium profile state with a workspace CTA", async () => {
+  it("renders the premium profile state with workspace and logout actions", async () => {
     createSupabaseServerClient.mockResolvedValue({
       auth: {
         getUser: vi.fn().mockResolvedValue({
@@ -86,5 +87,6 @@ describe("profile page", () => {
 
     expect(screen.getByText(/premium plan/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /open workspace/i })).toHaveAttribute("href", "/workspace/invoice");
+    expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
   });
 });

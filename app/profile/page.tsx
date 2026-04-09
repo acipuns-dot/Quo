@@ -16,6 +16,17 @@ export default async function ProfilePage() {
     return null;
   }
 
+  async function logout() {
+    "use server";
+
+    try {
+      const logoutSupabase = await createSupabaseServerClient();
+      await logoutSupabase.auth.signOut();
+    } finally {
+      redirect("/");
+    }
+  }
+
   const profile = await getWorkspaceAccountProfile(supabase, user.id);
   const plan = profile?.plan ?? "free";
 
@@ -78,6 +89,15 @@ export default async function ProfilePage() {
               >
                 Back to documents
               </Link>
+
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/75 transition hover:border-white/20 hover:text-white"
+                >
+                  Log out
+                </button>
+              </form>
             </div>
           </div>
         </section>
