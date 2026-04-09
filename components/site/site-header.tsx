@@ -4,7 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const navLinks = [
+const navLinks = [] as const;
+
+const landingPageLinks = [
   { href: "/#plans", label: "Pricing" },
   { href: "/#faq", label: "FAQ" },
 ] as const;
@@ -17,6 +19,7 @@ export type SiteHeaderAccount = {
 export function SiteHeader({ account }: { account: SiteHeaderAccount }) {
   const pathname = usePathname();
   const isAuthenticated = account.authenticated;
+  const links = pathname === "/" ? [...navLinks, ...landingPageLinks] : navLinks;
 
   return (
     <header className="quo-site-header sticky top-0 z-10 border-b">
@@ -25,7 +28,7 @@ export function SiteHeader({ account }: { account: SiteHeaderAccount }) {
           QUO
         </Link>
         <nav className="hidden md:flex gap-1 text-sm font-medium">
-          {navLinks.map((link) => {
+          {links.map((link) => {
             const isActive = pathname === link.href;
             return (
               <Link
