@@ -2,10 +2,6 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { AuthForm } from "../../../components/auth/auth-form";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
-import {
-  getWorkspaceAccountProfile,
-  resolvePostAuthPath,
-} from "../../../lib/workspace/account-profiles";
 
 export default async function LoginPage() {
   const hasSupabaseEnv = Boolean(
@@ -20,11 +16,7 @@ export default async function LoginPage() {
       } = await supabase.auth.getUser();
 
       if (user) {
-        const profile = await getWorkspaceAccountProfile(supabase, user.id);
-
-        if (profile?.plan === "premium") {
-          redirect(resolvePostAuthPath(profile.plan, "invoice"));
-        }
+        redirect("/profile");
       }
     } catch {
       // If Supabase is temporarily unavailable, keep the login page reachable.

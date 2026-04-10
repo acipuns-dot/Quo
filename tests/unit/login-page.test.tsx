@@ -37,7 +37,7 @@ describe("login page", () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   });
 
-  it("redirects signed-in premium users to the workspace entry route", async () => {
+  it("redirects signed-in premium users to profile", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
 
@@ -53,10 +53,10 @@ describe("login page", () => {
     const loginPageModule = await import("../../app/(auth)/login/page");
     await loginPageModule.default();
 
-    expect(redirect).toHaveBeenCalledWith("/workspace/invoice");
+    expect(redirect).toHaveBeenCalledWith("/profile");
   });
 
-  it("keeps signed-in free users on the login page instead of redirecting to workspace", async () => {
+  it("redirects signed-in free users to profile", async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
 
@@ -71,10 +71,9 @@ describe("login page", () => {
     getWorkspaceAccountProfile.mockResolvedValue({ plan: "free" });
 
     const loginPageModule = await import("../../app/(auth)/login/page");
-    const view = await loginPageModule.default();
+    await loginPageModule.default();
 
-    expect(redirect).not.toHaveBeenCalled();
-    expect(view).toBeTruthy();
+    expect(redirect).toHaveBeenCalledWith("/profile");
   });
 
   it("renders a setup message instead of the auth form when Supabase env is missing", async () => {

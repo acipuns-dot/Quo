@@ -9,7 +9,7 @@ const { createSupabaseServerClient } = vi.hoisted(() => ({
 const { getWorkspaceAccountProfile } = vi.hoisted(() => ({
   getWorkspaceAccountProfile: vi.fn(),
 }));
-const siteHeaderSpy = vi.fn(() => <div>Header</div>);
+const siteHeaderSpy = vi.fn((props: unknown) => <div data-props={JSON.stringify(props)}>Header</div>);
 
 vi.mock("../../lib/supabase/server", () => ({
   createSupabaseServerClient,
