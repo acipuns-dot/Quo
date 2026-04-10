@@ -42,6 +42,8 @@ export default async function WorkspaceKindPage({
 }) {
   const { kind } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const validTabs = new Set(["documents", "businesses", "customers", "history"]);
+  const requestedTab = resolvedSearchParams?.tab ?? "documents";
 
   if (!validKinds.includes(kind as DocumentKind)) {
     notFound();
@@ -51,7 +53,7 @@ export default async function WorkspaceKindPage({
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 
-  const activeTab = resolvedSearchParams?.tab ?? "documents";
+  const activeTab = validTabs.has(requestedTab) ? requestedTab : "documents";
 
   if (!hasSupabaseEnv) {
     const customers: CustomerRecord[] = [];

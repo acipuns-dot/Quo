@@ -10,7 +10,6 @@ import { WorkspaceSidebar } from "./workspace-sidebar";
 import { BusinessesTab } from "./businesses-tab";
 import { CustomersTab } from "./customers-tab";
 import { DocumentHistoryTab } from "./document-history-tab";
-import { SettingsTab } from "./settings-tab";
 
 type WorkspaceShellProps = {
   activeBusiness: BusinessRecord;
@@ -67,9 +66,6 @@ export function WorkspaceShell({
           )}
           {activeTab === "history" && (
             <DocumentHistoryTab documents={documents} kind={kind} />
-          )}
-          {activeTab === "settings" && (
-            <SettingsTab business={activeBusiness} />
           )}
         </main>
       </div>
