@@ -1,17 +1,24 @@
 import React, { type ReactNode } from "react";
 import Link from "next/link";
+import type { DocumentKind } from "../../lib/documents/types";
 import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
 import { BusinessSwitcher } from "./business-switcher";
 import { BusinessPanel } from "./business-panel";
 import { CustomerPanel } from "./customer-panel";
 import { DocumentHistoryPanel } from "./document-history-panel";
 import { WorkspaceSidebar } from "./workspace-sidebar";
+import { BusinessesTab } from "./businesses-tab";
+import { CustomersTab } from "./customers-tab";
+import { DocumentHistoryTab } from "./document-history-tab";
+import { SettingsTab } from "./settings-tab";
 
 type WorkspaceShellProps = {
   activeBusiness: BusinessRecord;
   businesses: BusinessRecord[];
   customers: CustomerRecord[];
   documents: SavedDocumentRecord[];
+  activeTab: string;
+  kind: DocumentKind;
   children: ReactNode;
 };
 
@@ -20,6 +27,8 @@ export function WorkspaceShell({
   businesses,
   customers,
   documents,
+  activeTab,
+  kind,
   children,
 }: WorkspaceShellProps) {
   return (
@@ -48,7 +57,21 @@ export function WorkspaceShell({
           <CustomerPanel customers={customers} />
           <DocumentHistoryPanel documents={documents} />
         </aside>
-        <main className="flex flex-1 flex-col min-h-0 overflow-hidden">{children}</main>
+        <main className="flex flex-1 flex-col min-h-0 overflow-hidden">
+          {activeTab === "documents" && children}
+          {activeTab === "businesses" && (
+            <BusinessesTab businesses={businesses} activeBusiness={activeBusiness} kind={kind} />
+          )}
+          {activeTab === "customers" && (
+            <CustomersTab customers={customers} businessId={activeBusiness.id} />
+          )}
+          {activeTab === "history" && (
+            <DocumentHistoryTab documents={documents} kind={kind} />
+          )}
+          {activeTab === "settings" && (
+            <SettingsTab business={activeBusiness} />
+          )}
+        </main>
       </div>
     </div>
   );

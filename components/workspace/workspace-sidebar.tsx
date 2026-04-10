@@ -7,6 +7,7 @@ const links = [
   { label: "Documents", value: "documents" },
   { label: "Customers", value: "customers" },
   { label: "Businesses", value: "businesses" },
+  { label: "History", value: "history" },
   { label: "Settings", value: "settings" },
 ] as const;
 

@@ -38,7 +38,7 @@ export default async function WorkspaceKindPage({
   searchParams,
 }: {
   params: Promise<{ kind: string }>;
-  searchParams?: Promise<{ businessId?: string }>;
+  searchParams?: Promise<{ businessId?: string; tab?: string }>;
 }) {
   const { kind } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
@@ -51,6 +51,8 @@ export default async function WorkspaceKindPage({
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 
+  const activeTab = resolvedSearchParams?.tab ?? "documents";
+
   if (!hasSupabaseEnv) {
     const customers: CustomerRecord[] = [];
     const documents: SavedDocumentRecord[] = [];
@@ -61,6 +63,8 @@ export default async function WorkspaceKindPage({
         businesses={[fallbackBusiness]}
         customers={customers}
         documents={documents}
+        activeTab={activeTab}
+        kind={kind as DocumentKind}
       >
         <BusinessDefaultsBanner business={fallbackBusiness} />
         <DocumentGenerator
@@ -110,6 +114,8 @@ export default async function WorkspaceKindPage({
       businesses={businesses}
       customers={customers}
       documents={documents}
+      activeTab={activeTab}
+      kind={kind as DocumentKind}
     >
       <BusinessDefaultsBanner business={activeBusiness} />
       <DocumentGenerator
