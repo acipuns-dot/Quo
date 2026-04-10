@@ -15,7 +15,6 @@
 !types/**
 
 # Keep web project config and package metadata.
-!.env.example
 !package.json
 !package-lock.json
 !next-env.d.ts
