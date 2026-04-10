@@ -203,9 +203,31 @@ export function AuthForm({
         <button
           type="submit"
           disabled={disabled || isSubmitting}
-          className="w-full rounded-2xl bg-[#d4901e] px-5 py-3.5 text-sm font-bold text-[#111111] shadow-[0_10px_30px_rgba(212,144,30,0.28)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+          className="relative w-full rounded-2xl bg-[#d4901e] px-5 py-3.5 text-sm font-bold text-[#111111] shadow-[0_10px_30px_rgba(212,144,30,0.28)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {mode === "sign-in" ? "Sign in" : "Create account"}
+          {isSubmitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg
+                className="animate-spin h-4 w-4 shrink-0"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12" cy="12" r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              {mode === "sign-in" ? "Signing in…" : "Creating account…"}
+            </span>
+          ) : mode === "sign-in" ? "Sign in" : "Create account"}
         </button>
       </form>
     </div>
