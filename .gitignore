@@ -11,8 +11,6 @@
 !components/**
 !lib/
 !lib/**
-!supabase/
-!supabase/**
 !types/
 !types/**
 !tests/
