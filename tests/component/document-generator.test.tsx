@@ -53,6 +53,7 @@ describe("DocumentGenerator", () => {
     const exportSpy = vi
       .spyOn(pdfExportModule, "exportDocumentToPdf")
       .mockResolvedValue(undefined);
+    const defaultQuotation = createDefaultDocument("quotation");
 
     render(<DocumentGenerator kind="quotation" />);
 
@@ -62,7 +63,7 @@ describe("DocumentGenerator", () => {
     expect(exportSpy).toHaveBeenCalledWith({
       data: expect.objectContaining({ kind: "quotation" }),
       previewNode: screen.getByTestId("preview-export-root"),
-      filename: "acme-trading-QUO-20260409.pdf",
+      filename: `acme-trading-${defaultQuotation.documentNumber}.pdf`,
     });
   });
 
