@@ -30,19 +30,51 @@ Live preview, instant PDF — no setup, no learning curve, no bloat.
 
 ## Features
 
-| | Free | Premium |
+<table>
+<tr>
+<th align="left" width="55%">Free &amp; Premium</th>
+<th align="left" width="45%">Coming Soon</th>
+</tr>
+<tr>
+<td valign="top">
+
+&nbsp;
+
+| &nbsp; | Free | Premium |
 |---|:---:|:---:|
 | Quotation, Invoice, Receipt | ✓ | ✓ |
-| All templates & themes | ✓ | ✓ |
+| All templates &amp; themes | ✓ | ✓ |
 | Logo upload | ✓ | ✓ |
 | Live preview | ✓ | ✓ |
 | PDF export | ✓ | ✓ |
-| Payment terms & tax | ✓ | ✓ |
+| Payment terms &amp; tax | ✓ | ✓ |
 | Notes per line item | ✓ | ✓ |
 | No account needed | ✓ | ✓ |
 | Multiple businesses | — | ✓ |
 | Saved customers | — | ✓ |
 | Document history | — | ✓ |
+
+&nbsp;
+
+</td>
+<td valign="top">
+
+&nbsp;
+
+| Feature | &nbsp; |
+|---|:---:|
+| Email document to client | 🔜 |
+| Recurring invoices | 🔜 |
+| Currency selector | 🔜 |
+| Team members &amp; roles | 🔜 |
+| Document templates library | 🔜 |
+| Mobile app | 🔜 |
+
+&nbsp;
+
+</td>
+</tr>
+</table>
 
 ---
 
