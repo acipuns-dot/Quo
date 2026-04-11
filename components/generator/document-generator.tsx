@@ -26,6 +26,11 @@ import { CustomerAutosuggest, type CustomerOption } from "../workspace/customer-
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 type FieldErrors = Record<string, string>;
+type SelectedWorkspaceCustomer = {
+  id: string;
+  name: string;
+  address: string;
+};
 
 function buildErrors(data: DocumentData): FieldErrors {
   const result = documentSchema.safeParse(data);
@@ -300,10 +305,91 @@ const TOTAL_SECTIONS = 5;
 type WorkspaceGeneratorContext = {
   businessId: string;
   businessName: string;
+  businessAddress: string;
+  defaultCurrency: string;
+  defaultTaxLabel: string;
+  defaultTaxRate: number;
+  defaultPaymentTerms: string;
   apiBasePath?: string;
   customerOptions?: CustomerOption[];
   persistenceMode?: "workspace";
 };
+
+function getWorkspacePaymentTermState(defaultPaymentTerms: string) {
+  if (!defaultPaymentTerms) {
+    return {
+      paymentTermPreset: "" as PaymentTermPreset | "",
+      paymentTermLabel: "",
+      paymentTermPercentage: null,
+    };
+  }
+
+  return {
+    paymentTermPreset: "custom" as PaymentTermPreset | "",
+    paymentTermLabel: defaultPaymentTerms,
+    paymentTermPercentage: 50,
+  };
+}
+
+function applyWorkspaceBusinessDefaults(
+  draft: StoredDocumentDraft,
+  workspace: WorkspaceGeneratorContext,
+): StoredDocumentDraft {
+  const paymentTermState = getWorkspacePaymentTermState(workspace.defaultPaymentTerms);
+
+  return {
+    ...draft,
+    data: {
+      ...draft.data,
+      businessName: workspace.businessName,
+      businessAddress: workspace.businessAddress,
+      currency: workspace.defaultCurrency,
+      taxLabel: workspace.defaultTaxLabel,
+      taxRate: workspace.defaultTaxRate,
+      paymentTermPreset: paymentTermState.paymentTermPreset,
+      paymentTermPercentage: paymentTermState.paymentTermPercentage,
+      paymentTermLabel: paymentTermState.paymentTermLabel,
+    },
+  };
+}
+
+function applySelectedCustomer(
+  draft: StoredDocumentDraft,
+  selectedCustomer: SelectedWorkspaceCustomer | null,
+): StoredDocumentDraft {
+  if (!selectedCustomer) {
+    return draft;
+  }
+
+  return {
+    ...draft,
+    data: {
+      ...draft.data,
+      customerName: selectedCustomer.name,
+      customerAddress: selectedCustomer.address,
+    },
+  };
+}
+
+function resolveValidSelectedCustomer(
+  selectedCustomer: SelectedWorkspaceCustomer | null,
+  workspace?: WorkspaceGeneratorContext,
+) {
+  if (!selectedCustomer || !workspace?.customerOptions) {
+    return selectedCustomer;
+  }
+
+  const match = workspace.customerOptions.find((option) => option.id === selectedCustomer.id);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    id: match.id,
+    name: match.name,
+    address: match.address,
+  };
+}
 
 function getInitialDraft(
   initialKind: DocumentKind,
@@ -316,13 +402,27 @@ function getInitialDraft(
     return initialDraft;
   }
 
-  return {
-    ...initialDraft,
-    data: {
-      ...initialDraft.data,
-      businessName: workspace.businessName,
-    },
-  };
+  return applyWorkspaceBusinessDefaults(initialDraft, workspace);
+}
+
+function getWorkspaceAdjustedDraft(
+  kind: DocumentKind,
+  persistenceMode: DraftPersistenceMode,
+  workspace?: WorkspaceGeneratorContext,
+  selectedCustomer?: SelectedWorkspaceCustomer | null,
+): StoredDocumentDraft {
+  const draft = getDraftOrDefault(kind, persistenceMode);
+
+  if (!workspace) {
+    return draft;
+  }
+
+  const validSelectedCustomer = resolveValidSelectedCustomer(selectedCustomer ?? null, workspace);
+
+  return applySelectedCustomer(
+    applyWorkspaceBusinessDefaults(draft, workspace),
+    validSelectedCustomer,
+  );
 }
 
 export function DocumentGenerator({
@@ -347,9 +447,12 @@ export function DocumentGenerator({
   const [doneSet, setDoneSet] = useState<Set<number>>(new Set());
   const [logoError, setLogoError] = useState<string | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [selectedWorkspaceCustomer, setSelectedWorkspaceCustomer] =
+    useState<SelectedWorkspaceCustomer | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const nextLineItemIdRef = useRef(getNextLineItemSeed(initialDraftRef.current.data.lineItems));
   const skipAutosaveKindRef = useRef<DocumentKind | null>(null);
+  const previousBusinessIdRef = useRef(workspace?.businessId ?? null);
 
   const errors = useMemo(() => buildErrors(data), [data]);
   const showLineItems = currentKind !== "receipt";
@@ -401,11 +504,67 @@ export function DocumentGenerator({
     );
   }, [currentKind, data.documentDate, documentNumberAuto]);
 
+  useEffect(() => {
+    const nextBusinessId = workspace?.businessId ?? null;
+
+    if (previousBusinessIdRef.current !== nextBusinessId) {
+      previousBusinessIdRef.current = nextBusinessId;
+      setSelectedWorkspaceCustomer(null);
+      setSelectedCustomerId(null);
+      setData((prev) => {
+        if (!workspace) {
+          return prev;
+        }
+
+        return applyWorkspaceBusinessDefaults(
+          {
+            version: DRAFT_STORAGE_VERSION,
+            kind: currentKind,
+            documentNumberAuto,
+            data: prev,
+          },
+          workspace,
+        ).data;
+      });
+    }
+  }, [currentKind, documentNumberAuto, workspace]);
+
+  useEffect(() => {
+    const validSelectedCustomer = resolveValidSelectedCustomer(
+      selectedWorkspaceCustomer,
+      workspace,
+    );
+
+    if (validSelectedCustomer || !selectedWorkspaceCustomer) {
+      return;
+    }
+
+    setSelectedWorkspaceCustomer(null);
+    setSelectedCustomerId(null);
+  }, [selectedWorkspaceCustomer, workspace]);
+
   // ── handlers ──────────────────────────────────────────────────────────────
 
   function update<K extends keyof DocumentData>(key: K, value: DocumentData[K]) {
     if (key === "documentNumber") {
       setDocumentNumberAuto(false);
+    }
+
+    if (
+      workspace &&
+      selectedWorkspaceCustomer &&
+      (key === "customerName" || key === "customerAddress")
+    ) {
+      const nextValue = String(value);
+      const currentSavedValue =
+        key === "customerName"
+          ? selectedWorkspaceCustomer.name
+          : selectedWorkspaceCustomer.address;
+
+      if (nextValue !== currentSavedValue) {
+        setSelectedWorkspaceCustomer(null);
+        setSelectedCustomerId(null);
+      }
     }
 
     setData((prev) => ({ ...prev, [key]: value }));
@@ -449,11 +608,22 @@ export function DocumentGenerator({
       data,
     });
 
-    const nextDraft = getDraftOrDefault(kind, persistenceMode);
+    const validSelectedCustomer = resolveValidSelectedCustomer(
+      selectedWorkspaceCustomer,
+      workspace,
+    );
+
+    const nextDraft = getWorkspaceAdjustedDraft(
+      kind,
+      persistenceMode,
+      workspace,
+      validSelectedCustomer,
+    );
 
     setCurrentKind(kind);
     setData(nextDraft.data);
-    setSelectedCustomerId(null);
+    setSelectedWorkspaceCustomer(validSelectedCustomer);
+    setSelectedCustomerId(validSelectedCustomer?.id ?? null);
     setDocumentNumberAuto(nextDraft.documentNumberAuto);
     nextLineItemIdRef.current = getNextLineItemSeed(nextDraft.data.lineItems);
     setActiveSection(1);
@@ -715,14 +885,15 @@ export function DocumentGenerator({
                 errors={errors}
                 currentKind={currentKind}
                 logoError={logoError}
-                customerOptions={matchingCustomerOptions}
-                update={update}
-                updateLineItem={updateLineItem}
-                addLineItem={addLineItem}
-                removeLineItem={removeLineItem}
-                setSelectedCustomerId={setSelectedCustomerId}
-                setLogoError={setLogoError}
-              />
+                  customerOptions={matchingCustomerOptions}
+                  update={update}
+                  updateLineItem={updateLineItem}
+                  addLineItem={addLineItem}
+                  removeLineItem={removeLineItem}
+                  setSelectedCustomerId={setSelectedCustomerId}
+                  setSelectedWorkspaceCustomer={setSelectedWorkspaceCustomer}
+                  setLogoError={setLogoError}
+                />
 
                       {/* Next button */}
                       <button
@@ -964,6 +1135,7 @@ type SectionContentProps = {
   addLineItem: () => void;
   removeLineItem: (index: number) => void;
   setSelectedCustomerId: (value: string | null) => void;
+  setSelectedWorkspaceCustomer: (value: SelectedWorkspaceCustomer | null) => void;
   setLogoError: (v: string | null) => void;
 };
 
@@ -979,6 +1151,7 @@ function SectionContent({
   addLineItem,
   removeLineItem,
   setSelectedCustomerId,
+  setSelectedWorkspaceCustomer,
   setLogoError,
 }: SectionContentProps) {
   const showLineItems = currentKind !== "receipt";
@@ -1040,6 +1213,11 @@ function SectionContent({
           options={customerOptions}
           onPick={(option) => {
             setSelectedCustomerId(option.id);
+            setSelectedWorkspaceCustomer({
+              id: option.id,
+              name: option.name,
+              address: option.address,
+            });
             update("customerName", option.name);
             update("customerAddress", option.address);
           }}

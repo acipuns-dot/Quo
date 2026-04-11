@@ -21,6 +21,7 @@ export function BusinessSwitcher({ businesses, activeBusinessId }: BusinessSwitc
       onChange={(event) => {
         const nextSearchParams = new URLSearchParams(searchParams.toString());
         nextSearchParams.set("businessId", event.target.value);
+        nextSearchParams.set("tab", "documents");
         router.push(`${pathname}?${nextSearchParams.toString()}`);
       }}
       className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-[#faf9f7] outline-none focus:border-[#d4901e]/50"

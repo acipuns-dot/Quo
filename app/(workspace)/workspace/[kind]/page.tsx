@@ -74,6 +74,11 @@ export default async function WorkspaceKindPage({
           workspace={{
             businessId: fallbackBusiness.id,
             businessName: fallbackBusiness.name,
+            businessAddress: fallbackBusiness.address,
+            defaultCurrency: fallbackBusiness.defaultCurrency,
+            defaultTaxLabel: fallbackBusiness.defaultTaxLabel,
+            defaultTaxRate: fallbackBusiness.defaultTaxRate,
+            defaultPaymentTerms: fallbackBusiness.defaultPaymentTerms,
             apiBasePath: `/api/workspace/businesses/${fallbackBusiness.id}/documents`,
             customerOptions: [],
             persistenceMode: "workspace",
@@ -126,6 +131,11 @@ export default async function WorkspaceKindPage({
         workspace={{
           businessId: activeBusiness.id,
           businessName: activeBusiness.name,
+          businessAddress: activeBusiness.address,
+          defaultCurrency: activeBusiness.defaultCurrency,
+          defaultTaxLabel: activeBusiness.defaultTaxLabel,
+          defaultTaxRate: activeBusiness.defaultTaxRate,
+          defaultPaymentTerms: activeBusiness.defaultPaymentTerms,
           apiBasePath: `/api/workspace/businesses/${activeBusiness.id}/documents`,
           customerOptions: customers.map((customer) => ({
             id: customer.id,
