@@ -7,6 +7,7 @@ import {
   DRAFT_STORAGE_VERSION,
   getDraftOrDefault,
   saveDraft,
+  type DraftPersistenceMode,
   type StoredDocumentDraft,
 } from "../../lib/documents/draft-storage";
 import { generateDocumentNumber } from "../../lib/documents/document-number";
@@ -301,13 +302,15 @@ type WorkspaceGeneratorContext = {
   businessName: string;
   apiBasePath?: string;
   customerOptions?: CustomerOption[];
+  persistenceMode?: "workspace";
 };
 
 function getInitialDraft(
   initialKind: DocumentKind,
   workspace?: WorkspaceGeneratorContext,
+  persistenceMode: DraftPersistenceMode = "free",
 ): StoredDocumentDraft {
-  const initialDraft = getDraftOrDefault(initialKind);
+  const initialDraft = getDraftOrDefault(initialKind, persistenceMode);
 
   if (!workspace) {
     return initialDraft;
@@ -329,9 +332,10 @@ export function DocumentGenerator({
   kind: DocumentKind;
   workspace?: WorkspaceGeneratorContext;
 }) {
+  const persistenceMode = workspace?.persistenceMode ?? "free";
   const initialDraftRef = useRef<StoredDocumentDraft | null>(null);
   if (initialDraftRef.current === null) {
-    initialDraftRef.current = getInitialDraft(initialKind, workspace);
+    initialDraftRef.current = getInitialDraft(initialKind, workspace, persistenceMode);
   }
 
   const [currentKind, setCurrentKind] = useState<DocumentKind>(initialKind);
@@ -438,14 +442,14 @@ export function DocumentGenerator({
   }
 
   function switchKind(kind: DocumentKind) {
-    saveDraft(currentKind, {
+    saveDraft(currentKind, persistenceMode, {
       version: DRAFT_STORAGE_VERSION,
       kind: currentKind,
       documentNumberAuto,
       data,
     });
 
-    const nextDraft = getDraftOrDefault(kind);
+    const nextDraft = getDraftOrDefault(kind, persistenceMode);
 
     setCurrentKind(kind);
     setData(nextDraft.data);
@@ -457,7 +461,7 @@ export function DocumentGenerator({
   }
 
   function handleClearDraft() {
-    clearDraft(currentKind);
+    clearDraft(currentKind, persistenceMode);
     skipAutosaveKindRef.current = currentKind;
 
     const freshDocument = createDefaultDocument(currentKind);
@@ -516,7 +520,7 @@ export function DocumentGenerator({
     }
 
     const timeout = window.setTimeout(() => {
-      saveDraft(currentKind, {
+      saveDraft(currentKind, persistenceMode, {
         version: DRAFT_STORAGE_VERSION,
         kind: currentKind,
         documentNumberAuto,
@@ -532,7 +536,7 @@ export function DocumentGenerator({
     }, 300);
 
     return () => window.clearTimeout(timeout);
-  }, [currentKind, data, documentNumberAuto, selectedCustomerId, workspace]);
+  }, [currentKind, data, documentNumberAuto, persistenceMode, selectedCustomerId, workspace]);
 
   // ── progress dots ──────────────────────────────────────────────────────────
 

@@ -76,6 +76,7 @@ export default async function WorkspaceKindPage({
             businessName: fallbackBusiness.name,
             apiBasePath: `/api/workspace/businesses/${fallbackBusiness.id}/documents`,
             customerOptions: [],
+            persistenceMode: "workspace",
           }}
         />
       </WorkspaceShell>
@@ -131,6 +132,7 @@ export default async function WorkspaceKindPage({
             name: customer.name,
             address: customer.address,
           })),
+          persistenceMode: "workspace",
         }}
       />
     </WorkspaceShell>

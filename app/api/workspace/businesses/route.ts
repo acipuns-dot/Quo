@@ -1,21 +1,7 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
+import { normalizeBusinessPayload } from "../../../../lib/workspace/route-helpers";
 import { listBusinessesForUser } from "../../../../lib/workspace/businesses";
-
-const businessCreateSchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  address: z.string().max(300),
-  email: z.string().max(160),
-  phone: z.string().max(40),
-  taxNumber: z.string().max(60),
-  defaultCurrency: z.string().trim().min(1).max(8),
-  defaultTaxLabel: z.string().max(40),
-  defaultTaxRate: z.number().min(0).max(100),
-  defaultPaymentTerms: z.string().max(80),
-  logoUrl: z.string().url().nullable(),
-  notes: z.string().max(500),
-});
 
 function hasSupabaseEnv() {
   return Boolean(
@@ -56,7 +42,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = businessCreateSchema.parse(await request.json());
+  const body = normalizeBusinessPayload(await request.json());
   const { data, error } = await supabase
     .from("businesses")
     .insert({

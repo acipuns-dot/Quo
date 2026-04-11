@@ -11,39 +11,48 @@ export type StoredDocumentDraft = {
   data: DocumentData;
 };
 
-export function getDraftStorageKey(kind: DocumentKind) {
-  return `quo:draft:${kind}`;
+export type DraftPersistenceMode = "free" | "workspace";
+
+export function getDraftStorageKey(kind: DocumentKind, mode: DraftPersistenceMode = "free") {
+  return `quo:draft:${mode}:${kind}`;
 }
 
 function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
 
-export function saveDraft(kind: DocumentKind, payload: StoredDocumentDraft) {
+export function saveDraft(
+  kind: DocumentKind,
+  mode: DraftPersistenceMode,
+  payload: StoredDocumentDraft,
+) {
   if (!canUseStorage()) return;
 
   try {
-    window.localStorage.setItem(getDraftStorageKey(kind), JSON.stringify(payload));
+    window.localStorage.setItem(getDraftStorageKey(kind, mode), JSON.stringify(payload));
   } catch {
     // Ignore storage failures so editing continues normally.
   }
 }
 
-export function clearDraft(kind: DocumentKind) {
+export function clearDraft(kind: DocumentKind, mode: DraftPersistenceMode) {
   if (!canUseStorage()) return;
 
   try {
-    window.localStorage.removeItem(getDraftStorageKey(kind));
+    window.localStorage.removeItem(getDraftStorageKey(kind, mode));
   } catch {
     // Ignore storage failures so editing continues normally.
   }
 }
 
-export function loadDraft(kind: DocumentKind): StoredDocumentDraft | null {
+export function loadDraft(
+  kind: DocumentKind,
+  mode: DraftPersistenceMode,
+): StoredDocumentDraft | null {
   if (!canUseStorage()) return null;
 
   try {
-    const raw = window.localStorage.getItem(getDraftStorageKey(kind));
+    const raw = window.localStorage.getItem(getDraftStorageKey(kind, mode));
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as Partial<StoredDocumentDraft>;
@@ -71,8 +80,11 @@ export function loadDraft(kind: DocumentKind): StoredDocumentDraft | null {
   }
 }
 
-export function getDraftOrDefault(kind: DocumentKind): StoredDocumentDraft {
-  const restored = loadDraft(kind);
+export function getDraftOrDefault(
+  kind: DocumentKind,
+  mode: DraftPersistenceMode = "free",
+): StoredDocumentDraft {
+  const restored = loadDraft(kind, mode);
   if (restored) {
     return restored;
   }
