@@ -11,6 +11,13 @@ export type StoredDocumentDraft = {
   data: DocumentData;
 };
 
+export type StoredSelectedWorkspaceCustomer = {
+  id: string;
+  name: string;
+  address: string;
+  selectedAt: string;
+};
+
 export type DraftPersistenceMode = "free" | "workspace";
 
 export function getDraftStorageKey(kind: DocumentKind, mode: DraftPersistenceMode = "free") {
@@ -19,6 +26,26 @@ export function getDraftStorageKey(kind: DocumentKind, mode: DraftPersistenceMod
 
 function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+}
+
+export function getSelectedCustomerStorageKey(businessId: string) {
+  return `quo:workspace:selected-customer:${businessId}`;
+}
+
+function isStoredSelectedWorkspaceCustomer(
+  value: unknown,
+): value is StoredSelectedWorkspaceCustomer {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.address === "string" &&
+    typeof candidate.selectedAt === "string"
+  );
 }
 
 export function saveDraft(
@@ -40,6 +67,50 @@ export function clearDraft(kind: DocumentKind, mode: DraftPersistenceMode) {
 
   try {
     window.localStorage.removeItem(getDraftStorageKey(kind, mode));
+  } catch {
+    // Ignore storage failures so editing continues normally.
+  }
+}
+
+export function saveSelectedWorkspaceCustomer(
+  businessId: string,
+  payload: StoredSelectedWorkspaceCustomer,
+) {
+  if (!canUseStorage()) return;
+
+  try {
+    window.localStorage.setItem(
+      getSelectedCustomerStorageKey(businessId),
+      JSON.stringify(payload),
+    );
+  } catch {
+    // Ignore storage failures so editing continues normally.
+  }
+}
+
+export function loadSelectedWorkspaceCustomer(
+  businessId: string,
+): StoredSelectedWorkspaceCustomer | null {
+  if (!canUseStorage()) return null;
+
+  try {
+    const raw = window.localStorage.getItem(getSelectedCustomerStorageKey(businessId));
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+    return isStoredSelectedWorkspaceCustomer(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearSelectedWorkspaceCustomer(businessId: string) {
+  if (!canUseStorage()) return;
+
+  try {
+    window.localStorage.removeItem(getSelectedCustomerStorageKey(businessId));
   } catch {
     // Ignore storage failures so editing continues normally.
   }

@@ -6,14 +6,24 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { getWorkspaceAccountProfile, resolvePostAuthPath } from "../../lib/workspace/account-profiles";
 
 export default async function ProfilePage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user: { id: string; email?: string | null } | null = null;
+  let plan: "free" | "premium" = "free";
 
-  if (!user) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user: authedUser },
+    } = await supabase.auth.getUser();
+
+    if (!authedUser) {
+      redirect("/login");
+    }
+
+    user = authedUser;
+    const profile = await getWorkspaceAccountProfile(supabase, authedUser.id);
+    plan = profile?.plan ?? "free";
+  } catch {
     redirect("/login");
-    return null;
   }
 
   async function logout() {
@@ -27,8 +37,6 @@ export default async function ProfilePage() {
     }
   }
 
-  const profile = await getWorkspaceAccountProfile(supabase, user.id);
-  const plan = profile?.plan ?? "free";
   const documentsHref = resolvePostAuthPath(plan, "invoice");
 
   return (
@@ -50,7 +58,7 @@ export default async function ProfilePage() {
           <div className="mt-10 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/35">Email</p>
-              <p className="mt-3 text-lg font-semibold text-white">{user.email}</p>
+              <p className="mt-3 text-lg font-semibold text-white">{user?.email ?? "Unknown email"}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/35">Access</p>

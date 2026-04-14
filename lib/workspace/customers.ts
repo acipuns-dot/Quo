@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { normalizeCustomerRow } from "./normalizers";
 import type { CustomerRecord } from "./types";
 
 export async function listCustomersForBusiness(
@@ -15,16 +16,5 @@ export async function listCustomersForBusiness(
     throw error;
   }
 
-  return (data ?? []).map((item) => ({
-    id: item.id,
-    businessId: item.business_id,
-    name: item.name,
-    address: item.address,
-    email: item.email,
-    phone: item.phone,
-    taxNumber: item.tax_number,
-    notes: item.notes,
-    createdAt: item.created_at,
-    updatedAt: item.updated_at,
-  }));
+  return (data ?? []).map((item) => normalizeCustomerRow(item as Record<string, unknown>));
 }

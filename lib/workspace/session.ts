@@ -1,10 +1,14 @@
 export type WorkspacePlan = "free" | "premium";
 
+export function resolveWorkspacePlan(plan: unknown): WorkspacePlan {
+  return plan === "premium" ? "premium" : "free";
+}
+
 export function canAccessPremiumWorkspace(
   user: { id: string } | null,
   plan: WorkspacePlan | null,
 ) {
-  return Boolean(user && plan === "premium");
+  return Boolean(user && resolveWorkspacePlan(plan) === "premium");
 }
 
 export function resolveWorkspaceAccess(
@@ -16,7 +20,7 @@ export function resolveWorkspaceAccess(
     return { allowed: false, redirectTo: "/login" };
   }
 
-  if (plan !== "premium") {
+  if (resolveWorkspacePlan(plan) !== "premium") {
     return { allowed: false, redirectTo: `/${kind}?upsell=workspace` };
   }
 

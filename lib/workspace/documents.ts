@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { WORKSPACE_DOCUMENT_PAYLOAD_VERSION, serializeSavedDocumentPayload } from "./document-payload";
 import type { DocumentData, DocumentKind } from "../documents/types";
+import { normalizeSavedDocumentRow } from "./normalizers";
 import type { SavedDocumentRecord } from "./types";
 
 export async function listDocumentsForBusiness(
@@ -17,19 +18,9 @@ export async function listDocumentsForBusiness(
     throw error;
   }
 
-  return (data ?? []).map((item) => ({
-    id: item.id,
-    businessId: item.business_id,
-    customerId: item.customer_id,
-    kind: item.kind,
-    status: item.status,
-    documentNumber: item.document_number,
-    issueDate: item.issue_date,
-    payloadVersion: item.payload_version,
-    payload: item.payload,
-    createdAt: item.created_at,
-    updatedAt: item.updated_at,
-  }));
+  return (data ?? []).map((item) =>
+    normalizeSavedDocumentRow(item as Record<string, unknown>),
+  ) as SavedDocumentRecord[];
 }
 
 export async function upsertWorkspaceDocument(

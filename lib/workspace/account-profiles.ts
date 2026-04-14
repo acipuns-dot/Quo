@@ -1,6 +1,7 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { DocumentKind } from "../documents/types";
 import type { WorkspacePlan } from "./session";
+import { normalizeWorkspaceAccountProfileRow } from "./normalizers";
 
 export type WorkspaceAccountProfile = {
   userId: string;
@@ -17,12 +18,7 @@ type UserProfileRow = {
 };
 
 export function normalizeWorkspaceAccountProfile(row: UserProfileRow): WorkspaceAccountProfile {
-  return {
-    userId: row.user_id,
-    plan: row.plan,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
+  return normalizeWorkspaceAccountProfileRow(row as Record<string, unknown>);
 }
 
 export function resolvePostAuthPath(plan: WorkspacePlan, kind: DocumentKind = "invoice") {
@@ -43,7 +39,7 @@ export async function getWorkspaceAccountProfile(
     throw error;
   }
 
-  return data ? normalizeWorkspaceAccountProfile(data as UserProfileRow) : null;
+  return data ? normalizeWorkspaceAccountProfileRow(data as Record<string, unknown>) : null;
 }
 
 export async function ensureWorkspaceAccountProfile(
@@ -66,5 +62,5 @@ export async function ensureWorkspaceAccountProfile(
     throw error;
   }
 
-  return normalizeWorkspaceAccountProfile(data as UserProfileRow);
+  return normalizeWorkspaceAccountProfileRow(data as Record<string, unknown>);
 }

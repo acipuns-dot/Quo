@@ -23,17 +23,21 @@ export default async function ReceiptPage({
   let account = { authenticated: false, plan: null as "free" | "premium" | null };
 
   if (hasSupabaseEnv) {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const supabase = await createSupabaseServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (user) {
-      const profile = await getWorkspaceAccountProfile(supabase, user.id);
-      account = {
-        authenticated: true,
-        plan: profile?.plan ?? "free",
-      };
+      if (user) {
+        const profile = await getWorkspaceAccountProfile(supabase, user.id);
+        account = {
+          authenticated: true,
+          plan: profile?.plan ?? "free",
+        };
+      }
+    } catch {
+      account = { authenticated: false, plan: null };
     }
   }
 

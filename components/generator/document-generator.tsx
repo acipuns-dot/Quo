@@ -4,11 +4,15 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createDefaultDocument } from "../../lib/documents/defaults";
 import {
   clearDraft,
+  clearSelectedWorkspaceCustomer,
   DRAFT_STORAGE_VERSION,
   getDraftOrDefault,
+  loadSelectedWorkspaceCustomer,
   saveDraft,
+  saveSelectedWorkspaceCustomer,
   type DraftPersistenceMode,
   type StoredDocumentDraft,
+  type StoredSelectedWorkspaceCustomer,
 } from "../../lib/documents/draft-storage";
 import { generateDocumentNumber } from "../../lib/documents/document-number";
 import { exportDocumentToPdf } from "../../lib/documents/pdf-export";
@@ -26,11 +30,7 @@ import { CustomerAutosuggest, type CustomerOption } from "../workspace/customer-
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 type FieldErrors = Record<string, string>;
-type SelectedWorkspaceCustomer = {
-  id: string;
-  name: string;
-  address: string;
-};
+type SelectedWorkspaceCustomer = StoredSelectedWorkspaceCustomer;
 
 function buildErrors(data: DocumentData): FieldErrors {
   const result = documentSchema.safeParse(data);
@@ -388,7 +388,28 @@ function resolveValidSelectedCustomer(
     id: match.id,
     name: match.name,
     address: match.address,
+    selectedAt: selectedCustomer.selectedAt,
   };
+}
+
+function restoreSelectedWorkspaceCustomer(
+  workspace?: WorkspaceGeneratorContext,
+) {
+  if (!workspace) {
+    return null;
+  }
+
+  const storedSelectedCustomer = loadSelectedWorkspaceCustomer(workspace.businessId);
+  const validSelectedCustomer = resolveValidSelectedCustomer(
+    storedSelectedCustomer,
+    workspace,
+  );
+
+  if (storedSelectedCustomer && !validSelectedCustomer) {
+    clearSelectedWorkspaceCustomer(workspace.businessId);
+  }
+
+  return validSelectedCustomer;
 }
 
 function getInitialDraft(
@@ -402,7 +423,10 @@ function getInitialDraft(
     return initialDraft;
   }
 
-  return applyWorkspaceBusinessDefaults(initialDraft, workspace);
+  return applySelectedCustomer(
+    applyWorkspaceBusinessDefaults(initialDraft, workspace),
+    restoreSelectedWorkspaceCustomer(workspace),
+  );
 }
 
 function getWorkspaceAdjustedDraft(
@@ -446,9 +470,11 @@ export function DocumentGenerator({
   const [activeSection, setActiveSection] = useState(1);
   const [doneSet, setDoneSet] = useState<Set<number>>(new Set());
   const [logoError, setLogoError] = useState<string | null>(null);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedWorkspaceCustomer, setSelectedWorkspaceCustomer] =
-    useState<SelectedWorkspaceCustomer | null>(null);
+    useState<SelectedWorkspaceCustomer | null>(() => restoreSelectedWorkspaceCustomer(workspace));
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    selectedWorkspaceCustomer?.id ?? null,
+  );
   const previewRef = useRef<HTMLDivElement>(null);
   const nextLineItemIdRef = useRef(getNextLineItemSeed(initialDraftRef.current.data.lineItems));
   const skipAutosaveKindRef = useRef<DocumentKind | null>(null);
@@ -505,25 +531,38 @@ export function DocumentGenerator({
   }, [currentKind, data.documentDate, documentNumberAuto]);
 
   useEffect(() => {
+    if (!workspace || !selectedWorkspaceCustomer) {
+      return;
+    }
+
+    saveSelectedWorkspaceCustomer(workspace.businessId, selectedWorkspaceCustomer);
+  }, [selectedWorkspaceCustomer, workspace]);
+
+  useEffect(() => {
     const nextBusinessId = workspace?.businessId ?? null;
 
     if (previousBusinessIdRef.current !== nextBusinessId) {
       previousBusinessIdRef.current = nextBusinessId;
-      setSelectedWorkspaceCustomer(null);
-      setSelectedCustomerId(null);
+      const restoredSelectedCustomer = restoreSelectedWorkspaceCustomer(workspace);
+
+      setSelectedWorkspaceCustomer(restoredSelectedCustomer);
+      setSelectedCustomerId(restoredSelectedCustomer?.id ?? null);
       setData((prev) => {
         if (!workspace) {
           return prev;
         }
 
-        return applyWorkspaceBusinessDefaults(
-          {
-            version: DRAFT_STORAGE_VERSION,
-            kind: currentKind,
-            documentNumberAuto,
-            data: prev,
-          },
-          workspace,
+        return applySelectedCustomer(
+          applyWorkspaceBusinessDefaults(
+            {
+              version: DRAFT_STORAGE_VERSION,
+              kind: currentKind,
+              documentNumberAuto,
+              data: prev,
+            },
+            workspace,
+          ),
+          restoredSelectedCustomer,
         ).data;
       });
     }
@@ -539,6 +578,9 @@ export function DocumentGenerator({
       return;
     }
 
+    if (workspace) {
+      clearSelectedWorkspaceCustomer(workspace.businessId);
+    }
     setSelectedWorkspaceCustomer(null);
     setSelectedCustomerId(null);
   }, [selectedWorkspaceCustomer, workspace]);
@@ -564,6 +606,7 @@ export function DocumentGenerator({
       if (nextValue !== currentSavedValue) {
         setSelectedWorkspaceCustomer(null);
         setSelectedCustomerId(null);
+        clearSelectedWorkspaceCustomer(workspace.businessId);
       }
     }
 
@@ -608,8 +651,9 @@ export function DocumentGenerator({
       data,
     });
 
-    const validSelectedCustomer = resolveValidSelectedCustomer(
-      selectedWorkspaceCustomer,
+    const nextSelectedCustomer = resolveValidSelectedCustomer(
+      (workspace ? loadSelectedWorkspaceCustomer(workspace.businessId) : null) ??
+        selectedWorkspaceCustomer,
       workspace,
     );
 
@@ -617,13 +661,13 @@ export function DocumentGenerator({
       kind,
       persistenceMode,
       workspace,
-      validSelectedCustomer,
+      nextSelectedCustomer,
     );
 
     setCurrentKind(kind);
     setData(nextDraft.data);
-    setSelectedWorkspaceCustomer(validSelectedCustomer);
-    setSelectedCustomerId(validSelectedCustomer?.id ?? null);
+    setSelectedWorkspaceCustomer(nextSelectedCustomer);
+    setSelectedCustomerId(nextSelectedCustomer?.id ?? null);
     setDocumentNumberAuto(nextDraft.documentNumberAuto);
     nextLineItemIdRef.current = getNextLineItemSeed(nextDraft.data.lineItems);
     setActiveSection(1);
@@ -1212,12 +1256,14 @@ function SectionContent({
           query={data.customerName}
           options={customerOptions}
           onPick={(option) => {
-            setSelectedCustomerId(option.id);
-            setSelectedWorkspaceCustomer({
+            const selectedCustomer = {
               id: option.id,
               name: option.name,
               address: option.address,
-            });
+              selectedAt: new Date().toISOString(),
+            };
+            setSelectedCustomerId(option.id);
+            setSelectedWorkspaceCustomer(selectedCustomer);
             update("customerName", option.name);
             update("customerAddress", option.address);
           }}

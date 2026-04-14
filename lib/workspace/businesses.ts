@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { normalizeBusinessRow } from "./normalizers";
 import type { BusinessRecord } from "./types";
 
 export function resolveActiveBusiness(
@@ -26,21 +27,5 @@ export async function listBusinessesForUser(
     throw error;
   }
 
-  return (data ?? []).map((item) => ({
-    id: item.id,
-    userId: item.user_id,
-    name: item.name,
-    address: item.address,
-    email: item.email,
-    phone: item.phone,
-    taxNumber: item.tax_number,
-    defaultCurrency: item.default_currency,
-    defaultTaxLabel: item.default_tax_label,
-    defaultTaxRate: item.default_tax_rate,
-    defaultPaymentTerms: item.default_payment_terms,
-    logoUrl: item.logo_url,
-    notes: item.notes,
-    createdAt: item.created_at,
-    updatedAt: item.updated_at,
-  }));
+  return (data ?? []).map((item) => normalizeBusinessRow(item as Record<string, unknown>));
 }

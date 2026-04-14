@@ -88,13 +88,24 @@ export default async function WorkspaceKindPage({
     );
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user: { id: string } | null = null;
+  let plan: "free" | "premium" | null = null;
+  let supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
-  const profile = user ? await getWorkspaceAccountProfile(supabase, user.id) : null;
-  const access = resolveWorkspaceAccess(user, profile?.plan ?? null, kind as DocumentKind);
+  try {
+    supabase = await createSupabaseServerClient();
+    const {
+      data: { user: authedUser },
+    } = await supabase.auth.getUser();
+
+    user = authedUser;
+    const profile = authedUser ? await getWorkspaceAccountProfile(supabase, authedUser.id) : null;
+    plan = profile?.plan ?? null;
+  } catch {
+    redirect("/login");
+  }
+
+  const access = resolveWorkspaceAccess(user, plan, kind as DocumentKind);
 
   if (!access.allowed) {
     redirect(access.redirectTo);
