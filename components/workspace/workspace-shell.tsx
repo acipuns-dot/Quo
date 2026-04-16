@@ -260,7 +260,7 @@ export function WorkspaceShell({
             <CustomersTab customers={customers} businessId={activeBusiness.id} />
           )}
           {currentTab === "history" && (
-            <DocumentHistoryTab documents={documents} kind={kind} />
+            <DocumentHistoryTab documents={documents} customers={customers} kind={kind} />
           )}
         </main>
       </div>

@@ -1,20 +1,203 @@
 import React from "react";
 import type { DocumentKind } from "../../lib/documents/types";
-import type { SavedDocumentRecord } from "../../lib/workspace/types";
+import type { CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
+import {
+  filterHistoryDocuments,
+  getHistoryCustomerLabel,
+  hasInvalidCustomRange,
+  type HistoryCustomerFilter,
+  type HistoryDateFilter,
+} from "../../lib/workspace/history-filters";
 
 export function DocumentHistoryTab({
   documents,
+  customers,
   kind,
+  now = new Date(),
 }: {
   documents: SavedDocumentRecord[];
+  customers: CustomerRecord[];
   kind: DocumentKind;
+  now?: Date;
 }) {
+  const [dateFilter, setDateFilter] = React.useState<HistoryDateFilter>({ mode: "all" });
+  const [customerSearch, setCustomerSearch] = React.useState("");
+  const [customerFilter, setCustomerFilter] = React.useState<HistoryCustomerFilter>({ mode: "all" });
+
+  const customerNameById = React.useMemo(
+    () => new Map(customers.map((customer) => [customer.id, customer.name])),
+    [customers],
+  );
+
+  const customerOptions = React.useMemo(() => {
+    const query = customerSearch.trim().toLowerCase();
+    const options = [
+      { id: "__all__", label: "All customers", filter: { mode: "all" } as const },
+      { id: "__none__", label: "No customer", filter: { mode: "none" } as const },
+      ...customers.map((customer) => ({
+        id: customer.id,
+        label: customer.name,
+        filter: { mode: "customer", customerId: customer.id } as const,
+      })),
+    ];
+
+    if (!query) {
+      return options;
+    }
+
+    return options.filter((option) => option.label.toLowerCase().includes(query));
+  }, [customerSearch, customers]);
+
+  const filteredDocuments = React.useMemo(
+    () =>
+      filterHistoryDocuments({
+        documents,
+        dateFilter,
+        customerFilter,
+        now,
+      }),
+    [customerFilter, dateFilter, documents, now],
+  );
+
+  const invalidRange = hasInvalidCustomRange(dateFilter);
+  const hasActiveFilters =
+    dateFilter.mode !== "all" || customerFilter.mode !== "all" || customerSearch.trim().length > 0;
+
   return (
     <div className="flex-1 overflow-y-auto p-6">
       <div className="mb-6">
         <h2 className="text-lg font-bold text-[#faf9f7]">Document History</h2>
-        <p className="mt-1 text-sm text-white/40">All saved documents for this business.</p>
+        <p className="mt-1 text-sm text-white/40">Browse and filter saved documents for this business.</p>
       </div>
+
+      <div className="mb-6 grid gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 md:grid-cols-[220px_minmax(0,1fr)_auto]">
+        <label className="text-sm text-white/75">
+          <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-white/35">Date range</span>
+          <select
+            aria-label="Date range"
+            value={dateFilter.mode}
+            onChange={(event) => {
+              const mode = event.target.value;
+              if (mode === "custom") {
+                setDateFilter({ mode: "custom", startDate: "", endDate: "" });
+                return;
+              }
+
+              if (mode === "last7" || mode === "last30" || mode === "thisMonth" || mode === "all") {
+                setDateFilter({ mode });
+              }
+            }}
+            className="w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white"
+          >
+            <option value="all">All dates</option>
+            <option value="last7">Last 7 days</option>
+            <option value="last30">Last 30 days</option>
+            <option value="thisMonth">This month</option>
+            <option value="custom">Custom range</option>
+          </select>
+        </label>
+
+        <div>
+          <label className="text-sm text-white/75">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-white/35">Customer filter</span>
+            <input
+              aria-label="Customer filter"
+              value={customerSearch}
+              onChange={(event) => setCustomerSearch(event.target.value)}
+              placeholder="Search customers"
+              className="w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white placeholder:text-white/25"
+            />
+          </label>
+          <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-white/10 bg-[#111111] p-2">
+            {customerOptions.length === 0 ? (
+              <p className="px-2 py-1 text-sm text-white/35">No matching customers</p>
+            ) : (
+              customerOptions.map((option) => {
+                const isSelected =
+                  (option.filter.mode === "all" && customerFilter.mode === "all") ||
+                  (option.filter.mode === "none" && customerFilter.mode === "none") ||
+                  (option.filter.mode === "customer" &&
+                    customerFilter.mode === "customer" &&
+                    option.filter.customerId === customerFilter.customerId);
+
+                return (
+                <button
+                  key={option.id}
+                  role="option"
+                  aria-selected={isSelected}
+                  type="button"
+                  onClick={() => {
+                    setCustomerFilter(option.filter);
+                    setCustomerSearch(option.label);
+                  }}
+                  className="block w-full rounded-lg px-2 py-1 text-left text-sm text-white/75 transition hover:bg-white/5 hover:text-white"
+                >
+                  {option.label}
+                </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {hasActiveFilters ? (
+          <div className="flex items-start md:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                setDateFilter({ mode: "all" });
+                setCustomerFilter({ mode: "all" });
+                setCustomerSearch("");
+              }}
+              className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-white/75 transition hover:border-white/20 hover:text-white"
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      {dateFilter.mode === "custom" ? (
+        <div className="mb-4 grid gap-4 md:grid-cols-2">
+          <label className="text-sm text-white/75">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-white/35">Start date</span>
+            <input
+              aria-label="Start date"
+              type="date"
+              value={dateFilter.startDate}
+              onChange={(event) =>
+                setDateFilter((current) =>
+                  current.mode === "custom"
+                    ? { ...current, startDate: event.target.value }
+                    : current,
+                )
+              }
+              className="w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white"
+            />
+          </label>
+          <label className="text-sm text-white/75">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-white/35">End date</span>
+            <input
+              aria-label="End date"
+              type="date"
+              value={dateFilter.endDate}
+              onChange={(event) =>
+                setDateFilter((current) =>
+                  current.mode === "custom"
+                    ? { ...current, endDate: event.target.value }
+                    : current,
+                )
+              }
+              className="w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white"
+            />
+          </label>
+        </div>
+      ) : null}
+
+      {invalidRange ? (
+        <p className="mb-4 text-sm text-[#f59e0b]">Start date must be on or before end date.</p>
+      ) : null}
+
       {documents.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.02] py-16 text-center">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.05]">
@@ -35,9 +218,14 @@ export function DocumentHistoryTab({
           <p className="text-sm font-medium text-white/40">No documents yet</p>
           <p className="mt-1 text-xs text-white/25">Documents you save will appear here.</p>
         </div>
+      ) : filteredDocuments.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.02] py-16 text-center">
+          <p className="text-sm font-medium text-white/40">No documents match these filters</p>
+          <p className="mt-1 text-xs text-white/25">Try a different date range or customer, or clear filters to see everything again.</p>
+        </div>
       ) : (
         <div className="space-y-2">
-          {documents.map((doc) => (
+          {filteredDocuments.map((doc) => (
             <a
               key={doc.id}
               href={`/workspace/${doc.kind}?tab=documents`}
@@ -48,7 +236,8 @@ export function DocumentHistoryTab({
                   {doc.documentNumber || "Untitled"}
                 </div>
                 <div className="mt-0.5 text-xs text-white/40">
-                  {doc.kind} - {doc.issueDate}
+                  {doc.kind} - {doc.issueDate} -{" "}
+                  <span>{getHistoryCustomerLabel(doc.customerId, customerNameById)}</span>
                 </div>
               </div>
               <span
