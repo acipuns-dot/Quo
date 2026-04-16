@@ -10,41 +10,44 @@ import { DocumentShell } from "../document-shell";
 
 const FONT = "'DM Sans', system-ui, sans-serif";
 
-// Full dark luxury theme — deep background, white type, accent color highlights
+// ─── Agency template ──────────────────────────────────────────────────────────
+// Reference: image 1
+// - Top: contact icons top-right, brand block (logo + name) bottom-left of header
+// - Big "INVOICE" block right side with solid dark bg
+// - Numbered rows (01, 02…)
+// - "Thank you for your business" dark banner above totals
+// - Notes / terms bottom section
 
-function NoirLineItems({
+function AgencyLineItems({
   data,
   items,
   layoutMode,
-  accent,
 }: {
   data: DocumentData;
   items: LineItem[];
   layoutMode: DocumentLayoutMode;
-  accent: string;
 }) {
   if (data.kind === "receipt") return null;
 
   const compact = layoutMode === "compact";
-  const cellV = compact ? "10px 14px" : "13px 16px";
+  const cellV = compact ? "9px 12px" : "11px 14px";
 
   return (
     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
       <thead>
-        <tr>
-          {["Description", "Qty", "Unit Price", "Amount"].map((col, i) => (
+        <tr style={{ background: "#222", printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
+          {["No", "Product Description", "Unit Price", "Qty", "Total"].map((col, i) => (
             <th
               key={col}
               style={{
-                padding: compact ? "9px 14px" : "11px 14px",
-                textAlign: i === 0 ? "left" : "right",
-                fontSize: 9,
+                padding: compact ? "9px 12px" : "11px 14px",
+                textAlign: i === 0 ? "center" : i === 1 ? "left" : "right",
+                fontSize: 10,
                 fontWeight: 700,
-                letterSpacing: "2px",
+                letterSpacing: "1.5px",
                 textTransform: "uppercase",
-                color: accent,
-                borderBottom: `1px solid rgba(255,255,255,0.12)`,
-                background: "transparent",
+                color: "#fff",
+                width: i === 0 ? "6%" : i === 1 ? "auto" : "14%",
               }}
             >
               {col}
@@ -53,163 +56,229 @@ function NoirLineItems({
         </tr>
       </thead>
       <tbody>
-        {items.map((item, index) => (
-          <tr
-            key={item.id}
-            style={{ background: index % 2 === 0 ? "rgba(255,255,255,0.025)" : "transparent" }}
-          >
-            <td style={{ padding: cellV, borderBottom: "1px solid rgba(255,255,255,0.06)", color: "#fff", fontWeight: 500 }}>
-              {item.description}
-              {item.note ? (
-                <div style={{ marginTop: 3, fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 400, lineHeight: 1.4 }}>
-                  {item.note}
-                </div>
-              ) : null}
-            </td>
-            <td style={{ padding: cellV, borderBottom: "1px solid rgba(255,255,255,0.06)", textAlign: "right", color: "rgba(255,255,255,0.55)", fontVariantNumeric: "tabular-nums" }}>
-              {formatLineItemQuantity(item)}
-            </td>
-            <td style={{ padding: cellV, borderBottom: "1px solid rgba(255,255,255,0.06)", textAlign: "right", color: "rgba(255,255,255,0.55)", fontVariantNumeric: "tabular-nums" }}>
-              {formatCurrency(item.unitPrice, data.currency)}
-            </td>
-            <td style={{ padding: cellV, borderBottom: "1px solid rgba(255,255,255,0.06)", textAlign: "right", color: "#fff", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-              {formatCurrency(item.quantity * item.unitPrice, data.currency)}
-            </td>
-          </tr>
-        ))}
+        {items.map((item, index) => {
+          const globalIndex = data.lineItems.indexOf(item);
+          const rowNum = (globalIndex >= 0 ? globalIndex : index) + 1;
+          return (
+            <tr key={item.id} style={{ background: index % 2 === 0 ? "#fff" : "#f7f7f7" }}>
+              <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", textAlign: "center", color: "#666", fontWeight: 600, fontSize: 12 }}>
+                {String(rowNum).padStart(2, "0")}
+              </td>
+              <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", color: "#111", fontWeight: 500 }}>
+                {item.description}
+                {item.note ? (
+                  <div style={{ marginTop: 3, fontSize: 11, color: "#999", fontWeight: 400, lineHeight: 1.4 }}>
+                    {item.note}
+                  </div>
+                ) : null}
+              </td>
+              <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", textAlign: "right", color: "#555", fontVariantNumeric: "tabular-nums" }}>
+                {formatCurrency(item.unitPrice, data.currency)}
+              </td>
+              <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", textAlign: "right", color: "#555", fontVariantNumeric: "tabular-nums" }}>
+                {formatLineItemQuantity(item)}
+              </td>
+              <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", textAlign: "right", color: "#111", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
+                {formatCurrency(item.quantity * item.unitPrice, data.currency)}
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
 }
 
-function NoirTotals({ data, compact, accent }: { data: DocumentData; compact: boolean; accent: string }) {
+function AgencyBottom({
+  data,
+  compact,
+  accent,
+}: {
+  data: DocumentData;
+  compact: boolean;
+  accent: string;
+}) {
+  const totals = calculateDocumentTotals(data);
+  const paymentTermSummary = getPaymentTermSummary(data);
+
   if (data.kind === "receipt") {
     return (
-      <div style={{ marginTop: compact ? 14 : 20, border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: compact ? "14px 18px" : "20px 24px", textAlign: "right" }}>
-        {data.paymentMethod ? (
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Payment method</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>{data.paymentMethod}</div>
+      <div style={{ marginTop: compact ? 12 : 16, display: "flex", justifyContent: "flex-end" }}>
+        <div style={{ width: 240 }}>
+          {data.paymentMethod ? (
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", borderBottom: "1px solid #e8e8e8" }}>
+              <span style={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>Payment method</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#111" }}>{data.paymentMethod}</span>
+            </div>
+          ) : null}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "#222", printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.1em" }}>Grand Total</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: accent, fontVariantNumeric: "tabular-nums" }}>
+              {formatCurrency(data.amountReceived, data.currency)}
+            </span>
           </div>
-        ) : null}
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Amount received</div>
-        <div style={{ fontSize: 30, fontWeight: 800, color: accent, letterSpacing: -0.5, fontVariantNumeric: "tabular-nums" }}>
-          {formatCurrency(data.amountReceived, data.currency)}
         </div>
       </div>
     );
   }
 
-  const totals = calculateDocumentTotals(data);
-  const paymentTermSummary = getPaymentTermSummary(data);
-
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: compact ? 14 : 20, alignItems: "start" }}>
-      <div>
-        {paymentTermSummary ? (
-          <div style={{ marginBottom: data.notes ? 14 : 0 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Payment terms</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", lineHeight: 1.5 }}>{paymentTermSummary.label}</div>
-            <div style={{ marginTop: 6, fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
-              Amount due now: {formatCurrency(paymentTermSummary.amountDue, data.currency)}
+    <div style={{ marginTop: compact ? 12 : 16 }}>
+      {/* Thank you banner */}
+      <div style={{ background: "#222", padding: "9px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: "1.5px", textTransform: "uppercase" }}>
+          Thank you for your business
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center" }}>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Sub Total</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#fff", fontVariantNumeric: "tabular-nums" }}>{formatCurrency(totals.lineItemSubtotal, data.currency)}</span>
+          </div>
+          {data.applyTax ? (
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center" }}>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{data.taxLabel}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#fff", fontVariantNumeric: "tabular-nums" }}>{formatCurrency(totals.taxAmount, data.currency)}</span>
             </div>
+          ) : null}
+          {totals.additionalFees.map((fee) => (
+            <div key={fee.id} style={{ display: "flex", gap: 16, alignItems: "center" }}>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{fee.label}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#fff", fontVariantNumeric: "tabular-nums" }}>{formatCurrency(fee.amount, data.currency)}</span>
+            </div>
+          ))}
+          <div style={{ display: "flex", gap: 16, alignItems: "center", borderLeft: "1px solid rgba(255,255,255,0.2)", paddingLeft: 16 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.08em" }}>Grand Total</span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: accent, fontVariantNumeric: "tabular-nums" }}>{formatCurrency(totals.total, data.currency)}</span>
           </div>
-        ) : null}
-        {data.notes ? (
-          <>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Notes</div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, whiteSpace: "pre-line" }}>{data.notes}</div>
-          </>
-        ) : null}
-      </div>
-
-      <div style={{ border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, overflow: "hidden" }}>
-        {[
-          { label: "Subtotal", value: formatCurrency(totals.lineItemSubtotal, data.currency), muted: true },
-          ...totals.additionalFees.map((f) => ({ label: f.label, value: formatCurrency(f.amount, data.currency), muted: true })),
-          ...(data.applyTax ? [{ label: data.taxLabel, value: formatCurrency(totals.taxAmount, data.currency), muted: true }] : []),
-        ].map((row) => (
-          <div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "9px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>{row.label}</span>
-            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", fontVariantNumeric: "tabular-nums" }}>{row.value}</span>
-          </div>
-        ))}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 14px", background: accent, printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
-          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: "#fff" }}>Total</span>
-          <span style={{ fontSize: 18, fontWeight: 900, color: "#fff", fontVariantNumeric: "tabular-nums", letterSpacing: -0.5 }}>
-            {formatCurrency(totals.total, data.currency)}
-          </span>
         </div>
       </div>
+
+      {/* Bottom: terms left, payment info right */}
+      {(paymentTermSummary || data.notes) ? (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: compact ? 12 : 16 }}>
+          {data.notes ? (
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1.5px", textTransform: "uppercase", color: "#222", marginBottom: 6 }}>Terms &amp; Conditions</div>
+              <div style={{ fontSize: 11, color: "#666", lineHeight: 1.65, whiteSpace: "pre-line" }}>{data.notes}</div>
+            </div>
+          ) : <div />}
+          {paymentTermSummary ? (
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1.5px", textTransform: "uppercase", color: "#222", marginBottom: 6 }}>Payment Info</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#111" }}>{paymentTermSummary.label}</div>
+              <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>
+                Amount due now: {formatCurrency(paymentTermSummary.amountDue, data.currency)}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 export function NoirTemplate({ data }: { data: DocumentData }) {
   const theme = getThemeById(data.themeId);
-  const { accent, dark } = theme;
+  const { accent } = theme;
 
-  const bg = dark;
+  const bleed = "clamp(1.25rem, 2.8vw, 2.5rem)";
 
-  const header = (
+  // Header: left = logo/brand, right top = contact details, right bottom = big INVOICE block
+  const firstPageHeader = (
     <div
       style={{
-        paddingBottom: 24,
-        borderBottom: `1px solid rgba(255,255,255,0.08)`,
+        marginLeft: `calc(-1 * ${bleed})`,
+        marginRight: `calc(-1 * ${bleed})`,
+        marginTop: `calc(-1 * ${bleed})`,
+        display: "grid",
+        gridTemplateColumns: "1fr auto",
+        minHeight: 110,
+        borderBottom: `3px solid ${accent}`,
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          {data.logoDataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- printable document templates use runtime data URLs here
-            <img src={data.logoDataUrl} alt="" style={{ height: 44, width: "auto", objectFit: "contain", filter: "brightness(0) invert(1)" }} />
-          ) : (
-            <div style={{ fontSize: 22, fontWeight: 900, color: "#fff", letterSpacing: -0.5, lineHeight: 1.1 }}>
-              {data.businessName}
-            </div>
-          )}
-          <div style={{ marginTop: 6, fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, whiteSpace: "pre-line" }}>
-            {data.businessAddress}
-          </div>
+      {/* Left: brand block */}
+      <div style={{ padding: `20px ${bleed}`, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+        {data.logoDataUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- printable document templates use runtime data URLs here
+          <img src={data.logoDataUrl} alt="" style={{ height: 36, width: "auto", objectFit: "contain", marginBottom: 8, alignSelf: "flex-start" }} />
+        ) : null}
+        <div style={{ fontSize: 18, fontWeight: 900, color: "#111", letterSpacing: -0.5, lineHeight: 1.1 }}>{data.businessName}</div>
+        <div style={{ fontSize: 10, color: "#888", marginTop: 3, lineHeight: 1.5 }}>
+          {data.businessAddress.split("\n")[0]}
         </div>
-        <div style={{ textAlign: "right" }}>
-          <div
-            style={{
-              display: "inline-block",
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: "3px",
-              textTransform: "uppercase",
-              color: accent,
-              marginBottom: 10,
-            }}
-          >
+      </div>
+
+      {/* Right: top row = contact info, bottom = big INVOICE */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {/* Contact strip */}
+        <div style={{ padding: "10px 20px", borderBottom: "1px solid #e8e8e8", display: "flex", gap: 16, justifyContent: "flex-end", alignItems: "center" }}>
+          <span style={{ fontSize: 10, color: "#666" }}>✉ {data.businessAddress.split("\n").slice(1).join(" ")}</span>
+        </div>
+        {/* INVOICE label block */}
+        <div
+          style={{
+            flex: 1,
+            background: "#222",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 28px",
+            printColorAdjust: "exact",
+            WebkitPrintColorAdjust: "exact",
+          } as React.CSSProperties}
+        >
+          <div style={{ fontSize: 28, fontWeight: 900, color: accent, letterSpacing: 4, textTransform: "uppercase" }}>
             {data.kind}
           </div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>
-            {data.documentNumber}
-          </div>
-          <div style={{ marginTop: 4, fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{data.documentDate}</div>
-          {data.validUntil ? (
-            <div style={{ marginTop: 2, fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Valid until {data.validUntil}</div>
-          ) : null}
         </div>
       </div>
     </div>
   );
 
-  const parties = (fromLabel: string, toLabel: string) => (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, padding: "20px 0", borderBottom: "1px solid rgba(255,255,255,0.08)", marginBottom: 20 }}>
-      {[
-        { label: fromLabel, name: data.businessName, address: data.businessAddress },
-        { label: toLabel, name: data.customerName, address: data.customerAddress },
-      ].map((p) => (
-        <div key={p.label}>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: accent, marginBottom: 6 }}>{p.label}</div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 3 }}>{p.name}</div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", lineHeight: 1.7, whiteSpace: "pre-line" }}>{p.address}</div>
+  // Meta row: doc details left, bill to right
+  const metaRow = (toLabel: string) => (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "16px 0 14px", borderBottom: "1px solid #e8e8e8", marginBottom: 16 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          <span style={{ fontSize: 11, color: "#888", width: 80 }}>Invoice No :</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#111" }}>{data.documentNumber}</span>
         </div>
-      ))}
+        <div style={{ display: "flex", gap: 6 }}>
+          <span style={{ fontSize: 11, color: "#888", width: 80 }}>Date :</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#111" }}>{data.documentDate}</span>
+        </div>
+        {data.validUntil ? (
+          <div style={{ display: "flex", gap: 6 }}>
+            <span style={{ fontSize: 11, color: "#888", width: 80 }}>Due Date :</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#111" }}>{data.validUntil}</span>
+          </div>
+        ) : null}
+      </div>
+      <div>
+        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#888", marginBottom: 5 }}>{toLabel}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: "#111", marginBottom: 2 }}>{data.customerName}</div>
+        <div style={{ fontSize: 11, color: "#777", lineHeight: 1.6, whiteSpace: "pre-line" }}>{data.customerAddress}</div>
+      </div>
+    </div>
+  );
+
+  const continuationHeader = (pageNumber: number, totalPages: number) => (
+    <div
+      style={{
+        marginLeft: `calc(-1 * ${bleed})`,
+        marginRight: `calc(-1 * ${bleed})`,
+        marginTop: `calc(-1 * ${bleed})`,
+        borderBottom: `3px solid ${accent}`,
+        padding: `14px ${bleed}`,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+      }}
+    >
+      <span style={{ fontSize: 14, fontWeight: 900, color: "#111" }}>{data.businessName}</span>
+      <span style={{ fontSize: 12, color: "#888" }}>{data.kind.toUpperCase()} · {data.documentNumber}</span>
+      <DocumentPageMeta data={data} pageNumber={pageNumber} totalPages={totalPages} />
     </div>
   );
 
@@ -217,46 +286,39 @@ export function NoirTemplate({ data }: { data: DocumentData }) {
     <div
       data-template-footer="noir"
       style={{
-        borderTop: `1px solid rgba(255,255,255,0.08)`,
-        paddingTop: 12,
-        marginTop: "auto",
+        marginLeft: `calc(-1 * ${bleed})`,
+        marginRight: `calc(-1 * ${bleed})`,
+        borderTop: `3px solid ${accent}`,
+        padding: `10px ${bleed}`,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        marginTop: "auto",
       }}
     >
-      <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: 1, textTransform: "uppercase" }}>
+      <span style={{ fontSize: 10, fontWeight: 700, color: "#555", letterSpacing: 1, textTransform: "uppercase" }}>
         {data.businessName}
       </span>
-      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", letterSpacing: 0.5 }}>
-        {data.kind} · {data.documentNumber}{data.validUntil ? ` · Valid until ${data.validUntil}` : ""}
+      <span style={{ fontSize: 10, color: "#bbb" }}>
+        {data.kind} · {data.documentNumber}
       </span>
     </div>
   );
 
   const autoGeneratedNote = (
-    <div style={{ marginTop: 18, fontSize: 12, color: "rgba(255,255,255,0.3)", lineHeight: 1.65 }}>
+    <div style={{ marginTop: 14, fontSize: 11, color: "#aaa", lineHeight: 1.65 }}>
       This is an auto-generated document. No signature required.
     </div>
   );
 
-  const notesSection = (layoutMode: DocumentLayoutMode) =>
-    data.notes ? (
-      <div style={{ marginTop: layoutMode === "compact" ? 12 : 18 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>Notes</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, whiteSpace: "pre-line" }}>{data.notes}</div>
-      </div>
-    ) : null;
-
   if (data.kind === "receipt") {
     return (
       <DocumentShell accentClass="">
-        <div style={{ fontFamily: FONT, display: "flex", flexDirection: "column", flex: 1, color: "#fff", background: bg, margin: "calc(-1 * clamp(1.25rem,2.8vw,2.5rem))", padding: "clamp(1.25rem,2.8vw,2.5rem)" } as React.CSSProperties}>
-          {header}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: 20 }}>
-            {parties("Issued by", "Received from")}
-            <NoirTotals data={data} compact={false} accent={accent} />
-            {notesSection("comfortable")}
+        <div style={{ fontFamily: FONT, display: "flex", flexDirection: "column", flex: 1 }}>
+          {firstPageHeader}
+          {metaRow("Received from")}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <AgencyBottom data={data} compact={false} accent={accent} />
             {autoGeneratedNote}
           </div>
           {footer}
@@ -270,13 +332,11 @@ export function NoirTemplate({ data }: { data: DocumentData }) {
       data={data}
       renderPage={(page, layoutMode) => (
         <DocumentShell accentClass="" continuation={page.isContinuationPage}>
-          <div style={{ fontFamily: FONT, display: "flex", flexDirection: "column", flex: 1, color: "#fff", background: bg, margin: "calc(-1 * clamp(1.25rem,2.8vw,2.5rem))", padding: "clamp(1.25rem,2.8vw,2.5rem)" } as React.CSSProperties}>
+          <div style={{ fontFamily: FONT, display: "flex", flexDirection: "column", flex: 1 }}>
             {page.isFirstPage ? (
               <>
-                {header}
-                <div style={{ paddingTop: 0 }}>
-                  {parties(data.kind === "invoice" ? "From" : "Prepared by", data.kind === "invoice" ? "Bill to" : "Prepared for")}
-                </div>
+                {firstPageHeader}
+                {metaRow(data.kind === "invoice" ? "Bill to" : "Prepared for")}
                 {page.totalPages > 1 ? (
                   <div style={{ marginBottom: 12 }}>
                     <DocumentPageMeta data={data} pageNumber={page.pageNumber} totalPages={page.totalPages} />
@@ -284,21 +344,19 @@ export function NoirTemplate({ data }: { data: DocumentData }) {
                 ) : null}
               </>
             ) : (
-              <div style={{ marginBottom: 12, paddingTop: 16 }}>
-                <DocumentPageMeta data={data} pageNumber={page.pageNumber} totalPages={page.totalPages} />
-              </div>
+              continuationHeader(page.pageNumber, page.totalPages)
             )}
             <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-              <NoirLineItems data={data} items={page.lineItems} layoutMode={layoutMode} accent={accent} />
+              <AgencyLineItems data={data} items={page.lineItems} layoutMode={layoutMode} />
               {page.showTotals ? (
                 <>
-                  <NoirTotals data={data} compact={layoutMode === "compact"} accent={accent} />
+                  <AgencyBottom data={data} compact={layoutMode === "compact"} accent={accent} />
                   {autoGeneratedNote}
                 </>
               ) : null}
             </div>
-            {page.isFinalPage ? footer : null}
           </div>
+          {page.isFinalPage ? footer : null}
         </DocumentShell>
       )}
     />

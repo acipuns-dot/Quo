@@ -10,40 +10,48 @@ import { DocumentShell } from "../document-shell";
 
 const FONT = "'DM Sans', system-ui, sans-serif";
 
-// Editorial / agency layout — vertical business name on left spine, wide content column right
+// ─── Wave template ────────────────────────────────────────────────────────────
+// Reference: image 2
+// - Header: dark bg with SVG wave bottom edge, logo + business name left, contact icons top-right
+// - "INVOICE" large right-aligned text mid-page
+// - Customer address left + doc details (key:value rows) right — between header and table
+// - Dark full-width table header, alternating rows
+// - Totals right-aligned, payment info + T&C left
 
-function StudioLineItems({
+function WaveLineItems({
   data,
   items,
   layoutMode,
   accent,
+  dark,
 }: {
   data: DocumentData;
   items: LineItem[];
   layoutMode: DocumentLayoutMode;
   accent: string;
+  dark: string;
 }) {
   if (data.kind === "receipt") return null;
 
   const compact = layoutMode === "compact";
-  const cellPad = compact ? "10px 0" : "13px 0";
+  const cellV = compact ? "9px 14px" : "12px 16px";
 
   return (
     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
       <thead>
-        <tr style={{ borderBottom: `2px solid ${accent}` }}>
-          {["Description", "Qty", "Unit Price", "Amount"].map((col, i) => (
+        <tr style={{ background: dark, printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
+          {["Product Descriptions", "Price", "Qty.", "Total"].map((col, i) => (
             <th
               key={col}
               style={{
-                padding: compact ? "8px 0 8px 0" : "10px 0",
-                paddingRight: i < 3 ? 16 : 0,
+                padding: compact ? "9px 14px" : "11px 16px",
                 textAlign: i === 0 ? "left" : "right",
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: 700,
-                letterSpacing: "2px",
+                letterSpacing: "1px",
                 textTransform: "uppercase",
-                color: "#888",
+                color: "#fff",
+                width: i === 0 ? "auto" : "15%",
               }}
             >
               {col}
@@ -52,23 +60,23 @@ function StudioLineItems({
         </tr>
       </thead>
       <tbody>
-        {items.map((item) => (
-          <tr key={item.id} style={{ borderBottom: "1px solid #f0ede9" }}>
-            <td style={{ padding: cellPad, paddingRight: 16, verticalAlign: "top", color: "#111", fontWeight: 600 }}>
+        {items.map((item, index) => (
+          <tr key={item.id} style={{ background: index % 2 === 0 ? "#fff" : "#f5f5f5" }}>
+            <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", color: "#111", fontWeight: 500 }}>
               {item.description}
               {item.note ? (
-                <div style={{ marginTop: 3, fontSize: 11, color: "#aaa", fontWeight: 400, lineHeight: 1.4 }}>
+                <div style={{ marginTop: 3, fontSize: 11, color: "#999", fontWeight: 400, lineHeight: 1.4 }}>
                   {item.note}
                 </div>
               ) : null}
             </td>
-            <td style={{ padding: cellPad, paddingRight: 16, textAlign: "right", color: "#888", fontVariantNumeric: "tabular-nums" }}>
-              {formatLineItemQuantity(item)}
-            </td>
-            <td style={{ padding: cellPad, paddingRight: 16, textAlign: "right", color: "#888", fontVariantNumeric: "tabular-nums" }}>
+            <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", textAlign: "right", color: "#555", fontVariantNumeric: "tabular-nums" }}>
               {formatCurrency(item.unitPrice, data.currency)}
             </td>
-            <td style={{ padding: cellPad, textAlign: "right", color: "#111", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
+            <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", textAlign: "right", color: "#555", fontVariantNumeric: "tabular-nums" }}>
+              {formatLineItemQuantity(item)}
+            </td>
+            <td style={{ padding: cellV, borderBottom: "1px solid #e8e8e8", textAlign: "right", color: "#111", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
               {formatCurrency(item.quantity * item.unitPrice, data.currency)}
             </td>
           </tr>
@@ -78,61 +86,82 @@ function StudioLineItems({
   );
 }
 
-function StudioTotals({ data, compact, accent }: { data: DocumentData; compact: boolean; accent: string }) {
+function WaveBottom({
+  data,
+  compact,
+  accent,
+}: {
+  data: DocumentData;
+  compact: boolean;
+  accent: string;
+}) {
+  const totals = calculateDocumentTotals(data);
+  const paymentTermSummary = getPaymentTermSummary(data);
+
   if (data.kind === "receipt") {
     return (
-      <div style={{ marginTop: compact ? 14 : 20, textAlign: "right" }}>
-        {data.paymentMethod ? (
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#bbb", marginBottom: 4 }}>Payment method</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{data.paymentMethod}</div>
+      <div style={{ marginTop: compact ? 14 : 20, display: "flex", justifyContent: "flex-end" }}>
+        <div style={{ width: 260 }}>
+          {data.paymentMethod ? (
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #e8e8e8" }}>
+              <span style={{ fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>Payment method</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#111" }}>{data.paymentMethod}</span>
+            </div>
+          ) : null}
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 12px", background: accent, borderRadius: 4, marginTop: 8, printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.08em" }}>Total</span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: "#fff", fontVariantNumeric: "tabular-nums" }}>
+              {formatCurrency(data.amountReceived, data.currency)}
+            </span>
           </div>
-        ) : null}
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#bbb", marginBottom: 4 }}>Amount received</div>
-        <div style={{ fontSize: 36, fontWeight: 900, color: accent, letterSpacing: -1, fontVariantNumeric: "tabular-nums" }}>
-          {formatCurrency(data.amountReceived, data.currency)}
         </div>
       </div>
     );
   }
 
-  const totals = calculateDocumentTotals(data);
-  const paymentTermSummary = getPaymentTermSummary(data);
-
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: compact ? 14 : 24, alignItems: "start" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: compact ? 14 : 20, alignItems: "start" }}>
+      {/* Left: payment info + notes */}
       <div>
         {paymentTermSummary ? (
           <div style={{ marginBottom: data.notes ? 14 : 0 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#bbb", marginBottom: 6 }}>Payment terms</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#111", lineHeight: 1.5 }}>{paymentTermSummary.label}</div>
-            <div style={{ marginTop: 6, fontSize: 12, color: "#888", lineHeight: 1.6 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1.5px", textTransform: "uppercase", color: "#111", marginBottom: 6 }}>Payment Info:</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#333" }}>{paymentTermSummary.label}</div>
+            <div style={{ fontSize: 11, color: "#666", marginTop: 3 }}>
               Amount due now: {formatCurrency(paymentTermSummary.amountDue, data.currency)}
             </div>
           </div>
         ) : null}
         {data.notes ? (
           <>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#bbb", marginBottom: 6 }}>Notes</div>
-            <div style={{ fontSize: 12, color: "#555", lineHeight: 1.65, whiteSpace: "pre-line" }}>{data.notes}</div>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1.5px", textTransform: "uppercase", color: "#111", marginBottom: 6 }}>
+              Terms &amp; Conditions:
+            </div>
+            <div style={{ fontSize: 11, color: "#666", lineHeight: 1.65, whiteSpace: "pre-line" }}>{data.notes}</div>
           </>
         ) : null}
+        {!paymentTermSummary && !data.notes ? (
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#333" }}>Thank You For Your Business.</div>
+        ) : (
+          <div style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: "#333" }}>Thank You For Your Business.</div>
+        )}
       </div>
 
+      {/* Right: totals */}
       <div>
         {[
-          { label: "Subtotal", value: formatCurrency(totals.lineItemSubtotal, data.currency) },
-          ...totals.additionalFees.map((f) => ({ label: f.label, value: formatCurrency(f.amount, data.currency) })),
-          ...(data.applyTax ? [{ label: data.taxLabel, value: formatCurrency(totals.taxAmount, data.currency) }] : []),
+          { label: "Sub Total", value: formatCurrency(totals.lineItemSubtotal, data.currency), highlight: false },
+          ...totals.additionalFees.map((f) => ({ label: f.label, value: formatCurrency(f.amount, data.currency), highlight: false })),
+          ...(data.applyTax ? [{ label: `${data.taxLabel}`, value: formatCurrency(totals.taxAmount, data.currency), highlight: false }] : []),
         ].map((row) => (
-          <div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0ede9" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#aaa" }}>{row.label}</span>
-            <span style={{ fontSize: 13, color: "#555", fontVariantNumeric: "tabular-nums" }}>{row.value}</span>
+          <div key={row.label} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", borderBottom: "1px solid #e8e8e8" }}>
+            <span style={{ fontSize: 11, color: "#888" }}>{row.label}</span>
+            <span style={{ fontSize: 12, color: "#333", fontVariantNumeric: "tabular-nums" }}>{row.value}</span>
           </div>
         ))}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "14px 0 0" }}>
-          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: accent }}>Total</span>
-          <span style={{ fontSize: 26, fontWeight: 900, color: "#111", fontVariantNumeric: "tabular-nums", letterSpacing: -1 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: accent, borderRadius: 4, marginTop: 6, printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.08em" }}>Total</span>
+          <span style={{ fontSize: 15, fontWeight: 800, color: "#fff", fontVariantNumeric: "tabular-nums" }}>
             {formatCurrency(totals.total, data.currency)}
           </span>
         </div>
@@ -143,115 +172,114 @@ function StudioTotals({ data, compact, accent }: { data: DocumentData; compact: 
 
 export function StudioTemplate({ data }: { data: DocumentData }) {
   const theme = getThemeById(data.themeId);
-  const { accent } = theme;
+  const { accent, dark } = theme;
 
   const bleed = "clamp(1.25rem, 2.8vw, 2.5rem)";
 
-  // Thin accent top stripe
-  const topStripe = (
+  // Wave header — dark bg, SVG wave at bottom
+  const waveHeader = (
     <div
       style={{
-        height: 3,
-        background: accent,
         marginLeft: `calc(-1 * ${bleed})`,
         marginRight: `calc(-1 * ${bleed})`,
         marginTop: `calc(-1 * ${bleed})`,
+        background: dark,
+        position: "relative",
+        paddingBottom: 28,
         printColorAdjust: "exact",
         WebkitPrintColorAdjust: "exact",
-      }}
-    />
-  );
-
-  const firstPageHeader = (fromLabel: string, toLabel: string) => (
-    <>
-      {topStripe}
-      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 28, paddingTop: 28, paddingBottom: 20, borderBottom: "1px solid #ede9e4" }}>
-        {/* Left: rotated business name */}
-        <div
-          style={{
-            writingMode: "vertical-rl",
-            textOrientation: "mixed",
-            transform: "rotate(180deg)",
-            fontSize: 11,
-            fontWeight: 900,
-            letterSpacing: "3px",
-            textTransform: "uppercase",
-            color: accent,
-            lineHeight: 1,
-            alignSelf: "start",
-          }}
-        >
-          {data.businessName}
+      } as React.CSSProperties}
+    >
+      {/* Content row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: `20px ${bleed} 0` }}>
+        {/* Left: logo + name */}
+        <div>
+          {data.logoDataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- printable document templates use runtime data URLs here
+            <img src={data.logoDataUrl} alt="" style={{ height: 36, width: "auto", objectFit: "contain", filter: "brightness(0) invert(1)", marginBottom: 8 }} />
+          ) : null}
+          <div style={{ fontSize: 16, fontWeight: 900, color: "#fff", letterSpacing: -0.3, lineHeight: 1.1 }}>
+            {data.businessName}
+          </div>
+          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", marginTop: 3, letterSpacing: "1px" }}>
+            {data.businessAddress.split("\n")[0]}
+          </div>
         </div>
 
-        {/* Right: all content */}
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-            <div>
-              {data.logoDataUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- printable document templates use runtime data URLs here
-                <img src={data.logoDataUrl} alt="" style={{ height: 40, width: "auto", objectFit: "contain" }} />
-              ) : (
-                <div style={{ fontSize: 24, fontWeight: 900, color: "#111", letterSpacing: -0.75, lineHeight: 1 }}>
-                  {data.businessName}
-                </div>
-              )}
-              <div style={{ marginTop: 5, fontSize: 11, color: "#aaa", lineHeight: 1.7, whiteSpace: "pre-line" }}>
-                {data.businessAddress}
-              </div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#bbb", marginBottom: 4 }}>{data.kind}</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#111", letterSpacing: -0.5 }}>{data.documentNumber}</div>
-              <div style={{ fontSize: 11, color: "#aaa", marginTop: 4 }}>{data.documentDate}</div>
-              {data.validUntil ? (
-                <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>Valid until {data.validUntil}</div>
-              ) : null}
-            </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-            {[
-              { label: fromLabel, name: data.businessName, address: data.businessAddress },
-              { label: toLabel, name: data.customerName, address: data.customerAddress },
-            ].map((p) => (
-              <div key={p.label}>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: accent, marginBottom: 5 }}>{p.label}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#111", marginBottom: 2 }}>{p.name}</div>
-                <div style={{ fontSize: 11, color: "#888", lineHeight: 1.65, whiteSpace: "pre-line" }}>{p.address}</div>
-              </div>
-            ))}
-          </div>
+        {/* Right: contact row */}
+        <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: 4 }}>
+          {data.businessAddress.split("\n").slice(1).map((line, i) => (
+            <div key={i} style={{ fontSize: 10, color: "rgba(255,255,255,0.6)" }}>{line}</div>
+          ))}
         </div>
       </div>
-    </>
+
+      {/* SVG wave */}
+      <svg
+        style={{ position: "absolute", bottom: 0, left: 0, right: 0, width: "100%", display: "block" }}
+        viewBox="0 0 800 28"
+        preserveAspectRatio="none"
+        fill="none"
+      >
+        <path d="M0 28 C200 0 600 28 800 0 L800 28 Z" fill={accent} opacity="0.9" />
+        <path d="M0 28 C200 8 600 28 800 10 L800 28 Z" fill={accent} />
+      </svg>
+    </div>
+  );
+
+  // "INVOICE" large text + client/doc meta row
+  const invoiceBlock = (toLabel: string) => (
+    <div style={{ paddingTop: 18, paddingBottom: 14, borderBottom: "1px solid #e8e8e8", marginBottom: 16 }}>
+      {/* Big INVOICE title right-aligned */}
+      <div style={{ textAlign: "right", marginBottom: 14 }}>
+        <div style={{ fontSize: 34, fontWeight: 900, color: dark, letterSpacing: -1, textTransform: "uppercase", lineHeight: 1 }}>
+          {data.kind}
+        </div>
+      </div>
+      {/* Two-column: customer left, doc details right */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", color: "#888", marginBottom: 5 }}>
+            {toLabel}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#111", marginBottom: 2 }}>{data.customerName}</div>
+          <div style={{ fontSize: 11, color: "#666", lineHeight: 1.6, whiteSpace: "pre-line" }}>{data.customerAddress}</div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {[
+            { label: "Invoice No", value: data.documentNumber },
+            { label: "Date", value: data.documentDate },
+            ...(data.validUntil ? [{ label: "Due Date", value: data.validUntil }] : []),
+          ].map((row) => (
+            <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 11, color: "#888" }}>{row.label}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#111" }}>: &nbsp;{row.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 
   const continuationHeader = (pageNumber: number, totalPages: number) => (
-    <>
-      {topStripe}
-      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 28, paddingTop: 20, paddingBottom: 16 }}>
-        <div
-          style={{
-            writingMode: "vertical-rl",
-            textOrientation: "mixed",
-            transform: "rotate(180deg)",
-            fontSize: 11,
-            fontWeight: 900,
-            letterSpacing: "3px",
-            textTransform: "uppercase",
-            color: accent,
-            lineHeight: 1,
-            alignSelf: "start",
-          }}
-        >
-          {data.businessName}
-        </div>
-        <div>
-          <DocumentPageMeta data={data} pageNumber={pageNumber} totalPages={totalPages} />
-        </div>
-      </div>
-    </>
+    <div
+      style={{
+        marginLeft: `calc(-1 * ${bleed})`,
+        marginRight: `calc(-1 * ${bleed})`,
+        marginTop: `calc(-1 * ${bleed})`,
+        background: dark,
+        padding: `14px ${bleed}`,
+        marginBottom: 16,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        printColorAdjust: "exact",
+        WebkitPrintColorAdjust: "exact",
+      } as React.CSSProperties}
+    >
+      <span style={{ fontSize: 13, fontWeight: 800, color: "#fff" }}>{data.businessName}</span>
+      <DocumentPageMeta data={data} pageNumber={pageNumber} totalPages={totalPages} />
+    </div>
   );
 
   const footer = (
@@ -260,48 +288,43 @@ export function StudioTemplate({ data }: { data: DocumentData }) {
       style={{
         marginLeft: `calc(-1 * ${bleed})`,
         marginRight: `calc(-1 * ${bleed})`,
-        borderTop: "1px solid #ede9e4",
-        padding: `12px ${bleed}`,
+        background: dark,
+        padding: `10px ${bleed}`,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-      }}
+        marginTop: "auto",
+        printColorAdjust: "exact",
+        WebkitPrintColorAdjust: "exact",
+      } as React.CSSProperties}
     >
-      <span style={{ fontSize: 11, fontWeight: 700, color: "#bbb", letterSpacing: 1, textTransform: "uppercase" }}>
+      <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.6)", letterSpacing: 1, textTransform: "uppercase" }}>
         {data.businessName}
       </span>
-      <span style={{ fontSize: 10, color: "#ccc" }}>
-        {data.kind} · {data.documentNumber}{data.validUntil ? ` · Valid until ${data.validUntil}` : ""}
+      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>
+        {data.kind} · {data.documentNumber}
       </span>
     </div>
   );
 
   const autoGeneratedNote = (
-    <div style={{ marginTop: 18, fontSize: 12, color: "#aaa", lineHeight: 1.65 }}>
+    <div style={{ marginTop: 14, fontSize: 11, color: "#aaa", lineHeight: 1.65 }}>
       This is an auto-generated document. No signature required.
     </div>
   );
-
-  const notesSection = (layoutMode: DocumentLayoutMode) =>
-    data.notes ? (
-      <div style={{ marginTop: layoutMode === "compact" ? 12 : 18 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#bbb", marginBottom: 6 }}>Notes</div>
-        <div style={{ fontSize: 12, color: "#555", lineHeight: 1.6, whiteSpace: "pre-line" }}>{data.notes}</div>
-      </div>
-    ) : null;
 
   if (data.kind === "receipt") {
     return (
       <DocumentShell accentClass="">
         <div style={{ fontFamily: FONT, display: "flex", flexDirection: "column", flex: 1 }}>
-          {firstPageHeader("Issued by", "Received from")}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: 20 }}>
-            <StudioTotals data={data} compact={false} accent={accent} />
-            {notesSection("comfortable")}
+          {waveHeader}
+          {invoiceBlock("Received from")}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <WaveBottom data={data} compact={false} accent={accent} />
             {autoGeneratedNote}
           </div>
+          {footer}
         </div>
-        {footer}
       </DocumentShell>
     );
   }
@@ -314,9 +337,10 @@ export function StudioTemplate({ data }: { data: DocumentData }) {
           <div style={{ fontFamily: FONT, display: "flex", flexDirection: "column", flex: 1 }}>
             {page.isFirstPage ? (
               <>
-                {firstPageHeader(data.kind === "invoice" ? "From" : "Prepared by", data.kind === "invoice" ? "Bill to" : "Prepared for")}
+                {waveHeader}
+                {invoiceBlock(data.kind === "invoice" ? "Bill to" : "Prepared for")}
                 {page.totalPages > 1 ? (
-                  <div style={{ marginTop: 14, marginBottom: 4 }}>
+                  <div style={{ marginBottom: 12 }}>
                     <DocumentPageMeta data={data} pageNumber={page.pageNumber} totalPages={page.totalPages} />
                   </div>
                 ) : null}
@@ -324,11 +348,11 @@ export function StudioTemplate({ data }: { data: DocumentData }) {
             ) : (
               continuationHeader(page.pageNumber, page.totalPages)
             )}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: page.isFirstPage ? 16 : 0 }}>
-              <StudioLineItems data={data} items={page.lineItems} layoutMode={layoutMode} accent={accent} />
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <WaveLineItems data={data} items={page.lineItems} layoutMode={layoutMode} accent={accent} dark={dark} />
               {page.showTotals ? (
                 <>
-                  <StudioTotals data={data} compact={layoutMode === "compact"} accent={accent} />
+                  <WaveBottom data={data} compact={layoutMode === "compact"} accent={accent} />
                   {autoGeneratedNote}
                 </>
               ) : null}
