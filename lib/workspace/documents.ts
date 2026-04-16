@@ -47,6 +47,8 @@ export async function upsertWorkspaceDocument(
       payload_version: WORKSPACE_DOCUMENT_PAYLOAD_VERSION,
       payload,
       updated_at: new Date().toISOString(),
+    }, {
+      onConflict: "business_id,kind,document_number",
     })
     .select()
     .single();
