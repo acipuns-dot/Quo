@@ -618,13 +618,14 @@ function DocumentGenerator({
   if (initialDraftRef.current === null) {
     initialDraftRef.current = getInitialDraft(initialKind, workspace, persistenceMode);
   }
+  const initialDraft = initialDraftRef.current;
   const initialSelectedWorkspaceCustomer = restoreSelectedWorkspaceCustomer(workspace);
   const initialSelectedCustomerId = initialSelectedWorkspaceCustomer?.id ?? null;
 
   const [currentKind, setCurrentKind] = useState<DocumentKind>(initialKind);
-  const [data, setData] = useState<DocumentData>(initialDraftRef.current.data);
+  const [data, setData] = useState<DocumentData>(initialDraft.data);
   const [documentNumberAuto, setDocumentNumberAuto] = useState(
-    initialDraftRef.current.documentNumberAuto,
+    initialDraft.documentNumberAuto,
   );
   const [activeSection, setActiveSection] = useState(1);
   const [doneSet, setDoneSet] = useState<Set<number>>(new Set());
@@ -635,12 +636,12 @@ function DocumentGenerator({
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(initialSelectedCustomerId);
   const previewRef = useRef<HTMLDivElement>(null);
   const lastTaxValuesRef = useRef({
-    taxLabel: initialDraftRef.current.data.taxLabel,
-    taxRate: initialDraftRef.current.data.taxRate,
+    taxLabel: initialDraft.data.taxLabel,
+    taxRate: initialDraft.data.taxRate,
   });
-  const nextLineItemIdRef = useRef(getNextLineItemSeed(initialDraftRef.current.data.lineItems));
+  const nextLineItemIdRef = useRef(getNextLineItemSeed(initialDraft.data.lineItems));
   const nextAdditionalFeeIdRef = useRef(
-    getNextAdditionalFeeSeed(initialDraftRef.current.data.additionalFees),
+    getNextAdditionalFeeSeed(initialDraft.data.additionalFees),
   );
   const skipAutosaveKindRef = useRef<DocumentKind | null>(null);
   const previousBusinessIdRef = useRef(workspace?.businessId ?? null);
@@ -648,8 +649,8 @@ function DocumentGenerator({
   const [baselineSnapshot, setBaselineSnapshot] = useState(() =>
     serializeDraftSnapshot({
       kind: initialKind,
-      data: initialDraftRef.current.data,
-      documentNumberAuto: initialDraftRef.current.documentNumberAuto,
+      data: initialDraft.data,
+      documentNumberAuto: initialDraft.documentNumberAuto,
       selectedCustomerId: initialSelectedCustomerId,
       businessId: workspace?.businessId ?? null,
     }),
