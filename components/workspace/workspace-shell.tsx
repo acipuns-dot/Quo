@@ -43,6 +43,11 @@ export function WorkspaceShell({
   kind,
   children,
 }: WorkspaceShellProps) {
+  function getSortableTimestamp(value: string) {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
   const pathname = usePathname();
   const router = useRouter();
   const [currentTab, setCurrentTab] = useState(activeTab);
@@ -52,6 +57,29 @@ export function WorkspaceShell({
   const [savePending, setSavePending] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const documentGeneratorRef = useRef<DocumentGeneratorHandle | null>(null);
+
+  const recentDocuments = [...documents]
+    .sort((left, right) => {
+      const leftUpdated = getSortableTimestamp(left.updatedAt);
+      const rightUpdated = getSortableTimestamp(right.updatedAt);
+
+      if (leftUpdated !== null && rightUpdated !== null) {
+        return rightUpdated - leftUpdated;
+      }
+
+      if (leftUpdated !== null) {
+        return -1;
+      }
+
+      if (rightUpdated !== null) {
+        return 1;
+      }
+
+      const leftCreated = getSortableTimestamp(left.createdAt) ?? 0;
+      const rightCreated = getSortableTimestamp(right.createdAt) ?? 0;
+      return rightCreated - leftCreated;
+    })
+    .slice(0, 5);
 
   useEffect(() => {
     setCurrentTab(activeTab);
@@ -213,7 +241,7 @@ export function WorkspaceShell({
             }
           />
           <DocumentHistoryPanel
-            documents={documents}
+            documents={recentDocuments}
             onOpenDocument={(document) =>
               queueSidebarAction({
                 id: `document:${document.id}`,
