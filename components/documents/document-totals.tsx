@@ -57,12 +57,14 @@ export function DocumentTotals({
           {formatCurrency(totals.subtotal, data.currency)}
         </span>
       </div>
-      <div className="flex justify-between border-t border-stone-200 py-2 text-stone-500">
-        <span className="uppercase tracking-[0.12em]">{data.taxLabel}</span>
-        <span className="tabular-nums">
-          {formatCurrency(totals.taxAmount, data.currency)}
-        </span>
-      </div>
+      {data.applyTax ? (
+        <div className="flex justify-between border-t border-stone-200 py-2 text-stone-500">
+          <span className="uppercase tracking-[0.12em]">{data.taxLabel}</span>
+          <span className="tabular-nums">
+            {formatCurrency(totals.taxAmount, data.currency)}
+          </span>
+        </div>
+      ) : null}
       {paymentTermSummary ? (
         <div className="border-t border-stone-200 py-3 text-stone-700">
           <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-stone-400">

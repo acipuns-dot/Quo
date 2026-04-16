@@ -140,12 +140,14 @@ function BoldBottom({
               {formatCurrency(totals.subtotal, data.currency)}
             </td>
           </tr>
-          <tr>
-            <td style={{ padding: "9px 14px", border: "1px solid #ddd", fontWeight: 600, color: "#333", textTransform: "uppercase", fontSize: 11, letterSpacing: "0.06em" }}>{data.taxLabel}</td>
-            <td style={{ padding: "9px 14px", border: "1px solid #ddd", textAlign: "right", fontVariantNumeric: "tabular-nums", color: "#333" }}>
-              {formatCurrency(totals.taxAmount, data.currency)}
-            </td>
-          </tr>
+          {data.applyTax ? (
+            <tr>
+              <td style={{ padding: "9px 14px", border: "1px solid #ddd", fontWeight: 600, color: "#333", textTransform: "uppercase", fontSize: 11, letterSpacing: "0.06em" }}>{data.taxLabel}</td>
+              <td style={{ padding: "9px 14px", border: "1px solid #ddd", textAlign: "right", fontVariantNumeric: "tabular-nums", color: "#333" }}>
+                {formatCurrency(totals.taxAmount, data.currency)}
+              </td>
+            </tr>
+          ) : null}
           <tr style={{ printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
             <td style={{ padding: "11px 14px", border: "1px solid #ddd", fontWeight: 700, color: "#fff", textTransform: "uppercase", fontSize: 11, letterSpacing: "0.08em", background: accent, printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" } as React.CSSProperties}>
               Total Price

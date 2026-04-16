@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { createDefaultDocument } from "../../lib/documents/defaults";
 import {
   clearDraft,
   clearSelectedWorkspaceCustomer,
@@ -86,7 +85,7 @@ function getPresetPercentage(preset: DocumentData["paymentTermPreset"]): number 
 
 const labelClass = "block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-1";
 const inputClass =
-  "w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-[#faf9f7] placeholder:text-white/20 focus:border-[#d4901e]/60 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/15";
+  "w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-[#faf9f7] placeholder:text-white/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e]/60 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/15";
 
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null;
@@ -311,6 +310,7 @@ type WorkspaceGeneratorContext = {
   defaultCurrency: string;
   defaultTaxLabel: string;
   defaultTaxRate: number;
+  applyTaxByDefault?: boolean;
   defaultPaymentTerms: string;
   apiBasePath?: string;
   customerOptions?: CustomerOption[];
@@ -346,6 +346,7 @@ function applyWorkspaceBusinessDefaults(
       businessName: workspace.businessName,
       businessAddress: workspace.businessAddress,
       currency: workspace.defaultCurrency,
+      applyTax: workspace.applyTaxByDefault ?? true,
       taxLabel: workspace.defaultTaxLabel,
       taxRate: workspace.defaultTaxRate,
       paymentTermPreset: paymentTermState.paymentTermPreset,
@@ -506,6 +507,10 @@ function DocumentGenerator({
     useState<SelectedWorkspaceCustomer | null>(initialSelectedWorkspaceCustomer);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(initialSelectedCustomerId);
   const previewRef = useRef<HTMLDivElement>(null);
+  const lastTaxValuesRef = useRef({
+    taxLabel: initialDraftRef.current.data.taxLabel,
+    taxRate: initialDraftRef.current.data.taxRate,
+  });
   const nextLineItemIdRef = useRef(getNextLineItemSeed(initialDraftRef.current.data.lineItems));
   const skipAutosaveKindRef = useRef<DocumentKind | null>(null);
   const previousBusinessIdRef = useRef(workspace?.businessId ?? null);
@@ -602,6 +607,15 @@ function DocumentGenerator({
   }, [selectedWorkspaceCustomer, workspace]);
 
   useEffect(() => {
+    if (!data.applyTax) {
+      lastTaxValuesRef.current = {
+        taxLabel: data.taxLabel,
+        taxRate: data.taxRate,
+      };
+    }
+  }, [data.applyTax, data.taxLabel, data.taxRate]);
+
+  useEffect(() => {
     const nextBusinessId = workspace?.businessId ?? null;
 
     if (previousBusinessIdRef.current !== nextBusinessId) {
@@ -645,6 +659,7 @@ function DocumentGenerator({
               defaultCurrency: "USD",
               defaultTaxLabel: "Tax",
               defaultTaxRate: 0,
+              applyTaxByDefault: true,
               defaultPaymentTerms: "",
             },
           ),
@@ -700,6 +715,24 @@ function DocumentGenerator({
     }
 
     setData((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function toggleApplyTax(nextValue: boolean) {
+    if (!nextValue) {
+      lastTaxValuesRef.current = {
+        taxLabel: data.taxLabel,
+        taxRate: data.taxRate,
+      };
+      update("applyTax", false);
+      return;
+    }
+
+    update("taxLabel", lastTaxValuesRef.current.taxLabel || workspace?.defaultTaxLabel || "Tax");
+    update(
+      "taxRate",
+      lastTaxValuesRef.current.taxRate || workspace?.defaultTaxRate || 0,
+    );
+    update("applyTax", true);
   }
 
   function updateLineItem(index: number, key: keyof LineItem, value: LineItem[keyof LineItem]) {
@@ -774,18 +807,26 @@ function DocumentGenerator({
     clearDraft(currentKind, persistenceMode);
     skipAutosaveKindRef.current = currentKind;
 
-    const freshDocument = createDefaultDocument(currentKind);
-    setData(freshDocument);
-    setSelectedCustomerId(null);
-    setDocumentNumberAuto(true);
-    nextLineItemIdRef.current = getNextLineItemSeed(freshDocument.lineItems);
+    const nextSelectedCustomer = workspace ? restoreSelectedWorkspaceCustomer(workspace) : null;
+    const freshDraft = getWorkspaceAdjustedDraft(
+      currentKind,
+      persistenceMode,
+      workspace,
+      nextSelectedCustomer,
+    );
+
+    setData(freshDraft.data);
+    setSelectedWorkspaceCustomer(nextSelectedCustomer);
+    setSelectedCustomerId(nextSelectedCustomer?.id ?? null);
+    setDocumentNumberAuto(freshDraft.documentNumberAuto);
+    nextLineItemIdRef.current = getNextLineItemSeed(freshDraft.data.lineItems);
     setActiveSection(1);
     setDoneSet(new Set());
     baselineSnapshotRef.current = serializeDraftSnapshot({
       kind: currentKind,
-      data: freshDocument,
-      documentNumberAuto: true,
-      selectedCustomerId: null,
+      data: freshDraft.data,
+      documentNumberAuto: freshDraft.documentNumberAuto,
+      selectedCustomerId: nextSelectedCustomer?.id ?? null,
       businessId: workspace?.businessId ?? null,
     });
     setSaveState(workspace?.apiBasePath ? "saved" : "idle");
@@ -1174,15 +1215,16 @@ function DocumentGenerator({
                 errors={errors}
                 currentKind={currentKind}
                 logoError={logoError}
-                  customerOptions={matchingCustomerOptions}
-                  update={update}
-                  updateLineItem={updateLineItem}
-                  addLineItem={addLineItem}
-                  removeLineItem={removeLineItem}
-                  setSelectedCustomerId={setSelectedCustomerId}
-                  setSelectedWorkspaceCustomer={setSelectedWorkspaceCustomer}
-                  setLogoError={setLogoError}
-                />
+                customerOptions={matchingCustomerOptions}
+                update={update}
+                updateLineItem={updateLineItem}
+                addLineItem={addLineItem}
+                removeLineItem={removeLineItem}
+                setSelectedCustomerId={setSelectedCustomerId}
+                setSelectedWorkspaceCustomer={setSelectedWorkspaceCustomer}
+                setLogoError={setLogoError}
+                onToggleApplyTax={toggleApplyTax}
+              />
 
                       {/* Next button */}
                       <button
@@ -1426,6 +1468,7 @@ type SectionContentProps = {
   setSelectedCustomerId: (value: string | null) => void;
   setSelectedWorkspaceCustomer: (value: SelectedWorkspaceCustomer | null) => void;
   setLogoError: (v: string | null) => void;
+  onToggleApplyTax: (value: boolean) => void;
 };
 
 function SectionContent({
@@ -1442,6 +1485,7 @@ function SectionContent({
   setSelectedCustomerId,
   setSelectedWorkspaceCustomer,
   setLogoError,
+  onToggleApplyTax,
 }: SectionContentProps) {
   const showLineItems = currentKind !== "receipt";
   const paymentTermSummary = getPaymentTermSummary(data);
@@ -1635,31 +1679,60 @@ function SectionContent({
         </label>
 
         {showLineItems ? (
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className={labelClass}>Tax label</span>
-              <input
-                aria-label="Tax label"
-                className={inputClass}
-                value={data.taxLabel}
-                onChange={(e) => update("taxLabel", e.target.value)}
-              />
-              <FieldError msg={errors.taxLabel} />
-            </label>
-            <label className="block">
-              <span className={labelClass}>Tax rate (%)</span>
-              <input
-                aria-label="Tax rate"
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                className={inputClass}
-                value={String(data.taxRate)}
-                onChange={(e) => update("taxRate", getNumericValue(e.target.value))}
-              />
-              <FieldError msg={errors.taxRate} />
-            </label>
+          <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={data.applyTax}
+              aria-label="Apply tax"
+              onClick={() => onToggleApplyTax(!data.applyTax)}
+              className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm transition ${
+                data.applyTax
+                  ? "border-[#d4901e]/40 bg-[#d4901e]/10 text-[#faf9f7]"
+                  : "border-white/10 bg-white/[0.03] text-white/55"
+              }`}
+            >
+              <span>Apply tax</span>
+              <span
+                className={`h-5 w-10 rounded-full p-0.5 transition ${
+                  data.applyTax ? "bg-[#d4901e]" : "bg-white/15"
+                }`}
+              >
+                <span
+                  className={`block h-4 w-4 rounded-full bg-[#111111] transition ${
+                    data.applyTax ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </span>
+            </button>
+            {data.applyTax ? (
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className={labelClass}>Tax label</span>
+                  <input
+                    aria-label="Tax label"
+                    className={inputClass}
+                    value={data.taxLabel}
+                    onChange={(e) => update("taxLabel", e.target.value)}
+                  />
+                  <FieldError msg={errors.taxLabel} />
+                </label>
+                <label className="block">
+                  <span className={labelClass}>Tax rate (%)</span>
+                  <input
+                    aria-label="Tax rate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    className={inputClass}
+                    value={String(data.taxRate)}
+                    onChange={(e) => update("taxRate", getNumericValue(e.target.value))}
+                  />
+                  <FieldError msg={errors.taxRate} />
+                </label>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">

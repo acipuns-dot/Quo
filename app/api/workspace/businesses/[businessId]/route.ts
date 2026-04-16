@@ -63,6 +63,7 @@ export async function PATCH(
       default_currency: body.defaultCurrency,
       default_tax_label: body.defaultTaxLabel,
       default_tax_rate: body.defaultTaxRate,
+      apply_tax_by_default: body.applyTaxByDefault,
       default_payment_terms: body.defaultPaymentTerms,
       logo_url: body.logoUrl,
       notes: body.notes,

@@ -119,10 +119,12 @@ function EdgeTotals({ data, compact, accent }: { data: DocumentData; compact: bo
         <span style={{ textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 11 }}>Subtotal</span>
         <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatCurrency(totals.subtotal, data.currency)}</span>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `2px solid ${accent}`, color: "#888", fontSize: 13 }}>
-        <span style={{ textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 11 }}>{data.taxLabel}</span>
-        <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatCurrency(totals.taxAmount, data.currency)}</span>
-      </div>
+      {data.applyTax ? (
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `2px solid ${accent}`, color: "#888", fontSize: 13 }}>
+          <span style={{ textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 11 }}>{data.taxLabel}</span>
+          <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatCurrency(totals.taxAmount, data.currency)}</span>
+        </div>
+      ) : null}
       {paymentTermSummary ? (
         <div style={{ padding: "12px 0", borderBottom: "1px solid #f0ede9" }}>
           <div style={{ textTransform: "uppercase", letterSpacing: "0.14em", fontSize: 11, fontWeight: 700, color: "#888" }}>Payment terms</div>

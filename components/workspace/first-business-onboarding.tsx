@@ -16,6 +16,7 @@ const defaultValues = {
   defaultCurrency: "USD",
   defaultTaxLabel: "Tax",
   defaultTaxRate: 0,
+  applyTaxByDefault: true,
   defaultPaymentTerms: "",
   logoUrl: "",
   notes: "",
@@ -164,6 +165,39 @@ export function FirstBusinessOnboarding({ kind }: FirstBusinessOnboardingProps) 
 
           <label className="block">
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+              Apply tax by default
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={values.applyTaxByDefault}
+              aria-label="Apply tax by default"
+              onClick={() => update("applyTaxByDefault", !values.applyTaxByDefault)}
+              className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
+                values.applyTaxByDefault
+                  ? "border-[#d4901e]/40 bg-[#d4901e]/10 text-[#faf9f7]"
+                  : "border-white/10 bg-white/5 text-white/55"
+              }`}
+            >
+              <span>Use tax on new documents</span>
+              <span
+                className={`h-5 w-10 rounded-full p-0.5 transition ${
+                  values.applyTaxByDefault ? "bg-[#d4901e]" : "bg-white/15"
+                }`}
+              >
+                <span
+                  className={`block h-4 w-4 rounded-full bg-[#111111] transition ${
+                    values.applyTaxByDefault ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </span>
+            </button>
+          </label>
+
+          {values.applyTaxByDefault ? (
+            <>
+              <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
               Default tax label
             </span>
             <input
@@ -187,9 +221,11 @@ export function FirstBusinessOnboarding({ kind }: FirstBusinessOnboardingProps) 
               step="0.01"
               value={values.defaultTaxRate}
               onChange={(event) => update("defaultTaxRate", Number(event.target.value))}
-              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[#d4901e] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/20"
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/20"
             />
           </label>
+            </>
+          ) : null}
 
           <label className="block">
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">

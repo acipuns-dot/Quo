@@ -17,5 +17,9 @@ export function deserializeSavedDocumentPayload(input: unknown): DocumentData {
     throw new Error("Unsupported document payload version");
   }
 
-  return documentSchema.parse(parsed.data);
+  const payload = parsed.data as Record<string, unknown> | undefined;
+  return documentSchema.parse({
+    ...(payload ?? {}),
+    applyTax: typeof payload?.applyTax === "boolean" ? payload.applyTax : true,
+  });
 }

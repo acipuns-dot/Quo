@@ -19,6 +19,10 @@ function numberOrFallback(value: unknown, fallback: number) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
+function booleanOrFallback(value: unknown, fallback: boolean) {
+  return typeof value === "boolean" ? value : fallback;
+}
+
 function timestampOrFallback(value: unknown) {
   return typeof value === "string" && value ? value : FALLBACK_TIMESTAMP;
 }
@@ -35,6 +39,7 @@ export function normalizeBusinessRow(row: Record<string, unknown>): BusinessReco
     defaultCurrency: stringOrFallback(row.default_currency, "USD"),
     defaultTaxLabel: stringOrFallback(row.default_tax_label, "Tax"),
     defaultTaxRate: numberOrFallback(row.default_tax_rate, 0),
+    applyTaxByDefault: booleanOrFallback(row.apply_tax_by_default, true),
     defaultPaymentTerms: stringOrEmpty(row.default_payment_terms),
     logoUrl: typeof row.logo_url === "string" ? row.logo_url : null,
     notes: stringOrEmpty(row.notes),

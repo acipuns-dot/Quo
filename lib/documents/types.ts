@@ -30,6 +30,7 @@ export type DocumentData = {
   documentNumber: string;
   documentDate: string;
   currency: string;
+  applyTax: boolean;
   taxLabel: string;
   taxRate: number;
   validUntil: string;

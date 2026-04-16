@@ -15,6 +15,7 @@ type BusinessPayload = {
   defaultCurrency: string;
   defaultTaxLabel: string;
   defaultTaxRate: number;
+  applyTaxByDefault?: boolean;
   defaultPaymentTerms: string;
   logoUrl: string | null;
   notes: string;

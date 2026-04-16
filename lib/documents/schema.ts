@@ -52,7 +52,8 @@ const baseDocumentSchema = z.object({
   customerAddress: z.string().max(300),
   documentNumber: z.string().trim().min(1, "Document number is required.").max(40),
   currency: z.string().trim().min(1, "Currency is required.").max(10),
-  taxLabel: z.string().trim().min(1, "Tax label is required.").max(40),
+  applyTax: z.boolean().optional().default(true),
+  taxLabel: z.string().trim().max(40),
   taxRate: z.number().min(0, "Tax rate cannot be negative.").max(100, "Tax rate cannot exceed 100."),
   validUntil: z.string().max(20).optional().default(""),
   paymentTerms: z.string().max(80).optional().default(""),
@@ -73,6 +74,14 @@ const baseDocumentSchema = z.object({
 });
 
 export const documentSchema = baseDocumentSchema.superRefine((data, ctx) => {
+  if (data.applyTax && !data.taxLabel.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["taxLabel"],
+      message: "Tax label is required.",
+    });
+  }
+
   if (!data.paymentTermPreset) {
     if (data.paymentTermPercentage !== null) {
       ctx.addIssue({

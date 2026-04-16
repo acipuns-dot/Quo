@@ -27,6 +27,7 @@ const fallbackBusiness: BusinessRecord = {
   defaultCurrency: "USD",
   defaultTaxLabel: "Tax",
   defaultTaxRate: 0,
+  applyTaxByDefault: true,
   defaultPaymentTerms: "",
   logoUrl: null,
   notes: "",
@@ -81,6 +82,7 @@ export default async function WorkspaceKindPage({
             defaultCurrency: fallbackBusiness.defaultCurrency,
             defaultTaxLabel: fallbackBusiness.defaultTaxLabel,
             defaultTaxRate: fallbackBusiness.defaultTaxRate,
+            applyTaxByDefault: fallbackBusiness.applyTaxByDefault,
             defaultPaymentTerms: fallbackBusiness.defaultPaymentTerms,
             apiBasePath: `/api/workspace/businesses/${fallbackBusiness.id}/documents`,
             customerOptions: [],
@@ -149,6 +151,7 @@ export default async function WorkspaceKindPage({
           defaultCurrency: activeBusiness.defaultCurrency,
           defaultTaxLabel: activeBusiness.defaultTaxLabel,
           defaultTaxRate: activeBusiness.defaultTaxRate,
+          applyTaxByDefault: activeBusiness.applyTaxByDefault,
           defaultPaymentTerms: activeBusiness.defaultPaymentTerms,
           apiBasePath: `/api/workspace/businesses/${activeBusiness.id}/documents`,
           customerOptions: customers.map((customer) => ({

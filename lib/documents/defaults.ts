@@ -23,6 +23,7 @@ export function createDefaultDocument(kind: DocumentKind): DocumentData {
     documentNumber: generateDocumentNumber(kind, documentDate),
     documentDate,
     currency: "USD",
+    applyTax: true,
     taxLabel: "Tax",
     taxRate: 0,
     validUntil: "",

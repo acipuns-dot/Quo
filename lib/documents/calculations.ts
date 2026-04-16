@@ -88,7 +88,7 @@ export function calculateDocumentTotals(data: DocumentData) {
     (sum, item) => sum + lineItemToCents(item.quantity, item.unitPrice),
     0n,
   );
-  const taxCents = taxRateToCents(subtotalCents, data.taxRate);
+  const taxCents = data.applyTax ? taxRateToCents(subtotalCents, data.taxRate) : 0n;
   const totalCents = subtotalCents + taxCents;
 
   return {

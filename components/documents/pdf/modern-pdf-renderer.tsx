@@ -456,21 +456,23 @@ export function ModernPdfRenderer({ model }: { model: ModernPdfModel }) {
                     <span style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}>Subtotal</span>
                     <span>{formatCurrency(model.totals.subtotal, model.currency)}</span>
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "12px 18px",
-                      borderBottom: "1px solid #eee",
-                      color: "#888",
-                      fontSize: 12,
-                    }}
-                  >
-                    <span style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                      {model.taxLabel}
-                    </span>
-                    <span>{formatCurrency(model.totals.taxAmount, model.currency)}</span>
-                  </div>
+                  {model.applyTax ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "12px 18px",
+                        borderBottom: "1px solid #eee",
+                        color: "#888",
+                        fontSize: 12,
+                      }}
+                    >
+                      <span style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                        {model.taxLabel}
+                      </span>
+                      <span>{formatCurrency(model.totals.taxAmount, model.currency)}</span>
+                    </div>
+                  ) : null}
                   {model.paymentTermSummary ? (
                     <div style={{ padding: "12px 18px", borderBottom: "1px solid #eee" }}>
                       <div style={labelStyle("#888")}>Payment terms</div>

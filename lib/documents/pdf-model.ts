@@ -42,6 +42,7 @@ export type ModernPdfModel = {
     validUntil: string;
   };
   notes: string;
+  applyTax: boolean;
   taxLabel: string;
   pages: ModernPdfPageModel[];
 };
@@ -94,6 +95,7 @@ export function buildModernPdfModel(data: DocumentData): ModernPdfModel {
       validUntil: data.validUntil,
     },
     notes: data.notes,
+    applyTax: data.applyTax,
     taxLabel: data.taxLabel,
     pages: paginated.pages.map((page) => ({
       pageNumber: page.pageNumber,

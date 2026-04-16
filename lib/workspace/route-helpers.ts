@@ -10,6 +10,7 @@ export const businessPayloadSchema = z.object({
   defaultCurrency: z.string().trim().min(1).max(8),
   defaultTaxLabel: z.string().max(40),
   defaultTaxRate: z.number().min(0).max(100),
+  applyTaxByDefault: z.boolean().optional().default(true),
   defaultPaymentTerms: z.string().max(80),
   logoUrl: z.string().nullable(),
   notes: z.string().max(500),
