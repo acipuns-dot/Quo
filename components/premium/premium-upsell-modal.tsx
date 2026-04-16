@@ -9,6 +9,8 @@ const featureCopy = {
   customers:
     "Save repeat customer details once and reuse them every time you create a quotation, invoice, or receipt.",
   history: "Reopen drafts and exported work whenever you need it, without rebuilding documents from scratch.",
+  templates:
+    "Access exclusive premium templates — Noir, Studio, Slate, and Pulse — designed to make your documents stand out.",
 } as const;
 
 const premiumBenefits = [
@@ -16,6 +18,7 @@ const premiumBenefits = [
   "Saved customers for repeat jobs",
   "Document history for drafts and exports",
   "Continue work across devices",
+  "4 exclusive premium templates",
 ] as const;
 
 export function PremiumUpsellModal({

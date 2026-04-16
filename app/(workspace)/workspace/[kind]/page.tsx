@@ -75,6 +75,7 @@ export default async function WorkspaceKindPage({
         <BusinessDefaultsBanner business={fallbackBusiness} />
         <DocumentGenerator
           kind={kind as DocumentKind}
+          plan="free"
           workspace={{
             businessId: fallbackBusiness.id,
             businessName: fallbackBusiness.name,
@@ -144,6 +145,7 @@ export default async function WorkspaceKindPage({
       <BusinessDefaultsBanner business={activeBusiness} />
       <DocumentGenerator
         kind={kind as DocumentKind}
+        plan="premium"
         workspace={{
           businessId: activeBusiness.id,
           businessName: activeBusiness.name,

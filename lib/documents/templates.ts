@@ -3,6 +3,10 @@ import { BoldTemplate } from "../../components/documents/templates/bold-template
 import { ClassicTemplate } from "../../components/documents/templates/classic-template";
 import { EdgeTemplate } from "../../components/documents/templates/edge-template";
 import { UnifiedTemplate } from "../../components/documents/templates/unified-template";
+import { NoirTemplate } from "../../components/documents/templates/noir-template";
+import { StudioTemplate } from "../../components/documents/templates/studio-template";
+import { SlateTemplate } from "../../components/documents/templates/slate-template";
+import { PulseTemplate } from "../../components/documents/templates/pulse-template";
 import type { DocumentData, DocumentKind } from "./types";
 
 // ─── theme definitions (colour schemes) ──────────────────────────────────────
@@ -100,7 +104,8 @@ export function getThemeById(themeId: string): ThemeDefinition {
 export type TemplateDefinition = {
   id: string;
   label: string;
-  thumbnailVariant: "dark" | "light" | "classic" | "bold";
+  thumbnailVariant: "dark" | "light" | "classic" | "bold" | "noir" | "studio" | "slate" | "pulse";
+  premium?: boolean;
   render: (data: DocumentData) => ReactElement;
 };
 
@@ -128,6 +133,34 @@ const templateRegistry: Record<string, TemplateDefinition> = {
     label: "Bold",
     thumbnailVariant: "bold",
     render: (data) => createElement(BoldTemplate, { data }),
+  },
+  noir: {
+    id: "noir",
+    label: "Noir",
+    thumbnailVariant: "noir",
+    premium: true,
+    render: (data) => createElement(NoirTemplate, { data }),
+  },
+  studio: {
+    id: "studio",
+    label: "Studio",
+    thumbnailVariant: "studio",
+    premium: true,
+    render: (data) => createElement(StudioTemplate, { data }),
+  },
+  slate: {
+    id: "slate",
+    label: "Slate",
+    thumbnailVariant: "slate",
+    premium: true,
+    render: (data) => createElement(SlateTemplate, { data }),
+  },
+  pulse: {
+    id: "pulse",
+    label: "Pulse",
+    thumbnailVariant: "pulse",
+    premium: true,
+    render: (data) => createElement(PulseTemplate, { data }),
   },
 };
 

@@ -34,6 +34,7 @@ import type { WorkspaceDocumentAction } from "../../lib/workspace/sidebar-action
 import { PreviewPanel } from "./preview-panel";
 import { LogoUpload } from "./logo-upload";
 import { CustomerAutosuggest, type CustomerOption } from "../workspace/customer-autosuggest";
+import { PremiumUpsellModal } from "../premium/premium-upsell-modal";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -599,6 +600,7 @@ export type DocumentGeneratorHandle = {
 
   type DocumentGeneratorProps = {
     kind: DocumentKind;
+    plan?: "free" | "premium";
     workspace?: WorkspaceGeneratorContext;
     workspaceAction?: WorkspaceDocumentAction | null;
     onWorkspaceActionHandled?: (actionId: string) => void;
@@ -611,6 +613,7 @@ export type DocumentGeneratorHandle = {
 export const DocumentGenerator = React.forwardRef<DocumentGeneratorHandle, DocumentGeneratorProps>(
 function DocumentGenerator({
   kind: initialKind,
+    plan,
     workspace,
     workspaceAction,
     onWorkspaceActionHandled,
@@ -635,6 +638,7 @@ function DocumentGenerator({
   const [doneSet, setDoneSet] = useState<Set<number>>(new Set());
   const [logoError, setLogoError] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [templateUpsellOpen, setTemplateUpsellOpen] = useState(false);
   const [selectedWorkspaceCustomer, setSelectedWorkspaceCustomer] =
     useState<SelectedWorkspaceCustomer | null>(initialSelectedWorkspaceCustomer);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(initialSelectedCustomerId);
@@ -1244,6 +1248,7 @@ function DocumentGenerator({
   // ─── render ────────────────────────────────────────────────────────────────
 
   return (
+    <>
     <div className="flex flex-1 flex-col overflow-hidden min-h-0">
       {/* Doc type bar */}
       <div className="bg-[#111111] border-b border-white/[0.07] px-5 py-2.5 flex items-center justify-between flex-shrink-0 no-print">
@@ -1492,6 +1497,7 @@ function DocumentGenerator({
               {templates.map((template) => {
                 const isSelected = data.templateId === template.id;
                 const activeTheme = THEMES.find((t) => t.id === data.themeId) ?? THEMES[0];
+                const isLocked = template.premium && plan !== "premium";
                 return (
                   <div
                     key={template.id}
@@ -1504,10 +1510,16 @@ function DocumentGenerator({
                   >
                     <button
                       type="button"
-                      onClick={() => setData((prev) => ({ ...prev, templateId: template.id }))}
-                      aria-label={`${template.label} template`}
+                      onClick={() => {
+                        if (isLocked) {
+                          setTemplateUpsellOpen(true);
+                        } else {
+                          setData((prev) => ({ ...prev, templateId: template.id }));
+                        }
+                      }}
+                      aria-label={`${template.label} template${isLocked ? " (premium)" : ""}`}
                       aria-pressed={isSelected}
-                      className="cursor-pointer transition-all w-full focus:outline-none"
+                      className="cursor-pointer transition-all w-full focus:outline-none relative"
                     >
                       {/* Mini document preview */}
                       {template.thumbnailVariant === "dark" ? (
@@ -1595,7 +1607,7 @@ function DocumentGenerator({
                             <div className="h-[3px] rounded-sm bg-[#f0ede9] w-full" />
                           </div>
                         </div>
-                      ) : (
+                      ) : template.thumbnailVariant === "light" ? (
                         <div
                           className="relative overflow-hidden bg-white"
                           style={{ aspectRatio: "4/2.6" }}
@@ -1619,15 +1631,164 @@ function DocumentGenerator({
                           </div>
                           <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: activeTheme.accent }} />
                         </div>
-                      )}
+                      ) : template.thumbnailVariant === "noir" ? (
+                        <div
+                          className="relative overflow-hidden"
+                          style={{ aspectRatio: "4/2.6", background: activeTheme.dark }}
+                        >
+                          {/* Header row */}
+                          <div className="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-start">
+                            <div className="h-[5px] rounded-sm bg-white/70 w-2/5" />
+                            <div className="flex flex-col gap-[2px] items-end">
+                              <div className="h-[3px] rounded-sm w-[22px]" style={{ background: activeTheme.accent }} />
+                              <div className="h-[3px] rounded-sm bg-white/30 w-[16px]" />
+                            </div>
+                          </div>
+                          {/* Divider */}
+                          <div className="absolute top-[18px] left-2.5 right-2.5 h-[1px] bg-white/10" />
+                          {/* Table rows */}
+                          <div className="absolute top-[23px] left-2.5 right-2.5 space-y-[3px]">
+                            <div className="h-[3px] rounded-sm w-full bg-white/8" />
+                            <div className="h-[3px] rounded-sm w-5/6 bg-white/5" />
+                            <div className="h-[3px] rounded-sm w-full bg-white/8" />
+                          </div>
+                          {/* Total bottom-right */}
+                          <div className="absolute bottom-[8px] right-2.5 h-[7px] w-[36%] rounded-sm" style={{ background: activeTheme.accent }} />
+                        </div>
+                      ) : template.thumbnailVariant === "studio" ? (
+                        <div
+                          className="relative overflow-hidden bg-white"
+                          style={{ aspectRatio: "4/2.6" }}
+                        >
+                          {/* Top accent stripe */}
+                          <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: activeTheme.accent }} />
+                          {/* Left spine — vertical label */}
+                          <div className="absolute left-2.5 top-[6px] bottom-[18px] w-[3px] rounded-full" style={{ background: activeTheme.accent, opacity: 0.3 }} />
+                          {/* Business name + doc# top */}
+                          <div className="absolute top-[8px] left-[10px] right-2.5 flex justify-between">
+                            <div className="h-[5px] rounded-sm w-2/5 bg-[#111]" style={{ marginLeft: 6 }} />
+                            <div className="h-[4px] rounded-sm w-[22px] bg-[#aaa]" />
+                          </div>
+                          {/* Two party boxes */}
+                          <div className="absolute top-[18px] left-[10px] right-2.5 flex gap-2" style={{ marginLeft: 6 }}>
+                            <div className="flex-1 flex flex-col gap-[2px]">
+                              <div className="h-[2px] rounded-sm w-[16px]" style={{ background: activeTheme.accent }} />
+                              <div className="h-[3px] rounded-sm bg-[#222] w-[28px]" />
+                            </div>
+                            <div className="flex-1 flex flex-col gap-[2px]">
+                              <div className="h-[2px] rounded-sm w-[16px]" style={{ background: activeTheme.accent }} />
+                              <div className="h-[3px] rounded-sm bg-[#222] w-[28px]" />
+                            </div>
+                          </div>
+                          {/* Table separator */}
+                          <div className="absolute top-[34px] left-[10px] right-2.5 h-[1px] bg-[#ede9e4]" style={{ marginLeft: 6 }} />
+                          {/* Rows */}
+                          <div className="absolute top-[38px] left-[10px] right-2.5 space-y-[3px]" style={{ marginLeft: 6 }}>
+                            <div className="h-[3px] rounded-sm bg-[#f0ede9] w-full" />
+                            <div className="h-[3px] rounded-sm bg-[#f7f6f5] w-5/6" />
+                            <div className="h-[3px] rounded-sm bg-[#f0ede9] w-full" />
+                          </div>
+                          {/* Total line */}
+                          <div className="absolute bottom-[8px] right-2.5 flex items-center gap-1.5">
+                            <div className="h-[2px] rounded-sm w-[20px]" style={{ background: activeTheme.accent }} />
+                            <div className="h-[5px] rounded-sm w-[30px] bg-[#111]" />
+                          </div>
+                        </div>
+                      ) : template.thumbnailVariant === "slate" ? (
+                        <div
+                          className="relative overflow-hidden bg-white"
+                          style={{ aspectRatio: "4/2.6" }}
+                        >
+                          {/* Split header: dark left, light right */}
+                          <div
+                            className="absolute top-0 left-0 w-1/2 h-[36px]"
+                            style={{ background: activeTheme.dark, printColorAdjust: "exact" } as React.CSSProperties}
+                          />
+                          <div
+                            className="absolute top-0 right-0 w-1/2 h-[36px] bg-[#f5f3f0]"
+                            style={{ borderBottom: `2px solid ${activeTheme.accent}` }}
+                          />
+                          {/* Left: business name */}
+                          <div className="absolute top-[9px] left-2.5 h-[4px] w-[30px] rounded-sm bg-white/80" />
+                          {/* Right: doc# */}
+                          <div className="absolute top-[9px] right-2.5 h-[4px] w-[24px] rounded-sm bg-[#333]" />
+                          {/* Table header accent */}
+                          <div className="absolute top-[36px] left-0 right-0 h-[1px]" style={{ background: activeTheme.accent, opacity: 0.4 }} />
+                          {/* Rows */}
+                          <div className="absolute top-[40px] left-2.5 right-2.5 space-y-[3px]">
+                            <div className="h-[3px] rounded-sm bg-[#f8f7f6] w-full" />
+                            <div className="h-[3px] rounded-sm bg-white w-full" />
+                            <div className="h-[3px] rounded-sm bg-[#f8f7f6] w-full" />
+                          </div>
+                          {/* Total accent box */}
+                          <div className="absolute bottom-[8px] right-2.5 h-[7px] w-[40%] rounded-sm" style={{ background: activeTheme.accent }} />
+                        </div>
+                      ) : template.thumbnailVariant === "pulse" ? (
+                        <div
+                          className="relative overflow-hidden bg-white"
+                          style={{ aspectRatio: "4/2.6" }}
+                        >
+                          {/* Geometric corner cut */}
+                          <svg style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40 }} viewBox="0 0 40 40" fill="none">
+                            <polygon points="40,0 40,40 0,0" fill={activeTheme.accent} opacity="0.12" />
+                            <polygon points="40,0 40,24 16,0" fill={activeTheme.accent} opacity="0.4" />
+                            <polygon points="40,0 40,12 28,0" fill={activeTheme.accent} />
+                          </svg>
+                          {/* Business name */}
+                          <div className="absolute top-[7px] left-2.5 h-[5px] w-2/5 rounded-sm bg-[#111]" />
+                          {/* Two party boxes with left-border */}
+                          <div className="absolute top-[18px] left-2.5 right-2.5 flex gap-2">
+                            <div className="flex-1 flex gap-1">
+                              <div className="w-[2px] h-[12px] rounded-full" style={{ background: activeTheme.accent }} />
+                              <div className="flex flex-col gap-[2px]">
+                                <div className="h-[2px] rounded-sm bg-[#222] w-[22px]" />
+                                <div className="h-[2px] rounded-sm bg-[#ccc] w-[16px]" />
+                              </div>
+                            </div>
+                            <div className="flex-1 flex gap-1">
+                              <div className="w-[2px] h-[12px] rounded-full" style={{ background: activeTheme.accent }} />
+                              <div className="flex flex-col gap-[2px]">
+                                <div className="h-[2px] rounded-sm bg-[#222] w-[22px]" />
+                                <div className="h-[2px] rounded-sm bg-[#ccc] w-[16px]" />
+                              </div>
+                            </div>
+                          </div>
+                          {/* Accent table header */}
+                          <div className="absolute top-[34px] left-2.5 right-2.5 h-[5px] rounded-sm" style={{ background: activeTheme.accent }} />
+                          {/* Rows */}
+                          <div className="absolute top-[43px] left-2.5 right-2.5 space-y-[3px]">
+                            <div className="h-[3px] rounded-sm bg-[#f8f7f6] w-full" />
+                            <div className="h-[3px] rounded-sm bg-white w-5/6" />
+                          </div>
+                          {/* Accent footer */}
+                          <div className="absolute bottom-0 left-0 right-0 h-[8px]" style={{ background: activeTheme.accent }} />
+                        </div>
+                      ) : null}
+                      {/* Lock overlay for premium templates */}
+                      {isLocked ? (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center" style={{ top: 0, bottom: "32px" }}>
+                          <div className="flex flex-col items-center gap-1">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <rect x="2" y="6" width="10" height="7" rx="1.5" fill="white" fillOpacity="0.9" />
+                              <path d="M4 6V4.5a3 3 0 0 1 6 0V6" stroke="white" strokeWidth="1.4" strokeOpacity="0.9" strokeLinecap="round" />
+                            </svg>
+                            <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)" }}>Premium</span>
+                          </div>
+                        </div>
+                      ) : null}
                       <div className="bg-[#1a1a1a] px-2 py-[7px] flex items-center justify-between">
                         <span className="text-[10px] font-semibold text-[#faf9f7]">{template.label}</span>
-                        {isSelected && (
+                        {isLocked ? (
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <rect x="1.5" y="4.5" width="7" height="5" rx="1" fill="#d4901e" />
+                            <path d="M3 4.5V3.5a2 2 0 0 1 4 0v1" stroke="#d4901e" strokeWidth="1.1" strokeLinecap="round" />
+                          </svg>
+                        ) : isSelected ? (
                           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                             <circle cx="5" cy="5" r="5" fill={activeTheme.accent} />
                             <path d="M2.5 5l1.8 1.8L7.5 3.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
-                        )}
+                        ) : null}
                       </div>
                     </button>
                     {isSelected ? (
@@ -1650,6 +1811,12 @@ function DocumentGenerator({
         </div>
       </div>
     </div>
+    <PremiumUpsellModal
+      feature="templates"
+      open={templateUpsellOpen}
+      onClose={() => setTemplateUpsellOpen(false)}
+    />
+    </>
   );
 });
 

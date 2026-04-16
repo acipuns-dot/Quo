@@ -75,6 +75,54 @@ const BOLD_INVOICE_COMPACT: CapacityProfile = {
   paymentTermsReserve: 0,
 };
 
+const NOIR_INVOICE_COMFORTABLE: CapacityProfile = {
+  ...COMFORTABLE,
+  finalPageReserve: 5.5,
+};
+
+const NOIR_INVOICE_COMPACT: CapacityProfile = {
+  ...COMPACT,
+  finalPageReserve: 8.2,
+  paymentTermsReserve: 0,
+};
+
+const STUDIO_INVOICE_COMFORTABLE: CapacityProfile = {
+  ...COMFORTABLE,
+  finalPageReserve: 5.5,
+};
+
+const STUDIO_INVOICE_COMPACT: CapacityProfile = {
+  ...COMPACT,
+  finalPageReserve: 8.2,
+  paymentTermsReserve: 0,
+};
+
+const SLATE_INVOICE_COMFORTABLE: CapacityProfile = {
+  ...COMFORTABLE,
+  firstPage: 13,
+  finalPageReserve: 6,
+};
+
+const SLATE_INVOICE_COMPACT: CapacityProfile = {
+  ...COMPACT,
+  firstPage: 17,
+  finalPageReserve: 8.5,
+  paymentTermsReserve: 0,
+};
+
+const PULSE_INVOICE_COMFORTABLE: CapacityProfile = {
+  ...COMFORTABLE,
+  firstPage: 13,
+  finalPageReserve: 6,
+};
+
+const PULSE_INVOICE_COMPACT: CapacityProfile = {
+  ...COMPACT,
+  firstPage: 17,
+  finalPageReserve: 8.5,
+  paymentTermsReserve: 0,
+};
+
 function getCapacityProfiles(data: DocumentData) {
   if (data.kind === "invoice") {
     switch (data.templateId) {
@@ -97,6 +145,26 @@ function getCapacityProfiles(data: DocumentData) {
         return {
           comfortable: BOLD_INVOICE_COMFORTABLE,
           compact: BOLD_INVOICE_COMPACT,
+        };
+      case "noir":
+        return {
+          comfortable: NOIR_INVOICE_COMFORTABLE,
+          compact: NOIR_INVOICE_COMPACT,
+        };
+      case "studio":
+        return {
+          comfortable: STUDIO_INVOICE_COMFORTABLE,
+          compact: STUDIO_INVOICE_COMPACT,
+        };
+      case "slate":
+        return {
+          comfortable: SLATE_INVOICE_COMFORTABLE,
+          compact: SLATE_INVOICE_COMPACT,
+        };
+      case "pulse":
+        return {
+          comfortable: PULSE_INVOICE_COMFORTABLE,
+          compact: PULSE_INVOICE_COMPACT,
         };
       default:
         break;

@@ -8,7 +8,7 @@ import { SiteHeader } from "../site/site-header";
 import type { SiteHeaderAccount } from "../site/site-header";
 import { PremiumUpsellModal } from "./premium-upsell-modal";
 
-type UpsellFeature = "workspace" | "customers" | "history";
+type UpsellFeature = "workspace" | "customers" | "history" | "templates";
 
 export function FreePlanShell({
   kind,
@@ -56,7 +56,7 @@ export function FreePlanShell({
           </div>
         </div>
       ) : null}
-      <DocumentGenerator kind={kind} />
+      <DocumentGenerator kind={kind} plan={isPremium ? "premium" : "free"} />
       <PremiumUpsellModal
         feature={feature ?? "workspace"}
         open={feature !== null}
