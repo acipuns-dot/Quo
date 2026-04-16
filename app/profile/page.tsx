@@ -92,12 +92,14 @@ export default async function ProfilePage() {
                 </Link>
               )}
 
-              <Link
-                href={documentsHref}
-                className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/75"
-              >
-                Back to documents
-              </Link>
+              {plan !== "premium" ? (
+                <Link
+                  href={documentsHref}
+                  className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/75"
+                >
+                  Back to documents
+                </Link>
+              ) : null}
 
               <form action={logout}>
                 <button
