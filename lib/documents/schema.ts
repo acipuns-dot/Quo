@@ -42,6 +42,16 @@ export const lineItemSchema = z.object({
   }
 });
 
+export const draftLineItemSchema = z.object({
+  id: z.string().min(1),
+  description: z.string().max(200),
+  note: z.string().max(300),
+  quantity: z.number().min(0, "Quantity cannot be negative."),
+  unit: builtInUnitSchema.optional().default(""),
+  customUnit: z.string().max(20).optional().default(""),
+  unitPrice: z.number().min(0, "Unit price cannot be negative."),
+});
+
 export const additionalFeeSchema = z.object({
   id: z.string().min(1),
   label: z.string().trim().max(80).optional().default(""),
@@ -90,6 +100,33 @@ const baseDocumentSchema = z.object({
       message: "Enter a valid date.",
     }),
   lineItems: z.array(lineItemSchema).min(1, "Add at least one line item."),
+  additionalFees: z.array(additionalFeeSchema).optional().default([]),
+});
+
+export const draftDocumentSchema = z.object({
+  kind: z.enum(DOCUMENT_KINDS),
+  templateId: z.string().min(1),
+  themeId: z.string().min(1),
+  businessName: z.string().max(120),
+  businessAddress: z.string().max(300),
+  customerName: z.string().max(120),
+  customerAddress: z.string().max(300),
+  documentNumber: z.string().max(40),
+  currency: z.string().max(10),
+  applyTax: z.boolean().optional().default(true),
+  taxLabel: z.string().max(40),
+  taxRate: z.number().min(0, "Tax rate cannot be negative.").max(100, "Tax rate cannot exceed 100."),
+  validUntil: z.string().max(20).optional().default(""),
+  paymentTerms: z.string().max(80).optional().default(""),
+  paymentTermPreset: paymentTermPresetSchema.optional().default(""),
+  paymentTermPercentage: z.number().min(0, "Payment percentage cannot be negative.").max(100, "Payment percentage cannot exceed 100.").nullable().optional().default(null),
+  paymentTermLabel: z.string().max(80).optional().default(""),
+  notes: z.string().max(500),
+  paymentMethod: z.string().max(80),
+  amountReceived: z.number().min(0, "Amount received cannot be negative."),
+  logoDataUrl: z.string().nullable(),
+  documentDate: z.string().max(20),
+  lineItems: z.array(draftLineItemSchema).optional().default([]),
   additionalFees: z.array(additionalFeeSchema).optional().default([]),
 });
 

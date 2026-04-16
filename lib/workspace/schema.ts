@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { documentSchema } from "../documents/schema";
+import { documentSchema, draftDocumentSchema } from "../documents/schema";
 
 const isoDateTimeSchema = z.string().datetime();
 
@@ -35,16 +35,25 @@ export const customerRecordSchema = z.object({
   updatedAt: isoDateTimeSchema,
 });
 
-export const savedDocumentRecordSchema = z.object({
+const savedDocumentRecordBaseSchema = z.object({
   id: z.string().min(1),
   businessId: z.string().min(1),
   customerId: z.string().min(1).nullable(),
   kind: z.enum(["quotation", "invoice", "receipt"]),
-  status: z.enum(["draft", "exported"]),
   documentNumber: z.string().max(80),
   issueDate: z.string().max(20),
   payloadVersion: z.number().int().positive(),
-  payload: documentSchema,
   createdAt: isoDateTimeSchema,
   updatedAt: isoDateTimeSchema,
 });
+
+export const savedDocumentRecordSchema = z.discriminatedUnion("status", [
+  savedDocumentRecordBaseSchema.extend({
+    status: z.literal("draft"),
+    payload: draftDocumentSchema,
+  }),
+  savedDocumentRecordBaseSchema.extend({
+    status: z.literal("exported"),
+    payload: documentSchema,
+  }),
+]);

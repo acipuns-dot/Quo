@@ -1127,7 +1127,10 @@ function DocumentGenerator({
     }
 
     try {
-      const restoredData = deserializeSavedDocumentPayload(workspaceAction.document.payload);
+        const restoredData = deserializeSavedDocumentPayload(
+          workspaceAction.document.payload,
+          workspaceAction.document.status,
+        );
       const nextKind = workspaceAction.document.kind;
       const matchedCustomer =
         workspaceAction.document.customerId && workspace?.customerOptions

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { documentSchema } from "../../../../../../lib/documents/schema";
+import { documentSchema, draftDocumentSchema } from "../../../../../../lib/documents/schema";
 import { createSupabaseServerClient } from "../../../../../../lib/supabase/server";
 import {
   listDocumentsForBusiness,
@@ -110,7 +110,10 @@ async function saveDocumentForBusiness(
       : requestBody.data;
   const body = {
     ...requestBody,
-    data: documentSchema.parse(data),
+    data:
+      requestBody.status === "draft"
+        ? draftDocumentSchema.parse(data)
+        : documentSchema.parse(data),
   };
   const item = await upsertWorkspaceDocument(supabase, {
     businessId,
