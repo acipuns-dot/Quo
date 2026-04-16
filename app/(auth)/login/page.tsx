@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthForm } from "../../../components/auth/auth-form";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
@@ -25,7 +26,16 @@ export default async function LoginPage() {
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#111111_0%,#1e1408_100%)] text-white">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center gap-12 px-6 py-16 lg:flex-row lg:items-center lg:gap-20">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-16">
+        <div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/70 transition hover:border-[#d4901e]/40 hover:text-white"
+          >
+            Back to home
+          </Link>
+        </div>
+        <div className="flex flex-1 flex-col justify-center gap-12 lg:flex-row lg:items-center lg:gap-20">
         <section className="max-w-xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#d4901e]/30 bg-[#d4901e]/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#d4901e]">
             Premium workspace
@@ -34,7 +44,7 @@ export default async function LoginPage() {
             Business documents
             <br />
             <em className="font-[Instrument_Serif] font-normal italic text-[#d4901e]">
-              with memory
+              ready in minutes
             </em>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-8 text-white/58">
@@ -57,6 +67,7 @@ export default async function LoginPage() {
             }
           />
         </section>
+        </div>
       </div>
     </main>
   );
