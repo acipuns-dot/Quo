@@ -52,6 +52,7 @@ export function WorkspaceShell({
   const router = useRouter();
   const [currentTab, setCurrentTab] = useState(activeTab);
   const [isDraftDirty, setIsDraftDirty] = useState(false);
+  const [isSwitchingBusiness, setIsSwitchingBusiness] = useState(false);
   const [pendingAction, setPendingAction] = useState<WorkspaceSidebarAction | null>(null);
   const [workspaceAction, setWorkspaceAction] = useState<WorkspaceDocumentAction | null>(null);
   const [savePending, setSavePending] = useState(false);
@@ -100,6 +101,7 @@ export function WorkspaceShell({
 
   function executeSidebarAction(action: WorkspaceSidebarAction) {
     if (action.kind === "business") {
+      setIsSwitchingBusiness(true);
       router.push(`${pathname}?businessId=${action.business.id}&tab=documents`);
       return;
     }
@@ -198,7 +200,7 @@ export function WorkspaceShell({
   });
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#111111] text-[#faf9f7]">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-[#111111] text-[#faf9f7]">
       <header className="flex-shrink-0 border-b border-white/[0.07] bg-[#111111]">
         <div className="flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-2">
@@ -305,6 +307,14 @@ export function WorkspaceShell({
           executeSidebarAction(action);
         }}
       />
+      {isSwitchingBusiness ? (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#111111]/70 backdrop-blur-sm">
+          <div className="rounded-2xl border border-white/10 bg-[#171717] px-6 py-5 text-center shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+            <p className="text-base font-semibold text-[#faf9f7]">Switching business...</p>
+            <p className="mt-2 text-sm text-white/45">Loading customers, history, and defaults.</p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
