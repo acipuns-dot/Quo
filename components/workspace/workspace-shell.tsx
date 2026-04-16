@@ -87,6 +87,10 @@ export function WorkspaceShell({
   }, [activeTab]);
 
   useEffect(() => {
+    setIsSwitchingBusiness(false);
+  }, [activeBusiness.id]);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
@@ -101,6 +105,10 @@ export function WorkspaceShell({
 
   function executeSidebarAction(action: WorkspaceSidebarAction) {
     if (action.kind === "business") {
+      if (action.business.id === activeBusiness.id) {
+        return;
+      }
+
       setIsSwitchingBusiness(true);
       router.push(`${pathname}?businessId=${action.business.id}&tab=documents`);
       return;

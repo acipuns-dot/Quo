@@ -15,6 +15,10 @@ export function BusinessSwitcher({ businesses, activeBusinessId }: BusinessSwitc
   const searchParams = useSearchParams();
   const [isSwitchingBusiness, setIsSwitchingBusiness] = React.useState(false);
 
+  React.useEffect(() => {
+    setIsSwitchingBusiness(false);
+  }, [activeBusinessId]);
+
   return (
     <div className="flex flex-col items-end gap-1">
       <select
@@ -22,6 +26,10 @@ export function BusinessSwitcher({ businesses, activeBusinessId }: BusinessSwitc
         value={activeBusinessId}
         disabled={isSwitchingBusiness}
         onChange={(event) => {
+          if (event.target.value === activeBusinessId) {
+            return;
+          }
+
           setIsSwitchingBusiness(true);
           const nextSearchParams = new URLSearchParams(searchParams.toString());
           nextSearchParams.set("businessId", event.target.value);
