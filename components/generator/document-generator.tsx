@@ -645,7 +645,7 @@ function DocumentGenerator({
   const skipAutosaveKindRef = useRef<DocumentKind | null>(null);
   const previousBusinessIdRef = useRef(workspace?.businessId ?? null);
   const lastHandledWorkspaceActionIdRef = useRef<string | null>(null);
-  const baselineSnapshotRef = useRef(
+  const [baselineSnapshot, setBaselineSnapshot] = useState(() =>
     serializeDraftSnapshot({
       kind: initialKind,
       data: initialDraftRef.current.data,
@@ -699,17 +699,19 @@ function DocumentGenerator({
   const selectedTemplateDefinition =
     templates.find((template) => template.id === data.templateId) ?? templates[0];
 
+  const isDirty = currentSnapshot !== baselineSnapshot;
+
   useEffect(() => {
-    onDirtyChange?.(currentSnapshot !== baselineSnapshotRef.current);
-  }, [currentSnapshot, onDirtyChange]);
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   useEffect(() => {
     if (saveState === "saving") {
       return;
     }
 
-    setSaveState(currentSnapshot === baselineSnapshotRef.current ? "saved" : "idle");
-  }, [currentSnapshot, saveState]);
+    setSaveState(isDirty ? "idle" : "saved");
+  }, [isDirty, saveState]);
 
   useEffect(() => {
     if (!documentNumberAuto) {
@@ -772,7 +774,7 @@ function DocumentGenerator({
           restoredSelectedCustomer,
         ).data;
       });
-      baselineSnapshotRef.current = serializeDraftSnapshot({
+      setBaselineSnapshot(serializeDraftSnapshot({
         kind: currentKind,
         data: applySelectedCustomer(
           applyWorkspaceBusinessDefaults(
@@ -798,7 +800,7 @@ function DocumentGenerator({
         documentNumberAuto,
         selectedCustomerId: restoredSelectedCustomer?.id ?? null,
         businessId: nextBusinessId,
-      });
+      }));
     }
   }, [currentKind, data, documentNumberAuto, workspace]);
 
@@ -969,13 +971,13 @@ function DocumentGenerator({
     nextAdditionalFeeIdRef.current = getNextAdditionalFeeSeed(nextDraft.data.additionalFees);
     setActiveSection(1);
     setDoneSet(new Set());
-    baselineSnapshotRef.current = serializeDraftSnapshot({
+    setBaselineSnapshot(serializeDraftSnapshot({
       kind,
       data: nextDraft.data,
       documentNumberAuto: nextDraft.documentNumberAuto,
       selectedCustomerId: nextSelectedCustomer?.id ?? null,
       businessId: workspace?.businessId ?? null,
-    });
+    }));
   }
 
   function handleClearDraft() {
@@ -998,13 +1000,13 @@ function DocumentGenerator({
     nextAdditionalFeeIdRef.current = getNextAdditionalFeeSeed(freshDraft.data.additionalFees);
     setActiveSection(1);
     setDoneSet(new Set());
-    baselineSnapshotRef.current = serializeDraftSnapshot({
+    setBaselineSnapshot(serializeDraftSnapshot({
       kind: currentKind,
       data: freshDraft.data,
       documentNumberAuto: freshDraft.documentNumberAuto,
       selectedCustomerId: nextSelectedCustomer?.id ?? null,
       businessId: workspace?.businessId ?? null,
-    });
+    }));
     setSaveState(workspace?.apiBasePath ? "saved" : "idle");
   }
 
@@ -1061,13 +1063,13 @@ function DocumentGenerator({
         customerId: selectedCustomerId,
         data,
       });
-      baselineSnapshotRef.current = serializeDraftSnapshot({
+      setBaselineSnapshot(serializeDraftSnapshot({
         kind: currentKind,
         data,
         documentNumberAuto,
         selectedCustomerId,
         businessId: workspace.businessId ?? null,
-      });
+      }));
       setSaveState("saved");
       return { ok: true as const };
     } catch (error) {
@@ -1107,13 +1109,13 @@ function DocumentGenerator({
       setSelectedWorkspaceCustomer(nextSelectedCustomer);
       setSelectedCustomerId(nextSelectedCustomer.id);
       setActiveSection(2);
-      baselineSnapshotRef.current = serializeDraftSnapshot({
+      setBaselineSnapshot(serializeDraftSnapshot({
         kind: currentKind,
         data: nextData,
         documentNumberAuto,
         selectedCustomerId: nextSelectedCustomer.id,
         businessId: workspace?.businessId ?? null,
-      });
+      }));
       saveDraft(currentKind, persistenceMode, {
         version: DRAFT_STORAGE_VERSION,
         kind: currentKind,
@@ -1159,13 +1161,13 @@ function DocumentGenerator({
       setDoneSet(new Set());
       nextLineItemIdRef.current = getNextLineItemSeed(restoredData.lineItems);
       nextAdditionalFeeIdRef.current = getNextAdditionalFeeSeed(restoredData.additionalFees);
-      baselineSnapshotRef.current = serializeDraftSnapshot({
+      setBaselineSnapshot(serializeDraftSnapshot({
         kind: nextKind,
         data: restoredData,
         documentNumberAuto: nextDocumentNumberAuto,
         selectedCustomerId: nextSelectedCustomerId,
         businessId: workspace?.businessId ?? null,
-      });
+      }));
       saveDraft(nextKind, persistenceMode, {
         version: DRAFT_STORAGE_VERSION,
         kind: nextKind,
