@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { documentSchema } from "../../lib/documents/schema";
-import type { DocumentData, LineItem } from "../../lib/documents/types";
+import type { AdditionalFee, DocumentData, LineItem } from "../../lib/documents/types";
 import { LogoUpload } from "./logo-upload";
 
 type DocumentFormProps = {
@@ -20,6 +20,10 @@ const inputClass =
 
 function nextLineItemId(items: LineItem[]): string {
   return `line-${items.length + 1}`;
+}
+
+function nextAdditionalFeeId(fees: AdditionalFee[]): string {
+  return `fee-${fees.length + 1}`;
 }
 
 function buildErrors(data: DocumentData): FieldErrors {
@@ -101,6 +105,36 @@ export function DocumentForm({ data, onChange }: DocumentFormProps) {
   }
 
   const showLineItems = data.kind !== "receipt";
+
+  function updateAdditionalFee(
+    index: number,
+    key: keyof AdditionalFee,
+    value: AdditionalFee[keyof AdditionalFee],
+  ) {
+    const nextFees = data.additionalFees.map((fee, feeIndex) =>
+      feeIndex === index ? { ...fee, [key]: value } : fee,
+    );
+
+    update("additionalFees", nextFees);
+  }
+
+  function addAdditionalFee() {
+    update("additionalFees", [
+      ...data.additionalFees,
+      {
+        id: nextAdditionalFeeId(data.additionalFees),
+        label: "",
+        amount: 0,
+      },
+    ]);
+  }
+
+  function removeAdditionalFee(index: number) {
+    update(
+      "additionalFees",
+      data.additionalFees.filter((_, feeIndex) => feeIndex !== index),
+    );
+  }
 
   return (
     <div className="space-y-5 rounded-3xl bg-white p-6 shadow-sm">
@@ -403,6 +437,80 @@ export function DocumentForm({ data, onChange }: DocumentFormProps) {
           {errors.lineItems ? (
             <p className="text-sm text-red-600">{errors.lineItems}</p>
           ) : null}
+
+          <div className="space-y-4 rounded-2xl border border-stone-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-stone-400">
+                Additional fees
+              </p>
+              <button
+                type="button"
+                onClick={addAdditionalFee}
+                className="rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 hover:border-stone-400"
+              >
+                Add fee
+              </button>
+            </div>
+
+            {data.additionalFees.map((fee, index) => (
+              <div
+                key={fee.id}
+                className="grid gap-4 rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:grid-cols-[minmax(0,1fr)_140px_auto]"
+              >
+                <label className="block">
+                  <span className={labelClass}>Fee label</span>
+                  <input
+                    aria-label={`Fee ${index + 1} label`}
+                    className={inputClass}
+                    placeholder="Transport"
+                    value={fee.label}
+                    onChange={(event) =>
+                      updateAdditionalFee(index, "label", event.target.value)
+                    }
+                  />
+                  {errors[`additionalFees.${index}.label`] ? (
+                    <p className="mt-1.5 text-sm text-red-600">
+                      {errors[`additionalFees.${index}.label`]}
+                    </p>
+                  ) : null}
+                </label>
+
+                <label className="block">
+                  <span className={labelClass}>Amount</span>
+                  <input
+                    aria-label={`Fee ${index + 1} amount`}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className={inputClass}
+                    value={String(fee.amount)}
+                    onChange={(event) =>
+                      updateAdditionalFee(
+                        index,
+                        "amount",
+                        getNumericValue(event.target.value),
+                      )
+                    }
+                  />
+                  {errors[`additionalFees.${index}.amount`] ? (
+                    <p className="mt-1.5 text-sm text-red-600">
+                      {errors[`additionalFees.${index}.amount`]}
+                    </p>
+                  ) : null}
+                </label>
+
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={() => removeAdditionalFee(index)}
+                    className="w-full rounded-full border border-stone-300 px-3 py-2 text-sm font-medium text-stone-700 hover:border-stone-400"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 

@@ -54,9 +54,17 @@ export function DocumentTotals({
       <div className="flex justify-between py-2 text-stone-500">
         <span className="uppercase tracking-[0.12em]">Subtotal</span>
         <span className="tabular-nums">
-          {formatCurrency(totals.subtotal, data.currency)}
+          {formatCurrency(totals.lineItemSubtotal, data.currency)}
         </span>
       </div>
+      {totals.additionalFees.map((fee) => (
+        <div key={fee.id} className="flex justify-between border-t border-stone-200 py-2 text-stone-500">
+          <span className="uppercase tracking-[0.12em]">{fee.label}</span>
+          <span className="tabular-nums">
+            {formatCurrency(fee.amount, data.currency)}
+          </span>
+        </div>
+      ))}
       {data.applyTax ? (
         <div className="flex justify-between border-t border-stone-200 py-2 text-stone-500">
           <span className="uppercase tracking-[0.12em]">{data.taxLabel}</span>

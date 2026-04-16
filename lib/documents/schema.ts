@@ -42,6 +42,12 @@ export const lineItemSchema = z.object({
   }
 });
 
+export const additionalFeeSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().trim().max(80).optional().default(""),
+  amount: z.number().min(0, "Fee amount cannot be negative."),
+});
+
 const paymentTermPresetSchema = z.union([
   z.literal(""),
   z.enum(PAYMENT_TERM_PRESETS),
@@ -84,9 +90,20 @@ const baseDocumentSchema = z.object({
       message: "Enter a valid date.",
     }),
   lineItems: z.array(lineItemSchema).min(1, "Add at least one line item."),
+  additionalFees: z.array(additionalFeeSchema).optional().default([]),
 });
 
 export const documentSchema = baseDocumentSchema.superRefine((data, ctx) => {
+  data.additionalFees.forEach((fee, index) => {
+    if (fee.amount > 0 && !fee.label.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["additionalFees", index, "label"],
+        message: "Fee label is required.",
+      });
+    }
+  });
+
   if (data.applyTax && !data.taxLabel.trim()) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,

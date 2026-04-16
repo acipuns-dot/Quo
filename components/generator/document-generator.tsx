@@ -19,7 +19,13 @@ import { getPaymentTermSummary } from "../../lib/documents/calculations";
 import { formatCurrency } from "../../lib/documents/format";
 import { BUILT_IN_LINE_ITEM_UNITS } from "../../lib/documents/line-items";
 import { getTemplatesForKind, THEMES } from "../../lib/documents/templates";
-import type { DocumentData, DocumentKind, LineItem, PaymentTermPreset } from "../../lib/documents/types";
+import type {
+  AdditionalFee,
+  DocumentData,
+  DocumentKind,
+  LineItem,
+  PaymentTermPreset,
+} from "../../lib/documents/types";
 import { documentSchema } from "../../lib/documents/schema";
 import { saveWorkspaceDraft, saveWorkspaceExport } from "../../lib/workspace/api-client";
 import { findMatchingCustomers } from "../../lib/workspace/customer-search";
@@ -63,6 +69,20 @@ function getNextLineItemSeed(items: LineItem[]): number {
   }, 0);
 
   return Math.max(maxId + 1, items.length + 1, 2);
+}
+
+function nextAdditionalFeeId(nextId: number): string {
+  return `fee-${nextId}`;
+}
+
+function getNextAdditionalFeeSeed(fees: AdditionalFee[]): number {
+  const maxId = fees.reduce((max, fee) => {
+    const match = /^fee-(\d+)$/.exec(fee.id);
+    const numericId = match ? Number(match[1]) : 0;
+    return Number.isFinite(numericId) ? Math.max(max, numericId) : max;
+  }, 0);
+
+  return Math.max(maxId + 1, fees.length + 1, 2);
 }
 
 function getPresetPercentage(preset: DocumentData["paymentTermPreset"]): number | null {
@@ -619,6 +639,9 @@ function DocumentGenerator({
     taxRate: initialDraftRef.current.data.taxRate,
   });
   const nextLineItemIdRef = useRef(getNextLineItemSeed(initialDraftRef.current.data.lineItems));
+  const nextAdditionalFeeIdRef = useRef(
+    getNextAdditionalFeeSeed(initialDraftRef.current.data.additionalFees),
+  );
   const skipAutosaveKindRef = useRef<DocumentKind | null>(null);
   const previousBusinessIdRef = useRef(workspace?.businessId ?? null);
   const lastHandledWorkspaceActionIdRef = useRef<string | null>(null);
@@ -857,6 +880,19 @@ function DocumentGenerator({
     }));
   }
 
+  function updateAdditionalFee(
+    index: number,
+    key: keyof AdditionalFee,
+    value: AdditionalFee[keyof AdditionalFee],
+  ) {
+    setData((prev) => ({
+      ...prev,
+      additionalFees: prev.additionalFees.map((fee, i) =>
+        i === index ? { ...fee, [key]: value } : fee,
+      ),
+    }));
+  }
+
   function addLineItem() {
     setData((prev) => ({
       ...prev,
@@ -880,6 +916,27 @@ function DocumentGenerator({
       if (prev.lineItems.length === 1) return prev;
       return { ...prev, lineItems: prev.lineItems.filter((_, i) => i !== index) };
     });
+  }
+
+  function addAdditionalFee() {
+    setData((prev) => ({
+      ...prev,
+      additionalFees: [
+        ...prev.additionalFees,
+        {
+          id: nextAdditionalFeeId(nextAdditionalFeeIdRef.current++),
+          label: "",
+          amount: 0,
+        },
+      ],
+    }));
+  }
+
+  function removeAdditionalFee(index: number) {
+    setData((prev) => ({
+      ...prev,
+      additionalFees: prev.additionalFees.filter((_, i) => i !== index),
+    }));
   }
 
   function switchKind(kind: DocumentKind) {
@@ -909,6 +966,7 @@ function DocumentGenerator({
     setSelectedCustomerId(nextSelectedCustomer?.id ?? null);
     setDocumentNumberAuto(nextDraft.documentNumberAuto);
     nextLineItemIdRef.current = getNextLineItemSeed(nextDraft.data.lineItems);
+    nextAdditionalFeeIdRef.current = getNextAdditionalFeeSeed(nextDraft.data.additionalFees);
     setActiveSection(1);
     setDoneSet(new Set());
     baselineSnapshotRef.current = serializeDraftSnapshot({
@@ -937,6 +995,7 @@ function DocumentGenerator({
     setSelectedCustomerId(nextSelectedCustomer?.id ?? null);
     setDocumentNumberAuto(freshDraft.documentNumberAuto);
     nextLineItemIdRef.current = getNextLineItemSeed(freshDraft.data.lineItems);
+    nextAdditionalFeeIdRef.current = getNextAdditionalFeeSeed(freshDraft.data.additionalFees);
     setActiveSection(1);
     setDoneSet(new Set());
     baselineSnapshotRef.current = serializeDraftSnapshot({
@@ -1093,6 +1152,7 @@ function DocumentGenerator({
       setActiveSection(1);
       setDoneSet(new Set());
       nextLineItemIdRef.current = getNextLineItemSeed(restoredData.lineItems);
+      nextAdditionalFeeIdRef.current = getNextAdditionalFeeSeed(restoredData.additionalFees);
       baselineSnapshotRef.current = serializeDraftSnapshot({
         kind: nextKind,
         data: restoredData,
@@ -1337,6 +1397,9 @@ function DocumentGenerator({
                 updateLineItem={updateLineItem}
                 addLineItem={addLineItem}
                 removeLineItem={removeLineItem}
+                updateAdditionalFee={updateAdditionalFee}
+                addAdditionalFee={addAdditionalFee}
+                removeAdditionalFee={removeAdditionalFee}
                 setSelectedCustomerId={setSelectedCustomerId}
                 setSelectedWorkspaceCustomer={setSelectedWorkspaceCustomer}
                 setLogoError={setLogoError}
@@ -1582,6 +1645,13 @@ type SectionContentProps = {
   updateLineItem: (index: number, key: keyof LineItem, value: LineItem[keyof LineItem]) => void;
   addLineItem: () => void;
   removeLineItem: (index: number) => void;
+  updateAdditionalFee: (
+    index: number,
+    key: keyof AdditionalFee,
+    value: AdditionalFee[keyof AdditionalFee],
+  ) => void;
+  addAdditionalFee: () => void;
+  removeAdditionalFee: (index: number) => void;
   setSelectedCustomerId: (value: string | null) => void;
   setSelectedWorkspaceCustomer: (value: SelectedWorkspaceCustomer | null) => void;
   setLogoError: (v: string | null) => void;
@@ -1599,6 +1669,9 @@ function SectionContent({
   updateLineItem,
   addLineItem,
   removeLineItem,
+  updateAdditionalFee,
+  addAdditionalFee,
+  removeAdditionalFee,
   setSelectedCustomerId,
   setSelectedWorkspaceCustomer,
   setLogoError,
@@ -1992,6 +2065,71 @@ function SectionContent({
           </svg>
           Add line item
         </button>
+
+        <div className="space-y-3 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-white/35">
+              Additional fees
+            </span>
+            <button
+              type="button"
+              onClick={addAdditionalFee}
+              className="rounded-lg border border-dashed border-white/15 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/45 transition-all hover:border-[#d4901e]/40 hover:text-[#d4901e]"
+            >
+              Add fee
+            </button>
+          </div>
+
+          {data.additionalFees.length ? (
+            <div className="space-y-2.5">
+              {data.additionalFees.map((fee, index) => (
+                <div
+                  key={fee.id}
+                  className="rounded-lg border border-white/[0.08] bg-white/[0.04] p-3"
+                >
+                  <div className="grid grid-cols-[minmax(0,1fr)_120px_auto] gap-2.5">
+                    <label className="block">
+                      <span className={labelClass}>Fee label</span>
+                      <input
+                        aria-label={`Fee ${index + 1} label`}
+                        className={inputClass}
+                        placeholder="Transport"
+                        value={fee.label}
+                        onChange={(e) => updateAdditionalFee(index, "label", e.target.value)}
+                      />
+                      <FieldError msg={errors[`additionalFees.${index}.label`]} />
+                    </label>
+                    <label className="block">
+                      <span className={labelClass}>Amount</span>
+                      <input
+                        aria-label={`Fee ${index + 1} amount`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className={inputClass}
+                        value={String(fee.amount)}
+                        onChange={(e) =>
+                          updateAdditionalFee(index, "amount", getNumericValue(e.target.value))
+                        }
+                      />
+                      <FieldError msg={errors[`additionalFees.${index}.amount`]} />
+                    </label>
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        aria-label={`Remove fee ${index + 1}`}
+                        onClick={() => removeAdditionalFee(index)}
+                        className="w-full rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-white/45 transition-colors hover:border-red-400/40 hover:text-red-300"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </div>
     );
   }

@@ -83,15 +83,37 @@ function roundCurrency(value: number) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
+function normalizeAdditionalFees(data: DocumentData) {
+  return data.additionalFees
+    .map((fee) => ({
+      ...fee,
+      label: fee.label.trim(),
+    }))
+    .filter((fee) => fee.label !== "" || fee.amount !== 0);
+}
+
+function feeAmountToCents(amount: number) {
+  return lineItemToCents(1, amount);
+}
+
 export function calculateDocumentTotals(data: DocumentData) {
-  const subtotalCents = getRenderableLineItems(data.lineItems).reduce(
+  const lineItemSubtotalCents = getRenderableLineItems(data.lineItems).reduce(
     (sum, item) => sum + lineItemToCents(item.quantity, item.unitPrice),
     0n,
   );
+  const additionalFees = normalizeAdditionalFees(data);
+  const additionalFeeTotalCents = additionalFees.reduce(
+    (sum, fee) => sum + feeAmountToCents(fee.amount),
+    0n,
+  );
+  const subtotalCents = lineItemSubtotalCents + additionalFeeTotalCents;
   const taxCents = data.applyTax ? taxRateToCents(subtotalCents, data.taxRate) : 0n;
   const totalCents = subtotalCents + taxCents;
 
   return {
+    lineItemSubtotal: Number(lineItemSubtotalCents) / 100,
+    additionalFees,
+    additionalFeeTotal: Number(additionalFeeTotalCents) / 100,
     subtotal: Number(subtotalCents) / 100,
     taxAmount: Number(taxCents) / 100,
     total: Number(totalCents) / 100,

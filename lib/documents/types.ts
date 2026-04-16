@@ -21,6 +21,12 @@ export type LineItem = {
   unitPrice: number;
 };
 
+export type AdditionalFee = {
+  id: string;
+  label: string;
+  amount: number;
+};
+
 export type DocumentData = {
   kind: DocumentKind;
   templateId: string;
@@ -45,6 +51,7 @@ export type DocumentData = {
   amountReceived: number;
   logoDataUrl: string | null;
   lineItems: LineItem[];
+  additionalFees: AdditionalFee[];
 };
 
 export type DocumentLayoutMode = "comfortable" | "compact";

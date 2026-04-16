@@ -126,8 +126,14 @@ function ClassicTotals({ data, compact, accent }: { data: DocumentData; compact:
     <div style={{ marginLeft: "auto", width: "100%", maxWidth: 300 }}>
       <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #f0ede9", color: "#888", fontSize: 13 }}>
         <span style={{ textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 11 }}>Sub Total</span>
-        <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatCurrency(totals.subtotal, data.currency)}</span>
+        <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatCurrency(totals.lineItemSubtotal, data.currency)}</span>
       </div>
+      {totals.additionalFees.map((fee) => (
+        <div key={fee.id} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #f0ede9", color: "#888", fontSize: 13 }}>
+          <span style={{ textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 11 }}>{fee.label}</span>
+          <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatCurrency(fee.amount, data.currency)}</span>
+        </div>
+      ))}
       {data.applyTax ? (
         <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid #f0ede9", color: "#888", fontSize: 13 }}>
           <span style={{ textTransform: "uppercase", letterSpacing: "0.1em", fontSize: 11 }}>{data.taxLabel}</span>

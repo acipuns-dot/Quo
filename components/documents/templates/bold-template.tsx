@@ -138,9 +138,19 @@ function BoldBottom({
           <tr>
             <td style={{ padding: "9px 14px", border: "1px solid #ddd", fontWeight: 600, color: "#333", textTransform: "uppercase", fontSize: 11, letterSpacing: "0.06em" }}>Subtotal</td>
             <td style={{ padding: "9px 14px", border: "1px solid #ddd", textAlign: "right", fontVariantNumeric: "tabular-nums", color: "#333" }}>
-              {formatCurrency(totals.subtotal, data.currency)}
+              {formatCurrency(totals.lineItemSubtotal, data.currency)}
             </td>
           </tr>
+          {totals.additionalFees.map((fee) => (
+            <tr key={fee.id}>
+              <td style={{ padding: "9px 14px", border: "1px solid #ddd", fontWeight: 600, color: "#333", textTransform: "uppercase", fontSize: 11, letterSpacing: "0.06em" }}>
+                {fee.label}
+              </td>
+              <td style={{ padding: "9px 14px", border: "1px solid #ddd", textAlign: "right", fontVariantNumeric: "tabular-nums", color: "#333" }}>
+                {formatCurrency(fee.amount, data.currency)}
+              </td>
+            </tr>
+          ))}
           {data.applyTax ? (
             <tr>
               <td style={{ padding: "9px 14px", border: "1px solid #ddd", fontWeight: 600, color: "#333", textTransform: "uppercase", fontSize: 11, letterSpacing: "0.06em" }}>{data.taxLabel}</td>

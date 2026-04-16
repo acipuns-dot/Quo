@@ -455,8 +455,26 @@ export function ModernPdfRenderer({ model }: { model: ModernPdfModel }) {
                     }}
                   >
                     <span style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}>Subtotal</span>
-                    <span>{formatCurrency(model.totals.subtotal, model.currency)}</span>
+                    <span>{formatCurrency(model.totals.lineItemSubtotal, model.currency)}</span>
                   </div>
+                  {model.totals.additionalFees.map((fee) => (
+                    <div
+                      key={fee.id}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "12px 18px",
+                        borderBottom: "1px solid #eee",
+                        color: "#888",
+                        fontSize: 12,
+                      }}
+                    >
+                      <span style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                        {fee.label}
+                      </span>
+                      <span>{formatCurrency(fee.amount, model.currency)}</span>
+                    </div>
+                  ))}
                   {model.applyTax ? (
                     <div
                       style={{

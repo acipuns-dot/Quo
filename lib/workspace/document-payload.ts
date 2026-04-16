@@ -21,5 +21,6 @@ export function deserializeSavedDocumentPayload(input: unknown): DocumentData {
   return documentSchema.parse({
     ...(payload ?? {}),
     applyTax: typeof payload?.applyTax === "boolean" ? payload.applyTax : true,
+    additionalFees: Array.isArray(payload?.additionalFees) ? payload.additionalFees : [],
   });
 }

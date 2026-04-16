@@ -46,5 +46,6 @@ export function createDefaultDocument(kind: DocumentKind): DocumentData {
         unitPrice: 250,
       },
     ],
+    additionalFees: [],
   };
 }
