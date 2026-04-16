@@ -4,7 +4,6 @@ import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { DocumentKind } from "../../lib/documents/types";
-import { DocumentGenerator, type DocumentGeneratorHandle } from "../generator/document-generator";
 import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
 import type { WorkspaceDocumentAction, WorkspaceSidebarAction } from "../../lib/workspace/sidebar-actions";
 import { BusinessPanel } from "./business-panel";
@@ -31,6 +30,9 @@ type WorkspaceDocumentChildProps = {
   onWorkspaceActionHandled?: (actionId: string) => void;
   onDirtyChange?: (dirty: boolean) => void;
   onSaveRequest?: () => Promise<{ ok: boolean; errorMessage?: string }>;
+  onSaveRequestReady?: (
+    saveRequest: (() => Promise<{ ok: boolean; errorMessage?: string }>) | null,
+  ) => void;
 };
 
 export function WorkspaceShell({
@@ -56,7 +58,8 @@ export function WorkspaceShell({
   const [workspaceAction, setWorkspaceAction] = useState<WorkspaceDocumentAction | null>(null);
   const [savePending, setSavePending] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const documentGeneratorRef = useRef<DocumentGeneratorHandle | null>(null);
+  const registeredSaveRequestRef =
+    useRef<(() => Promise<{ ok: boolean; errorMessage?: string }>) | null>(null);
 
   const recentDocuments = [...documents]
     .sort((left, right) => {
@@ -166,8 +169,8 @@ export function WorkspaceShell({
   }
 
   async function runSaveRequest() {
-    if (documentGeneratorRef.current) {
-      return documentGeneratorRef.current.saveCurrentDraft();
+    if (registeredSaveRequestRef.current) {
+      return registeredSaveRequestRef.current();
     }
 
     const saveCapableChild = React.Children.toArray(children).find(
@@ -193,16 +196,16 @@ export function WorkspaceShell({
     }
 
     const typedChild = child as React.ReactElement<WorkspaceDocumentChildProps>;
-    const isDocumentGenerator = typedChild.type === DocumentGenerator;
-
     return React.cloneElement(typedChild, {
-      ...(isDocumentGenerator ? { ref: documentGeneratorRef } : {}),
       workspaceAction,
       onWorkspaceActionHandled: (actionId: string) => {
         setWorkspaceAction((current) => (current?.id === actionId ? null : current));
       },
       onDirtyChange: setIsDraftDirty,
       onSaveRequest: typedChild.props.onSaveRequest,
+      onSaveRequestReady: (saveRequest) => {
+        registeredSaveRequestRef.current = saveRequest;
+      },
     });
   });
 

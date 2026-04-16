@@ -597,22 +597,26 @@ export type DocumentGeneratorHandle = {
   saveCurrentDraft: () => Promise<{ ok: boolean; errorMessage?: string }>;
 };
 
-type DocumentGeneratorProps = {
-  kind: DocumentKind;
-  workspace?: WorkspaceGeneratorContext;
-  workspaceAction?: WorkspaceDocumentAction | null;
-  onWorkspaceActionHandled?: (actionId: string) => void;
-  onDirtyChange?: (dirty: boolean) => void;
-};
+  type DocumentGeneratorProps = {
+    kind: DocumentKind;
+    workspace?: WorkspaceGeneratorContext;
+    workspaceAction?: WorkspaceDocumentAction | null;
+    onWorkspaceActionHandled?: (actionId: string) => void;
+    onDirtyChange?: (dirty: boolean) => void;
+    onSaveRequestReady?: (
+      saveRequest: (() => Promise<{ ok: boolean; errorMessage?: string }>) | null,
+    ) => void;
+  };
 
 export const DocumentGenerator = React.forwardRef<DocumentGeneratorHandle, DocumentGeneratorProps>(
 function DocumentGenerator({
   kind: initialKind,
-  workspace,
-  workspaceAction,
-  onWorkspaceActionHandled,
-  onDirtyChange,
-}: DocumentGeneratorProps, ref) {
+    workspace,
+    workspaceAction,
+    onWorkspaceActionHandled,
+    onDirtyChange,
+    onSaveRequestReady,
+  }: DocumentGeneratorProps, ref) {
   const persistenceMode = workspace?.persistenceMode ?? "free";
   const initialDraftRef = useRef<StoredDocumentDraft | null>(null);
   if (initialDraftRef.current === null) {
@@ -1085,6 +1089,14 @@ function DocumentGenerator({
   useImperativeHandle(ref, () => ({
     saveCurrentDraft: saveCurrentWorkspaceDraft,
   }));
+
+  useEffect(() => {
+    onSaveRequestReady?.(saveCurrentWorkspaceDraft);
+
+    return () => {
+      onSaveRequestReady?.(null);
+    };
+  }, [onSaveRequestReady, saveCurrentWorkspaceDraft]);
 
   useEffect(() => {
     if (!workspaceAction || lastHandledWorkspaceActionIdRef.current === workspaceAction.id) {
