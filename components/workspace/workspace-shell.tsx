@@ -30,7 +30,7 @@ type WorkspaceDocumentChildProps = {
   workspaceAction?: WorkspaceDocumentAction | null;
   onWorkspaceActionHandled?: (actionId: string) => void;
   onDirtyChange?: (dirty: boolean) => void;
-  onSaveRequest?: () => Promise<{ ok: boolean }>;
+  onSaveRequest?: () => Promise<{ ok: boolean; errorMessage?: string }>;
 };
 
 export function WorkspaceShell({
@@ -181,7 +181,7 @@ export function WorkspaceShell({
     ) as React.ReactElement<WorkspaceDocumentChildProps> | undefined;
 
     if (!saveCapableChild?.props.onSaveRequest) {
-      return { ok: false as const };
+      return { ok: false as const, errorMessage: "Save is not available right now." };
     }
 
     return saveCapableChild.props.onSaveRequest();
@@ -304,7 +304,7 @@ export function WorkspaceShell({
           setSavePending(false);
 
           if (!result.ok) {
-            setSaveError("Save failed. Please try again.");
+            setSaveError(result.errorMessage ?? "Save failed. Please try again.");
             return;
           }
 

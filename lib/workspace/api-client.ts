@@ -68,7 +68,10 @@ async function postWorkspaceDocument(
   });
 
   if (!response.ok) {
-    throw new Error(`Workspace document save failed with status ${response.status}`);
+    const payload = await response.json().catch(() => null);
+    throw new Error(
+      payload?.error ?? `Workspace document save failed with status ${response.status}`,
+    );
   }
 
   return response.json();

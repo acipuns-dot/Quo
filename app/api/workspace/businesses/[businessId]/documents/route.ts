@@ -86,44 +86,59 @@ async function saveDocumentForBusiness(
   request: Request,
   businessId: string,
 ) {
-  if (!hasSupabaseEnv()) {
-    return NextResponse.json({ ok: true, mocked: true });
-  }
+  try {
+    if (!hasSupabaseEnv()) {
+      return NextResponse.json({ ok: true, mocked: true });
+    }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  if (!(await userOwnsBusiness(user.id, businessId, supabase))) {
-    return NextResponse.json({ error: "Business not found" }, { status: 404 });
-  }
+    if (!(await userOwnsBusiness(user.id, businessId, supabase))) {
+      return NextResponse.json({ error: "Business not found" }, { status: 404 });
+    }
 
-  const requestBody = workspaceDocumentRequestSchema.parse(await request.json());
-  const data =
-    requestBody.status === "draft"
-      ? normalizeDraftDocumentData(requestBody.data)
-      : requestBody.data;
-  const body = {
-    ...requestBody,
-    data:
+    const requestBody = workspaceDocumentRequestSchema.parse(await request.json());
+    const data =
       requestBody.status === "draft"
-        ? draftDocumentSchema.parse(data)
-        : documentSchema.parse(data),
-  };
-  const item = await upsertWorkspaceDocument(supabase, {
-    businessId,
-    customerId: body.customerId,
-    kind: body.kind,
-    status: body.status,
-    data: body.data,
-  });
+        ? normalizeDraftDocumentData(requestBody.data)
+        : requestBody.data;
+    const body = {
+      ...requestBody,
+      data:
+        requestBody.status === "draft"
+          ? draftDocumentSchema.parse(data)
+          : documentSchema.parse(data),
+    };
+    const item = await upsertWorkspaceDocument(supabase, {
+      businessId,
+      customerId: body.customerId,
+      kind: body.kind,
+      status: body.status,
+      data: body.data,
+    });
 
-  return NextResponse.json({ item });
+    return NextResponse.json({ item });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: error.issues[0]?.message ?? "Invalid workspace document payload." },
+        { status: 400 },
+      );
+    }
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ error: "Workspace document save failed." }, { status: 500 });
+  }
 }
 
 export async function GET(

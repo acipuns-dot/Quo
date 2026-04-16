@@ -594,7 +594,7 @@ function serializeDraftSnapshot(input: {
 }
 
 export type DocumentGeneratorHandle = {
-  saveCurrentDraft: () => Promise<{ ok: boolean }>;
+  saveCurrentDraft: () => Promise<{ ok: boolean; errorMessage?: string }>;
 };
 
 type DocumentGeneratorProps = {
@@ -1070,9 +1070,12 @@ function DocumentGenerator({
       });
       setSaveState("saved");
       return { ok: true as const };
-    } catch {
+    } catch (error) {
       setSaveState("error");
-      return { ok: false as const };
+      return {
+        ok: false as const,
+        errorMessage: error instanceof Error ? error.message : "Save failed. Please try again.",
+      };
     }
   }
 
