@@ -4,6 +4,7 @@ import { DocumentGenerator } from "../../../../components/generator/document-gen
 import { BusinessDefaultsBanner } from "../../../../components/workspace/business-defaults-banner";
 import { FirstBusinessOnboarding } from "../../../../components/workspace/first-business-onboarding";
 import { WorkspaceShell } from "../../../../components/workspace/workspace-shell";
+import type { WorkspaceTab } from "../../../../components/workspace/workspace-sidebar";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
 import type { DocumentKind } from "../../../../lib/documents/types";
 import { listBusinessesForUser, resolveActiveBusiness } from "../../../../lib/workspace/businesses";
@@ -42,7 +43,7 @@ export default async function WorkspaceKindPage({
 }) {
   const { kind } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const validTabs = new Set(["documents", "businesses", "customers", "history"]);
+  const validTabs: WorkspaceTab[] = ["documents", "businesses", "customers", "history"];
   const requestedTab = resolvedSearchParams?.tab ?? "documents";
 
   if (!validKinds.includes(kind as DocumentKind)) {
@@ -53,7 +54,9 @@ export default async function WorkspaceKindPage({
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 
-  const activeTab = validTabs.has(requestedTab) ? requestedTab : "documents";
+  const activeTab: WorkspaceTab = validTabs.includes(requestedTab as WorkspaceTab)
+    ? (requestedTab as WorkspaceTab)
+    : "documents";
 
   if (!hasSupabaseEnv) {
     const customers: CustomerRecord[] = [];

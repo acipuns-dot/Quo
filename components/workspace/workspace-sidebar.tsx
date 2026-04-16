@@ -9,7 +9,7 @@ const links = [
   { label: "History", value: "history" },
 ] as const;
 
-type WorkspaceTab = (typeof links)[number]["value"];
+export type WorkspaceTab = (typeof links)[number]["value"];
 
 type WorkspaceSidebarProps = {
   activeTab: WorkspaceTab;

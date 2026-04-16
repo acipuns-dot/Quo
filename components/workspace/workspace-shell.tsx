@@ -8,7 +8,7 @@ import { BusinessSwitcher } from "./business-switcher";
 import { BusinessPanel } from "./business-panel";
 import { CustomerPanel } from "./customer-panel";
 import { DocumentHistoryPanel } from "./document-history-panel";
-import { WorkspaceSidebar } from "./workspace-sidebar";
+import { WorkspaceSidebar, type WorkspaceTab } from "./workspace-sidebar";
 import { BusinessesTab } from "./businesses-tab";
 import { CustomersTab } from "./customers-tab";
 import { DocumentHistoryTab } from "./document-history-tab";
@@ -18,7 +18,7 @@ type WorkspaceShellProps = {
   businesses: BusinessRecord[];
   customers: CustomerRecord[];
   documents: SavedDocumentRecord[];
-  activeTab: string;
+  activeTab: WorkspaceTab;
   kind: DocumentKind;
   children: ReactNode;
 };
