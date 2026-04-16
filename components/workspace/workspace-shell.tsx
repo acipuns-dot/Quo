@@ -1,4 +1,6 @@
-import React, { type ReactNode } from "react";
+"use client";
+
+import React, { type ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import type { DocumentKind } from "../../lib/documents/types";
 import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
@@ -30,6 +32,25 @@ export function WorkspaceShell({
   kind,
   children,
 }: WorkspaceShellProps) {
+  const [currentTab, setCurrentTab] = useState(activeTab);
+
+  useEffect(() => {
+    setCurrentTab(activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const nextSearchParams = new URLSearchParams(window.location.search);
+    nextSearchParams.set("tab", currentTab);
+    const nextSearch = nextSearchParams.toString();
+    const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}`;
+
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [currentTab]);
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#111111] text-[#faf9f7]">
       <header className="flex-shrink-0 border-b border-white/[0.07] bg-[#111111]">
@@ -51,20 +72,20 @@ export function WorkspaceShell({
       </header>
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <aside className="flex w-[220px] flex-shrink-0 flex-col gap-3 overflow-y-auto border-r border-white/[0.07] p-4">
-          <WorkspaceSidebar />
+          <WorkspaceSidebar activeTab={currentTab} onTabChange={setCurrentTab} />
           <BusinessPanel businesses={businesses} />
           <CustomerPanel customers={customers} />
           <DocumentHistoryPanel documents={documents} />
         </aside>
         <main className="flex flex-1 flex-col min-h-0 overflow-hidden">
-          {activeTab === "documents" && children}
-          {activeTab === "businesses" && (
+          {currentTab === "documents" && children}
+          {currentTab === "businesses" && (
             <BusinessesTab businesses={businesses} activeBusiness={activeBusiness} kind={kind} />
           )}
-          {activeTab === "customers" && (
+          {currentTab === "customers" && (
             <CustomersTab customers={customers} businessId={activeBusiness.id} />
           )}
-          {activeTab === "history" && (
+          {currentTab === "history" && (
             <DocumentHistoryTab documents={documents} kind={kind} />
           )}
         </main>

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const links = [
   { label: "Documents", value: "documents" },
@@ -10,11 +9,14 @@ const links = [
   { label: "History", value: "history" },
 ] as const;
 
-export function WorkspaceSidebar() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const activeTab = searchParams.get("tab") ?? "documents";
+type WorkspaceTab = (typeof links)[number]["value"];
+
+type WorkspaceSidebarProps = {
+  activeTab: WorkspaceTab;
+  onTabChange: (tab: WorkspaceTab) => void;
+};
+
+export function WorkspaceSidebar({ activeTab, onTabChange }: WorkspaceSidebarProps) {
 
   return (
     <nav className="space-y-0.5">
@@ -23,11 +25,7 @@ export function WorkspaceSidebar() {
           key={link.value}
           type="button"
           aria-pressed={activeTab === link.value}
-          onClick={() => {
-            const nextSearchParams = new URLSearchParams(searchParams.toString());
-            nextSearchParams.set("tab", link.value);
-            router.push(`${pathname}?${nextSearchParams.toString()}`);
-          }}
+          onClick={() => onTabChange(link.value)}
           className={`w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
             activeTab === link.value
               ? "border border-[#d4901e]/25 bg-[#d4901e]/10 text-[#d4901e]"
