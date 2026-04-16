@@ -1,6 +1,10 @@
 import type { DocumentData, DocumentKind } from "../documents/types";
 
 export type WorkspaceDocumentStatus = "draft" | "exported";
+export type SavedDocumentPayload = {
+  version: number;
+  data: DocumentData;
+};
 
 export type BusinessRecord = {
   id: string;
@@ -42,7 +46,7 @@ export type SavedDocumentRecord = {
   documentNumber: string;
   issueDate: string;
   payloadVersion: number;
-  payload: DocumentData;
+  payload: SavedDocumentPayload | null;
   createdAt: string;
   updatedAt: string;
 };

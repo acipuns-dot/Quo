@@ -2,10 +2,13 @@
 
 import React, { type ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import type { DocumentKind } from "../../lib/documents/types";
 import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
+import type { WorkspaceDocumentAction, WorkspaceSidebarAction } from "../../lib/workspace/sidebar-actions";
 import { BusinessSwitcher } from "./business-switcher";
 import { BusinessPanel } from "./business-panel";
+import { ConfirmWorkspaceActionModal } from "./confirm-workspace-action-modal";
 import { CustomerPanel } from "./customer-panel";
 import { DocumentHistoryPanel } from "./document-history-panel";
 import { WorkspaceSidebar, type WorkspaceTab } from "./workspace-sidebar";
@@ -23,6 +26,12 @@ type WorkspaceShellProps = {
   children: ReactNode;
 };
 
+type WorkspaceDocumentChildProps = {
+  workspaceAction?: WorkspaceDocumentAction | null;
+  onWorkspaceActionHandled?: (actionId: string) => void;
+  onDirtyChange?: (dirty: boolean) => void;
+};
+
 export function WorkspaceShell({
   activeBusiness,
   businesses,
@@ -32,7 +41,12 @@ export function WorkspaceShell({
   kind,
   children,
 }: WorkspaceShellProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [currentTab, setCurrentTab] = useState(activeTab);
+  const [isDraftDirty, setIsDraftDirty] = useState(false);
+  const [pendingAction, setPendingAction] = useState<WorkspaceSidebarAction | null>(null);
+  const [workspaceAction, setWorkspaceAction] = useState<WorkspaceDocumentAction | null>(null);
 
   useEffect(() => {
     setCurrentTab(activeTab);
@@ -50,6 +64,74 @@ export function WorkspaceShell({
 
     window.history.replaceState(window.history.state, "", nextUrl);
   }, [currentTab]);
+
+  function executeSidebarAction(action: WorkspaceSidebarAction) {
+    if (action.kind === "business") {
+      router.push(`${pathname}?businessId=${action.business.id}&tab=documents`);
+      return;
+    }
+
+    setCurrentTab("documents");
+    if (action.kind === "customer") {
+      setWorkspaceAction({
+        id: action.id,
+        kind: "customer",
+        customer: {
+          id: action.customer.id,
+          name: action.customer.name,
+          address: action.customer.address,
+        },
+      });
+      return;
+    }
+
+    setWorkspaceAction({
+      id: action.id,
+      kind: "document",
+      document: action.document,
+    });
+  }
+
+  function queueSidebarAction(action: WorkspaceSidebarAction) {
+    const replacesCurrentDraft =
+      action.kind === "business" ||
+      action.kind === "customer" ||
+      action.kind === "document";
+
+    if (replacesCurrentDraft && isDraftDirty) {
+      setPendingAction(action);
+      return;
+    }
+
+    executeSidebarAction(action);
+  }
+
+  function getPendingActionLabel(action: WorkspaceSidebarAction | null) {
+    if (!action) {
+      return "";
+    }
+
+    if (action.kind === "business") {
+      return `Switch to ${action.business.name}`;
+    }
+
+    if (action.kind === "customer") {
+      return `Load customer ${action.customer.name}`;
+    }
+
+    return `Open saved draft ${action.document.documentNumber || "Untitled"}`;
+  }
+
+  const documentChild =
+    React.isValidElement(children) && typeof children.type !== "string"
+      ? React.cloneElement(children as React.ReactElement<WorkspaceDocumentChildProps>, {
+          workspaceAction,
+          onWorkspaceActionHandled: (actionId: string) => {
+            setWorkspaceAction((current) => (current?.id === actionId ? null : current));
+          },
+          onDirtyChange: setIsDraftDirty,
+        })
+      : children;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#111111] text-[#faf9f7]">
@@ -73,12 +155,40 @@ export function WorkspaceShell({
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <aside className="flex w-[220px] flex-shrink-0 flex-col gap-3 overflow-y-auto border-r border-white/[0.07] p-4">
           <WorkspaceSidebar activeTab={currentTab} onTabChange={setCurrentTab} />
-          <BusinessPanel businesses={businesses} />
-          <CustomerPanel customers={customers} />
-          <DocumentHistoryPanel documents={documents} />
+          <BusinessPanel
+            businesses={businesses}
+            activeBusinessId={activeBusiness.id}
+            onSelectBusiness={(business) =>
+              queueSidebarAction({
+                id: `business:${business.id}`,
+                kind: "business",
+                business,
+              })
+            }
+          />
+          <CustomerPanel
+            customers={customers}
+            onSelectCustomer={(customer) =>
+              queueSidebarAction({
+                id: `customer:${customer.id}`,
+                kind: "customer",
+                customer,
+              })
+            }
+          />
+          <DocumentHistoryPanel
+            documents={documents}
+            onOpenDocument={(document) =>
+              queueSidebarAction({
+                id: `document:${document.id}`,
+                kind: "document",
+                document,
+              })
+            }
+          />
         </aside>
         <main className="flex flex-1 flex-col min-h-0 overflow-hidden">
-          {currentTab === "documents" && children}
+          {currentTab === "documents" && documentChild}
           {currentTab === "businesses" && (
             <BusinessesTab businesses={businesses} activeBusiness={activeBusiness} kind={kind} />
           )}
@@ -90,6 +200,22 @@ export function WorkspaceShell({
           )}
         </main>
       </div>
+      <ConfirmWorkspaceActionModal
+        open={Boolean(pendingAction)}
+        title="Leave current draft?"
+        description="You have in-progress edits in the current document. Opening another workspace item will replace them."
+        targetLabel={getPendingActionLabel(pendingAction)}
+        onClose={() => setPendingAction(null)}
+        onConfirm={() => {
+          if (!pendingAction) {
+            return;
+          }
+
+          const action = pendingAction;
+          setPendingAction(null);
+          executeSidebarAction(action);
+        }}
+      />
     </div>
   );
 }
