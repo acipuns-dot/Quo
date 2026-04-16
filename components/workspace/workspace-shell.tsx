@@ -122,16 +122,19 @@ export function WorkspaceShell({
     return `Open saved draft ${action.document.documentNumber || "Untitled"}`;
   }
 
-  const documentChild =
-    React.isValidElement(children) && typeof children.type !== "string"
-      ? React.cloneElement(children as React.ReactElement<WorkspaceDocumentChildProps>, {
-          workspaceAction,
-          onWorkspaceActionHandled: (actionId: string) => {
-            setWorkspaceAction((current) => (current?.id === actionId ? null : current));
-          },
-          onDirtyChange: setIsDraftDirty,
-        })
-      : children;
+  const documentChild = React.Children.map(children, (child) => {
+    if (!React.isValidElement(child) || typeof child.type === "string") {
+      return child;
+    }
+
+    return React.cloneElement(child as React.ReactElement<WorkspaceDocumentChildProps>, {
+      workspaceAction,
+      onWorkspaceActionHandled: (actionId: string) => {
+        setWorkspaceAction((current) => (current?.id === actionId ? null : current));
+      },
+      onDirtyChange: setIsDraftDirty,
+    });
+  });
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#111111] text-[#faf9f7]">
