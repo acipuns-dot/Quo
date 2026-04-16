@@ -1,9 +1,10 @@
 "use client";
 
-import React, { type ReactNode, useEffect, useState } from "react";
+import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { DocumentKind } from "../../lib/documents/types";
+import { DocumentGenerator, type DocumentGeneratorHandle } from "../generator/document-generator";
 import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
 import type { WorkspaceDocumentAction, WorkspaceSidebarAction } from "../../lib/workspace/sidebar-actions";
 import { BusinessSwitcher } from "./business-switcher";
@@ -30,6 +31,7 @@ type WorkspaceDocumentChildProps = {
   workspaceAction?: WorkspaceDocumentAction | null;
   onWorkspaceActionHandled?: (actionId: string) => void;
   onDirtyChange?: (dirty: boolean) => void;
+  onSaveRequest?: () => Promise<{ ok: boolean }>;
 };
 
 export function WorkspaceShell({
@@ -47,6 +49,9 @@ export function WorkspaceShell({
   const [isDraftDirty, setIsDraftDirty] = useState(false);
   const [pendingAction, setPendingAction] = useState<WorkspaceSidebarAction | null>(null);
   const [workspaceAction, setWorkspaceAction] = useState<WorkspaceDocumentAction | null>(null);
+  const [savePending, setSavePending] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const documentGeneratorRef = useRef<DocumentGeneratorHandle | null>(null);
 
   useEffect(() => {
     setCurrentTab(activeTab);
@@ -99,6 +104,7 @@ export function WorkspaceShell({
       action.kind === "document";
 
     if (replacesCurrentDraft && isDraftDirty) {
+      setSaveError(null);
       setPendingAction(action);
       return;
     }
@@ -122,17 +128,44 @@ export function WorkspaceShell({
     return `Open saved draft ${action.document.documentNumber || "Untitled"}`;
   }
 
+  async function runSaveRequest() {
+    if (documentGeneratorRef.current) {
+      return documentGeneratorRef.current.saveCurrentDraft();
+    }
+
+    const saveCapableChild = React.Children.toArray(children).find(
+      (child) => {
+        if (!React.isValidElement<WorkspaceDocumentChildProps>(child) || typeof child.type === "string") {
+          return false;
+        }
+
+        return typeof child.props.onSaveRequest === "function";
+      },
+    ) as React.ReactElement<WorkspaceDocumentChildProps> | undefined;
+
+    if (!saveCapableChild?.props.onSaveRequest) {
+      return { ok: false as const };
+    }
+
+    return saveCapableChild.props.onSaveRequest();
+  }
+
   const documentChild = React.Children.map(children, (child) => {
     if (!React.isValidElement(child) || typeof child.type === "string") {
       return child;
     }
 
-    return React.cloneElement(child as React.ReactElement<WorkspaceDocumentChildProps>, {
+    const typedChild = child as React.ReactElement<WorkspaceDocumentChildProps>;
+    const isDocumentGenerator = typedChild.type === DocumentGenerator;
+
+    return React.cloneElement(typedChild, {
+      ...(isDocumentGenerator ? { ref: documentGeneratorRef } : {}),
       workspaceAction,
       onWorkspaceActionHandled: (actionId: string) => {
         setWorkspaceAction((current) => (current?.id === actionId ? null : current));
       },
       onDirtyChange: setIsDraftDirty,
+      onSaveRequest: typedChild.props.onSaveRequest,
     });
   });
 
@@ -208,9 +241,34 @@ export function WorkspaceShell({
         title="Leave current draft?"
         description="You have in-progress edits in the current document. Opening another workspace item will replace them."
         targetLabel={getPendingActionLabel(pendingAction)}
-        onClose={() => setPendingAction(null)}
-        onConfirm={() => {
+        savePending={savePending}
+        errorMessage={saveError}
+        onClose={() => {
+          setSaveError(null);
+          setPendingAction(null);
+        }}
+        onConfirmDiscard={() => {
           if (!pendingAction) {
+            return;
+          }
+
+          const action = pendingAction;
+          setSaveError(null);
+          setPendingAction(null);
+          executeSidebarAction(action);
+        }}
+        onConfirmSave={async () => {
+          if (!pendingAction) {
+            return;
+          }
+
+          setSavePending(true);
+          setSaveError(null);
+          const result = await runSaveRequest();
+          setSavePending(false);
+
+          if (!result.ok) {
+            setSaveError("Save failed. Please try again.");
             return;
           }
 

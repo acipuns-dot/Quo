@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { createDefaultDocument } from "../../lib/documents/defaults";
 import {
   clearDraft,
@@ -465,19 +465,26 @@ function serializeDraftSnapshot(input: {
   return JSON.stringify(input);
 }
 
-export function DocumentGenerator({
-  kind: initialKind,
-  workspace,
-  workspaceAction,
-  onWorkspaceActionHandled,
-  onDirtyChange,
-}: {
+export type DocumentGeneratorHandle = {
+  saveCurrentDraft: () => Promise<{ ok: boolean }>;
+};
+
+type DocumentGeneratorProps = {
   kind: DocumentKind;
   workspace?: WorkspaceGeneratorContext;
   workspaceAction?: WorkspaceDocumentAction | null;
   onWorkspaceActionHandled?: (actionId: string) => void;
   onDirtyChange?: (dirty: boolean) => void;
-}) {
+};
+
+export const DocumentGenerator = React.forwardRef<DocumentGeneratorHandle, DocumentGeneratorProps>(
+function DocumentGenerator({
+  kind: initialKind,
+  workspace,
+  workspaceAction,
+  onWorkspaceActionHandled,
+  onDirtyChange,
+}: DocumentGeneratorProps, ref) {
   const persistenceMode = workspace?.persistenceMode ?? "free";
   const initialDraftRef = useRef<StoredDocumentDraft | null>(null);
   if (initialDraftRef.current === null) {
@@ -494,6 +501,7 @@ export function DocumentGenerator({
   const [activeSection, setActiveSection] = useState(1);
   const [doneSet, setDoneSet] = useState<Set<number>>(new Set());
   const [logoError, setLogoError] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [selectedWorkspaceCustomer, setSelectedWorkspaceCustomer] =
     useState<SelectedWorkspaceCustomer | null>(initialSelectedWorkspaceCustomer);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(initialSelectedCustomerId);
@@ -559,6 +567,14 @@ export function DocumentGenerator({
   useEffect(() => {
     onDirtyChange?.(currentSnapshot !== baselineSnapshotRef.current);
   }, [currentSnapshot, onDirtyChange]);
+
+  useEffect(() => {
+    if (saveState === "saving") {
+      return;
+    }
+
+    setSaveState(currentSnapshot === baselineSnapshotRef.current ? "saved" : "idle");
+  }, [currentSnapshot, saveState]);
 
   useEffect(() => {
     if (!documentNumberAuto) {
@@ -772,6 +788,7 @@ export function DocumentGenerator({
       selectedCustomerId: null,
       businessId: workspace?.businessId ?? null,
     });
+    setSaveState(workspace?.apiBasePath ? "saved" : "idle");
   }
 
   function markDone(sectionNum: number) {
@@ -813,6 +830,38 @@ export function DocumentGenerator({
       });
     }
   }
+
+  async function saveCurrentWorkspaceDraft() {
+    if (!workspace?.apiBasePath) {
+      return { ok: false as const };
+    }
+
+    setSaveState("saving");
+
+    try {
+      await saveWorkspaceDraft(workspace.apiBasePath, {
+        kind: currentKind,
+        customerId: selectedCustomerId,
+        data,
+      });
+      baselineSnapshotRef.current = serializeDraftSnapshot({
+        kind: currentKind,
+        data,
+        documentNumberAuto,
+        selectedCustomerId,
+        businessId: workspace.businessId ?? null,
+      });
+      setSaveState("saved");
+      return { ok: true as const };
+    } catch {
+      setSaveState("error");
+      return { ok: false as const };
+    }
+  }
+
+  useImperativeHandle(ref, () => ({
+    saveCurrentDraft: saveCurrentWorkspaceDraft,
+  }));
 
   useEffect(() => {
     if (!workspaceAction || lastHandledWorkspaceActionIdRef.current === workspaceAction.id) {
@@ -927,17 +976,10 @@ export function DocumentGenerator({
         documentNumberAuto,
         data,
       });
-      if (workspace?.apiBasePath) {
-        void saveWorkspaceDraft(workspace.apiBasePath, {
-          kind: currentKind,
-          customerId: selectedCustomerId,
-          data,
-        });
-      }
     }, 300);
 
     return () => window.clearTimeout(timeout);
-  }, [currentKind, data, documentNumberAuto, persistenceMode, selectedCustomerId, workspace]);
+  }, [currentKind, data, documentNumberAuto, persistenceMode]);
 
   // ── progress dots ──────────────────────────────────────────────────────────
 
@@ -996,6 +1038,22 @@ export function DocumentGenerator({
           >
             Clear draft
           </button>
+          {workspace?.apiBasePath ? (
+            <button
+              type="button"
+              onClick={() => void saveCurrentWorkspaceDraft()}
+              disabled={saveState === "saving"}
+              className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-sm font-semibold text-white transition-all hover:border-[#d4901e]/40 hover:text-[#d4901e] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saveState === "saving"
+                ? "Saving..."
+                : saveState === "saved"
+                  ? "Saved"
+                  : saveState === "error"
+                    ? "Save failed"
+                    : "Save"}
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={handleDownloadPdf}
@@ -1350,7 +1408,7 @@ export function DocumentGenerator({
       </div>
     </div>
   );
-}
+});
 
 // ─── section content ──────────────────────────────────────────────────────────
 
