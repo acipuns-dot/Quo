@@ -16,6 +16,8 @@ export type LineItem = {
   description: string;
   note: string;
   quantity: number;
+  unit: string;
+  customUnit: string;
   unitPrice: number;
 };
 

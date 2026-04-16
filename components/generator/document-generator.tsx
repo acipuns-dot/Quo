@@ -17,6 +17,7 @@ import { generateDocumentNumber } from "../../lib/documents/document-number";
 import { exportDocumentToPdf } from "../../lib/documents/pdf-export";
 import { getPaymentTermSummary } from "../../lib/documents/calculations";
 import { formatCurrency } from "../../lib/documents/format";
+import { BUILT_IN_LINE_ITEM_UNITS } from "../../lib/documents/line-items";
 import { getTemplatesForKind, THEMES } from "../../lib/documents/templates";
 import type { DocumentData, DocumentKind, LineItem, PaymentTermPreset } from "../../lib/documents/types";
 import { documentSchema } from "../../lib/documents/schema";
@@ -120,6 +121,16 @@ const PAYMENT_TERM_OPTIONS: Array<{
   { value: "deposit_50", label: "50% deposit" },
   { value: "custom", label: "Custom" },
 ];
+
+const LINE_ITEM_UNIT_OPTIONS = BUILT_IN_LINE_ITEM_UNITS.map((value) => ({
+  value,
+  label:
+    value === ""
+      ? "No unit"
+      : value === "custom"
+        ? "Custom..."
+        : value,
+}));
 
 function PaymentTermPresetDropdown({
   value,
@@ -738,7 +749,15 @@ function DocumentGenerator({
   function updateLineItem(index: number, key: keyof LineItem, value: LineItem[keyof LineItem]) {
     setData((prev) => ({
       ...prev,
-      lineItems: prev.lineItems.map((item, i) => (i === index ? { ...item, [key]: value } : item)),
+      lineItems: prev.lineItems.map((item, i) => {
+        if (i !== index) return item;
+
+        if (key === "unit" && value !== "custom") {
+          return { ...item, unit: value as LineItem["unit"], customUnit: "" };
+        }
+
+        return { ...item, [key]: value };
+      }),
     }));
   }
 
@@ -752,6 +771,8 @@ function DocumentGenerator({
           description: "",
           note: "",
           quantity: 1,
+          unit: "",
+          customUnit: "",
           unitPrice: 0,
         },
       ],
@@ -1809,7 +1830,7 @@ function SectionContent({
                 onChange={(e) => updateLineItem(index, "note", e.target.value)}
               />
             </label>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-3 gap-2.5">
               <label className="block">
                 <span className={labelClass}>Qty</span>
                 <input
@@ -1822,6 +1843,22 @@ function SectionContent({
                   onChange={(e) => updateLineItem(index, "quantity", getNumericValue(e.target.value))}
                 />
                 <FieldError msg={errors[`lineItems.${index}.quantity`]} />
+              </label>
+              <label className="block">
+                <span className={labelClass}>Unit</span>
+                <select
+                  aria-label={`Line item ${index + 1} unit`}
+                  className={inputClass}
+                  value={item.unit}
+                  onChange={(e) => updateLineItem(index, "unit", e.target.value)}
+                >
+                  {LINE_ITEM_UNIT_OPTIONS.map((option) => (
+                    <option key={option.value || "none"} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <FieldError msg={errors[`lineItems.${index}.unit`]} />
               </label>
               <label className="block">
                 <span className={labelClass}>Unit price</span>
@@ -1837,6 +1874,18 @@ function SectionContent({
                 <FieldError msg={errors[`lineItems.${index}.unitPrice`]} />
               </label>
             </div>
+            {item.unit === "custom" ? (
+              <label className="block">
+                <span className={labelClass}>Custom unit</span>
+                <input
+                  aria-label={`Line item ${index + 1} custom unit`}
+                  className={inputClass}
+                  value={item.customUnit}
+                  onChange={(e) => updateLineItem(index, "customUnit", e.target.value)}
+                />
+                <FieldError msg={errors[`lineItems.${index}.customUnit`]} />
+              </label>
+            ) : null}
           </div>
         ))}
 

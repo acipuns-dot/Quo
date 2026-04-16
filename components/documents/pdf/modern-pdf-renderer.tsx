@@ -1,5 +1,6 @@
 import React from "react";
 import { formatCurrency } from "../../../lib/documents/format";
+import { formatLineItemQuantity } from "../../../lib/documents/line-items";
 import { getThemeById } from "../../../lib/documents/templates";
 import type { ModernPdfModel } from "../../../lib/documents/pdf-model";
 
@@ -402,7 +403,7 @@ export function ModernPdfRenderer({ model }: { model: ModernPdfModel }) {
                             color: "#555",
                           }}
                         >
-                          {item.quantity}
+                          {formatLineItemQuantity(item)}
                         </td>
                         <td
                           style={{

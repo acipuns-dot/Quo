@@ -2,6 +2,7 @@ import React from "react";
 import { getThemeById } from "../../../lib/documents/templates";
 import { calculateDocumentTotals, getPaymentTermSummary } from "../../../lib/documents/calculations";
 import { formatCurrency } from "../../../lib/documents/format";
+import { formatLineItemQuantity } from "../../../lib/documents/line-items";
 import type { DocumentData, DocumentLayoutMode, LineItem } from "../../../lib/documents/types";
 import { DocumentPageMeta } from "../document-page-meta";
 import { DocumentPaginatedLayout } from "../document-paginated-layout";
@@ -56,7 +57,7 @@ function BoldLineItems({
         {items.map((item) => (
           <tr key={item.id}>
             <td style={{ padding: cellV, border: "1px solid #ddd", textAlign: "center", color: "#555", fontVariantNumeric: "tabular-nums", width: "8%" }}>
-              {item.quantity}
+              {formatLineItemQuantity(item)}
             </td>
             <td style={{ padding: cellV, border: "1px solid #ddd", color: "#111", fontWeight: 500 }}>
               {item.description}

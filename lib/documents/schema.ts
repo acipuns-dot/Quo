@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BUILT_IN_LINE_ITEM_UNITS } from "./line-items";
 import { DOCUMENT_KINDS, PAYMENT_TERM_PRESETS, type PaymentTermPreset } from "./types";
 
 const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -21,12 +22,24 @@ function isValidIsoDate(value: string): boolean {
   );
 }
 
+const builtInUnitSchema = z.enum(BUILT_IN_LINE_ITEM_UNITS);
+
 export const lineItemSchema = z.object({
   id: z.string().min(1),
   description: z.string().trim().min(1, "Line item description is required.").max(200),
   note: z.string().max(300),
   quantity: z.number().min(0, "Quantity cannot be negative."),
+  unit: builtInUnitSchema.optional().default(""),
+  customUnit: z.string().trim().max(20).optional().default(""),
   unitPrice: z.number().min(0, "Unit price cannot be negative."),
+}).superRefine((item, ctx) => {
+  if (item.unit === "custom" && !item.customUnit.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["customUnit"],
+      message: "Custom unit is required.",
+    });
+  }
 });
 
 const paymentTermPresetSchema = z.union([

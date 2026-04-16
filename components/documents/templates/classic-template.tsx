@@ -2,6 +2,7 @@ import React from "react";
 import { getThemeById } from "../../../lib/documents/templates";
 import { calculateDocumentTotals, getPaymentTermSummary } from "../../../lib/documents/calculations";
 import { formatCurrency } from "../../../lib/documents/format";
+import { formatLineItemQuantity } from "../../../lib/documents/line-items";
 import type { DocumentData, DocumentLayoutMode, LineItem } from "../../../lib/documents/types";
 import { DocumentPageMeta } from "../document-page-meta";
 import { DocumentPaginatedLayout } from "../document-paginated-layout";
@@ -84,7 +85,7 @@ function ClassicLineItems({
               ) : null}
             </td>
             <td style={{ padding: cellV, borderBottom: "1px solid #f0ede9", textAlign: "right", color: "#555", fontVariantNumeric: "tabular-nums" }}>
-              {item.quantity}
+              {formatLineItemQuantity(item)}
             </td>
             <td style={{ padding: cellV, borderBottom: "1px solid #f0ede9", textAlign: "right", color: "#555", fontVariantNumeric: "tabular-nums" }}>
               {formatCurrency(item.unitPrice, data.currency)}

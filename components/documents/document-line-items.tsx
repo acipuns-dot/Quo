@@ -1,5 +1,6 @@
 import React from "react";
 import { formatCurrency } from "../../lib/documents/format";
+import { formatLineItemQuantity } from "../../lib/documents/line-items";
 import type { DocumentData, DocumentLayoutMode, LineItem } from "../../lib/documents/types";
 
 type Props = {
@@ -62,7 +63,7 @@ export function DocumentLineItems({
               ) : null}
             </td>
             <td className={`border-b border-stone-200 text-right align-top tabular-nums text-stone-500 ${bodyCell}`}>
-              {item.quantity}
+              {formatLineItemQuantity(item)}
             </td>
             <td className={`border-b border-stone-200 text-right align-top tabular-nums text-stone-500 ${bodyCell}`}>
               {formatCurrency(item.unitPrice, data.currency)}

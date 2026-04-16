@@ -64,7 +64,11 @@ export function DocumentForm({ data, onChange }: DocumentFormProps) {
     value: LineItem[keyof LineItem],
   ) {
     const nextItems = data.lineItems.map((item, itemIndex) =>
-      itemIndex === index ? { ...item, [key]: value } : item,
+      itemIndex === index
+        ? key === "unit" && value !== "custom"
+          ? { ...item, unit: value as LineItem["unit"], customUnit: "" }
+          : { ...item, [key]: value }
+        : item,
     );
 
     update("lineItems", nextItems);
@@ -78,6 +82,8 @@ export function DocumentForm({ data, onChange }: DocumentFormProps) {
         description: "",
         note: "",
         quantity: 1,
+        unit: "",
+        customUnit: "",
         unitPrice: 0,
       },
     ]);

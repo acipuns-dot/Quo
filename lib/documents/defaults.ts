@@ -41,6 +41,8 @@ export function createDefaultDocument(kind: DocumentKind): DocumentData {
         description: "Design service",
         note: "",
         quantity: 1,
+        unit: "",
+        customUnit: "",
         unitPrice: 250,
       },
     ],
