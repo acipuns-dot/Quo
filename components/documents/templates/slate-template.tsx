@@ -178,14 +178,6 @@ function GradientBottom({
         </div>
       ) : null}
 
-      {/* Signature line */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: compact ? 14 : 20 }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ width: 120, borderTop: "1px solid #ccc", paddingTop: 6 }}>
-            <div style={{ fontSize: 11, color: "#999", fontStyle: "italic" }}>Company Signature</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

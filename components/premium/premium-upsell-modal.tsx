@@ -10,7 +10,7 @@ const featureCopy = {
     "Save repeat customer details once and reuse them every time you create a quotation, invoice, or receipt.",
   history: "Reopen drafts and exported work whenever you need it, without rebuilding documents from scratch.",
   templates:
-    "Access exclusive premium templates — Noir, Studio, Slate, and Pulse — designed to make your documents stand out.",
+    "Access exclusive premium templates — Ledger, Studio, Slate, and Pulse — designed to make your documents stand out.",
 } as const;
 
 const premiumBenefits = [

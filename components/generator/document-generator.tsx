@@ -1631,29 +1631,42 @@ function DocumentGenerator({
                           </div>
                           <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: activeTheme.accent }} />
                         </div>
-                      ) : template.thumbnailVariant === "noir" ? (
+                      ) : template.thumbnailVariant === "ledger" ? (
                         <div
-                          className="relative overflow-hidden"
-                          style={{ aspectRatio: "4/2.6", background: activeTheme.dark }}
+                          className="relative overflow-hidden bg-white"
+                          style={{ aspectRatio: "4/2.6" }}
                         >
-                          {/* Header row */}
-                          <div className="absolute top-2.5 left-2.5 right-2.5 flex justify-between items-start">
-                            <div className="h-[5px] rounded-sm bg-white/70 w-2/5" />
-                            <div className="flex flex-col gap-[2px] items-end">
-                              <div className="h-[3px] rounded-sm w-[22px]" style={{ background: activeTheme.accent }} />
-                              <div className="h-[3px] rounded-sm bg-white/30 w-[16px]" />
+                          {/* Top: logo placeholder left, INVOICE title right */}
+                          <div className="absolute top-2.5 left-2.5 w-[18px] h-[14px] rounded-sm" style={{ border: `1.5px solid ${activeTheme.accent}` }} />
+                          <div className="absolute top-2.5 right-2.5 flex flex-col items-end gap-[2px]">
+                            <div className="h-[5px] rounded-sm w-[28px]" style={{ background: activeTheme.accent }} />
+                            <div className="h-[2px] rounded-sm w-[20px] bg-[#aaa]" />
+                          </div>
+                          {/* Parties row divider */}
+                          <div className="absolute top-[20px] left-2.5 right-2.5 h-[1px] bg-[#ddd]" />
+                          {/* Two-column FROM / BILL TO */}
+                          <div className="absolute top-[24px] left-2.5 right-2.5 flex gap-2">
+                            <div className="flex-1 flex flex-col gap-[2px]">
+                              <div className="h-[2px] rounded-sm w-[14px] bg-[#bbb]" />
+                              <div className="h-[3px] rounded-sm w-[24px] bg-[#333]" />
+                            </div>
+                            <div className="flex-1 flex flex-col gap-[2px]">
+                              <div className="h-[2px] rounded-sm w-[14px] bg-[#bbb]" />
+                              <div className="h-[3px] rounded-sm w-[24px] bg-[#333]" />
                             </div>
                           </div>
-                          {/* Divider */}
-                          <div className="absolute top-[18px] left-2.5 right-2.5 h-[1px] bg-white/10" />
-                          {/* Table rows */}
-                          <div className="absolute top-[23px] left-2.5 right-2.5 space-y-[3px]">
-                            <div className="h-[3px] rounded-sm w-full bg-white/8" />
-                            <div className="h-[3px] rounded-sm w-5/6 bg-white/5" />
-                            <div className="h-[3px] rounded-sm w-full bg-white/8" />
+                          {/* Bordered table header */}
+                          <div className="absolute top-[36px] left-2.5 right-2.5 h-[6px] rounded-sm" style={{ background: activeTheme.accent }} />
+                          {/* Bordered table rows */}
+                          <div className="absolute top-[44px] left-2.5 right-2.5 space-y-[2px]">
+                            <div className="h-[4px] rounded-sm bg-[#f5f5f5]" style={{ border: "1px solid #e0e0e0" }} />
+                            <div className="h-[4px] rounded-sm bg-white" style={{ border: "1px solid #e0e0e0" }} />
+                            <div className="h-[4px] rounded-sm bg-[#f5f5f5]" style={{ border: "1px solid #e0e0e0" }} />
                           </div>
-                          {/* Total bottom-right */}
-                          <div className="absolute bottom-[8px] right-2.5 h-[7px] w-[36%] rounded-sm" style={{ background: activeTheme.accent }} />
+                          {/* Bottom-right: accent balance due */}
+                          <div className="absolute bottom-[6px] right-2.5 h-[6px] w-[36%] rounded-sm" style={{ background: activeTheme.accent }} />
+                          {/* Bottom-left: payment box outline */}
+                          <div className="absolute bottom-[6px] left-2.5 w-[36%] h-[12px] rounded-sm" style={{ border: `1px solid #ddd` }} />
                         </div>
                       ) : template.thumbnailVariant === "studio" ? (
                         <div

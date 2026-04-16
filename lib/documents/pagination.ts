@@ -75,12 +75,12 @@ const BOLD_INVOICE_COMPACT: CapacityProfile = {
   paymentTermsReserve: 0,
 };
 
-const NOIR_INVOICE_COMFORTABLE: CapacityProfile = {
+const LEDGER_INVOICE_COMFORTABLE: CapacityProfile = {
   ...COMFORTABLE,
   finalPageReserve: 5.5,
 };
 
-const NOIR_INVOICE_COMPACT: CapacityProfile = {
+const LEDGER_INVOICE_COMPACT: CapacityProfile = {
   ...COMPACT,
   finalPageReserve: 8.2,
   paymentTermsReserve: 0,
@@ -146,10 +146,10 @@ function getCapacityProfiles(data: DocumentData) {
           comfortable: BOLD_INVOICE_COMFORTABLE,
           compact: BOLD_INVOICE_COMPACT,
         };
-      case "noir":
+      case "ledger":
         return {
-          comfortable: NOIR_INVOICE_COMFORTABLE,
-          compact: NOIR_INVOICE_COMPACT,
+          comfortable: LEDGER_INVOICE_COMFORTABLE,
+          compact: LEDGER_INVOICE_COMPACT,
         };
       case "studio":
         return {

@@ -3,7 +3,7 @@ import { BoldTemplate } from "../../components/documents/templates/bold-template
 import { ClassicTemplate } from "../../components/documents/templates/classic-template";
 import { EdgeTemplate } from "../../components/documents/templates/edge-template";
 import { UnifiedTemplate } from "../../components/documents/templates/unified-template";
-import { NoirTemplate } from "../../components/documents/templates/noir-template";
+import { LedgerTemplate } from "../../components/documents/templates/ledger-template";
 import { StudioTemplate } from "../../components/documents/templates/studio-template";
 import { SlateTemplate } from "../../components/documents/templates/slate-template";
 import { PulseTemplate } from "../../components/documents/templates/pulse-template";
@@ -104,7 +104,7 @@ export function getThemeById(themeId: string): ThemeDefinition {
 export type TemplateDefinition = {
   id: string;
   label: string;
-  thumbnailVariant: "dark" | "light" | "classic" | "bold" | "noir" | "studio" | "slate" | "pulse";
+  thumbnailVariant: "dark" | "light" | "classic" | "bold" | "ledger" | "studio" | "slate" | "pulse";
   premium?: boolean;
   render: (data: DocumentData) => ReactElement;
 };
@@ -134,12 +134,12 @@ const templateRegistry: Record<string, TemplateDefinition> = {
     thumbnailVariant: "bold",
     render: (data) => createElement(BoldTemplate, { data }),
   },
-  noir: {
-    id: "noir",
-    label: "Noir",
-    thumbnailVariant: "noir",
+  ledger: {
+    id: "ledger",
+    label: "Ledger",
+    thumbnailVariant: "ledger",
     premium: true,
-    render: (data) => createElement(NoirTemplate, { data }),
+    render: (data) => createElement(LedgerTemplate, { data }),
   },
   studio: {
     id: "studio",
