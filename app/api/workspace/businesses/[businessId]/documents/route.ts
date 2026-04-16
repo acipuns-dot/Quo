@@ -11,8 +11,50 @@ const workspaceDocumentRequestSchema = z.object({
   kind: z.enum(["quotation", "invoice", "receipt"]),
   customerId: z.string().min(1).nullable(),
   status: z.enum(["draft", "exported"]),
-  data: documentSchema,
+  data: z.unknown(),
 });
+
+function normalizeDraftDocumentData(data: unknown) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return data;
+  }
+
+  const candidate = data as {
+    additionalFees?: Array<{
+      id?: unknown;
+      label?: unknown;
+      amount?: unknown;
+    }>;
+  };
+
+  if (!Array.isArray(candidate.additionalFees)) {
+    return data;
+  }
+
+  return {
+    ...candidate,
+    additionalFees: candidate.additionalFees.map((fee) => {
+      if (!fee || typeof fee !== "object" || Array.isArray(fee)) {
+        return fee;
+      }
+
+      const amount =
+        typeof fee.amount === "number" && Number.isFinite(fee.amount)
+          ? fee.amount
+          : null;
+      const label = typeof fee.label === "string" ? fee.label : "";
+
+      if (amount !== null && amount > 0 && !label.trim()) {
+        return {
+          ...fee,
+          label: "Additional fee",
+        };
+      }
+
+      return fee;
+    }),
+  };
+}
 
 function hasSupabaseEnv() {
   return Boolean(
@@ -61,7 +103,15 @@ async function saveDocumentForBusiness(
     return NextResponse.json({ error: "Business not found" }, { status: 404 });
   }
 
-  const body = workspaceDocumentRequestSchema.parse(await request.json());
+  const requestBody = workspaceDocumentRequestSchema.parse(await request.json());
+  const data =
+    requestBody.status === "draft"
+      ? normalizeDraftDocumentData(requestBody.data)
+      : requestBody.data;
+  const body = {
+    ...requestBody,
+    data: documentSchema.parse(data),
+  };
   const item = await upsertWorkspaceDocument(supabase, {
     businessId,
     customerId: body.customerId,
