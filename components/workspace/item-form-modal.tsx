@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import type { LineItem } from "../../lib/documents/types";
 import { createItem, updateItem } from "../../lib/workspace/api-client";
 import type { ItemRecord } from "../../lib/workspace/types";
+import { LineItemUnitDropdown } from "../generator/line-item-unit-dropdown";
 import { ModalShell } from "./modal-shell";
 
 const inputClass =
@@ -13,7 +15,7 @@ const emptyItemValues = {
   description: "",
   note: "",
   quantity: 1,
-  unit: "",
+  unit: "" as LineItem["unit"],
   customUnit: "",
   unitPrice: 0,
 };
@@ -150,26 +152,34 @@ export function ItemFormModal({
           <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
             Unit
           </span>
-          <input
-            aria-label="Unit"
+          <LineItemUnitDropdown
+            ariaLabel="Unit"
             value={values.unit}
-            onChange={(event) => update("unit", event.target.value)}
-            className={inputClass}
-            placeholder="service"
+            onSelect={(value) => {
+              update("unit", value);
+              if (value !== "custom") {
+                update("customUnit", "");
+              }
+            }}
+            buttonClassName={inputClass}
           />
         </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-            Custom unit
-          </span>
-          <input
-            aria-label="Custom unit"
-            value={values.customUnit}
-            onChange={(event) => update("customUnit", event.target.value)}
-            className={inputClass}
-            placeholder="Only when unit is custom"
-          />
-        </label>
+        {values.unit === "custom" ? (
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+              Custom unit
+            </span>
+            <input
+              aria-label="Custom unit"
+              value={values.customUnit}
+              onChange={(event) => update("customUnit", event.target.value)}
+              className={inputClass}
+              placeholder="Only when unit is custom"
+            />
+          </label>
+        ) : (
+          <div />
+        )}
         <label className="block">
           <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
             Unit price
