@@ -28,7 +28,7 @@ export const customerPayloadSchema = z.object({
 export const itemPayloadSchema = z
   .object({
     name: z.string().trim().min(1).max(120),
-    description: z.string().trim().min(1).max(200),
+    description: z.string().trim().max(200),
     quantity: z.number().min(0),
     unit: z.string().max(40),
     customUnit: z.string().max(20),

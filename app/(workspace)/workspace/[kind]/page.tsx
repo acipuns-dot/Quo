@@ -170,7 +170,7 @@ export default async function WorkspaceKindPage({
           itemOptions: items.map((item) => ({
             id: item.id,
             name: item.name,
-            description: item.description,
+            description: item.description || item.name,
             quantity: item.quantity,
             unit: item.unit,
             customUnit: item.customUnit,

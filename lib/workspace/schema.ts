@@ -39,7 +39,7 @@ export const itemRecordSchema = z.object({
   id: z.string().min(1),
   businessId: z.string().min(1),
   name: z.string().trim().min(1).max(120),
-  description: z.string().trim().min(1).max(200),
+  description: z.string().trim().max(200),
   quantity: z.number().min(0),
   unit: z.string().max(40),
   customUnit: z.string().max(20),
