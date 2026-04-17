@@ -217,7 +217,7 @@ export function WorkspaceShell({
       <header className="flex-shrink-0 border-b border-white/[0.07] bg-[#111111]">
         <div className="flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-2">
-            <div className="text-sm font-extrabold tracking-[0.06em] text-[#faf9f7]">QUO<span className="text-[#d4901e]">.</span></div>
+            <div className="text-sm font-extrabold tracking-[0.06em] text-[#faf9f7]">QUODO</div>
             <span className="rounded-full border border-[#d4901e]/25 bg-[#d4901e]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d4901e]">Premium</span>
           </div>
           <div className="flex items-center">
