@@ -38,7 +38,7 @@ export function UnifiedTemplate({ data }: { data: DocumentData }) {
       }}
     >
       <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, background: glow }} />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative" }}>
         <div>
           {data.logoDataUrl && (
             // eslint-disable-next-line @next/next/no-img-element -- printable document templates use runtime data URLs here
