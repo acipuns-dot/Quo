@@ -106,7 +106,7 @@ export default function HomePage() {
 
           {/* Proof points */}
           <div className="animate-fade-in delay-500 flex items-center justify-center gap-6 flex-wrap">
-            {["10 free exports daily", "Quotation · Invoice · Receipt", "Upgrade for unlimited"].map((pt) => (
+            {["Free & unlimited exports", "Quotation · Invoice · Receipt", "No account required"].map((pt) => (
               <span key={pt} className="quo-proof-point inline-flex items-center gap-1.5 text-xs">
                 <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
