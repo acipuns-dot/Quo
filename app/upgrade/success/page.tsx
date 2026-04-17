@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SiteHeaderServer } from "../../../components/site/site-header-server";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
@@ -43,21 +42,6 @@ export default async function UpgradeSuccessPage() {
             Your subscription is being activated. We will send you to the premium workspace as soon as your account finishes syncing.
           </p>
           <UpgradeSuccessRedirect />
-
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/workspace/invoice"
-              className="rounded-2xl bg-[#d4901e] px-6 py-3 text-sm font-bold text-[#111111] transition hover:bg-[#e8a030]"
-            >
-              Open Workspace
-            </Link>
-            <Link
-              href="/profile"
-              className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/75 transition hover:border-white/20 hover:text-white"
-            >
-              View Profile
-            </Link>
-          </div>
         </section>
       </main>
     </>
