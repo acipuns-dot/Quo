@@ -20,7 +20,10 @@ export type StoredSelectedWorkspaceCustomer = {
 
 export type DraftPersistenceMode = "free" | "workspace";
 
-export function getDraftStorageKey(kind: DocumentKind, mode: DraftPersistenceMode = "free") {
+export function getDraftStorageKey(kind: DocumentKind, mode: DraftPersistenceMode = "free", userId?: string) {
+  if (mode === "workspace" && userId) {
+    return `quo:draft:workspace:${userId}:${kind}`;
+  }
   return `quo:draft:${mode}:${kind}`;
 }
 
@@ -52,21 +55,22 @@ export function saveDraft(
   kind: DocumentKind,
   mode: DraftPersistenceMode,
   payload: StoredDocumentDraft,
+  userId?: string,
 ) {
   if (!canUseStorage()) return;
 
   try {
-    window.localStorage.setItem(getDraftStorageKey(kind, mode), JSON.stringify(payload));
+    window.localStorage.setItem(getDraftStorageKey(kind, mode, userId), JSON.stringify(payload));
   } catch {
     // Ignore storage failures so editing continues normally.
   }
 }
 
-export function clearDraft(kind: DocumentKind, mode: DraftPersistenceMode) {
+export function clearDraft(kind: DocumentKind, mode: DraftPersistenceMode, userId?: string) {
   if (!canUseStorage()) return;
 
   try {
-    window.localStorage.removeItem(getDraftStorageKey(kind, mode));
+    window.localStorage.removeItem(getDraftStorageKey(kind, mode, userId));
   } catch {
     // Ignore storage failures so editing continues normally.
   }
@@ -119,11 +123,12 @@ export function clearSelectedWorkspaceCustomer(businessId: string) {
 export function loadDraft(
   kind: DocumentKind,
   mode: DraftPersistenceMode,
+  userId?: string,
 ): StoredDocumentDraft | null {
   if (!canUseStorage()) return null;
 
   try {
-    const raw = window.localStorage.getItem(getDraftStorageKey(kind, mode));
+    const raw = window.localStorage.getItem(getDraftStorageKey(kind, mode, userId));
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as Partial<StoredDocumentDraft>;
@@ -154,8 +159,9 @@ export function loadDraft(
 export function getDraftOrDefault(
   kind: DocumentKind,
   mode: DraftPersistenceMode = "free",
+  userId?: string,
 ): StoredDocumentDraft {
-  const restored = loadDraft(kind, mode);
+  const restored = loadDraft(kind, mode, userId);
   if (restored) {
     return restored;
   }
