@@ -281,6 +281,8 @@ select:focus-visible {
 .quo-plan-item-paid    { color: rgba(255,255,255,0.9); }
 .quo-plan-item-paid svg { color: white; flex-shrink: 0; }
 .quo-plan-cta-soon { background-color: rgba(0,0,0,0.18); color: rgba(255,255,255,0.5); }
+.quo-plan-cta-paid { background-color: rgba(0,0,0,0.25); color: white; }
+.quo-plan-cta-paid:hover { background-color: rgba(0,0,0,0.35); }
 
 /* Trust */
 .quo-trust-section {

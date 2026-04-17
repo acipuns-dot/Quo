@@ -242,18 +242,18 @@ export default function HomePage() {
             {/* Paid */}
             <div className="animate-scale-in delay-200 quo-plan-paid rounded-2xl p-8 border relative overflow-hidden">
               <div className="quo-plan-badge absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full">Best for regular use</div>
-              <p className="quo-plan-label-paid text-xs font-bold uppercase tracking-widest mb-1">Member</p>
-              <p className="quo-plan-price-paid text-4xl font-bold mb-1">Soon</p>
-              <p className="quo-plan-subdesc-paid text-sm mb-7">For businesses that run on Quo</p>
+              <p className="quo-plan-label-paid text-xs font-bold uppercase tracking-widest mb-1">Premium</p>
+              <p className="quo-plan-price-paid text-4xl font-bold mb-1">$4.99<span className="text-base font-medium opacity-70"> / mo</span></p>
+              <p className="quo-plan-subdesc-paid text-sm mb-7">or $49.90 / year &mdash; for businesses that run on Quo</p>
               <ul className="space-y-2.5 mb-8">
-                {["Unlimited exports", "No ads", "All document types", "Early access to new features"].map((item) => (
+                {["Unlimited PDF exports", "No ads", "Multi-business workspace", "Saved customers", "Document history", "Item catalogue", "Full template library"].map((item) => (
                   <li key={item} className="quo-plan-item-paid flex items-start gap-2.5 text-sm">
                     <svg className="flex-shrink-0 mt-0.5" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                     {item}
                   </li>
                 ))}
               </ul>
-              <span className="quo-plan-cta-soon block text-center rounded-lg px-5 py-3 text-sm font-bold cursor-not-allowed">Coming soon</span>
+              <Link href="/upgrade" className="quo-plan-cta-paid block text-center rounded-lg px-5 py-3 text-sm font-bold transition-all duration-150">Upgrade now</Link>
             </div>
           </div>
         </div>
