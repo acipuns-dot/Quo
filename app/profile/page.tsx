@@ -4,10 +4,17 @@ import { redirect } from "next/navigation";
 import { SiteHeader } from "../../components/site/site-header";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { getWorkspaceAccountProfile, resolvePostAuthPath } from "../../lib/workspace/account-profiles";
+import { CancelSubscriptionButton } from "./cancel-subscription-button";
 
 export default async function ProfilePage() {
   let user: { id: string; email?: string | null } | null = null;
   let plan: "free" | "premium" = "free";
+  let subscription: {
+    plan_interval: string;
+    status: string;
+    current_period_end: string | null;
+    cancel_at_period_end: boolean;
+  } | null = null;
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -22,6 +29,19 @@ export default async function ProfilePage() {
     user = authedUser;
     const profile = await getWorkspaceAccountProfile(supabase, authedUser.id);
     plan = profile?.plan ?? "free";
+
+    if (plan === "premium") {
+      const { data } = await supabase
+        .from("billing_subscriptions")
+        .select("plan_interval, status, current_period_end, cancel_at_period_end")
+        .eq("user_id", authedUser.id)
+        .eq("provider", "paypal")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      subscription = data ?? null;
+    }
   } catch {
     redirect("/login");
   }
@@ -38,6 +58,14 @@ export default async function ProfilePage() {
   }
 
   const documentsHref = resolvePostAuthPath(plan, "invoice");
+
+  const periodEnd = subscription?.current_period_end
+    ? new Date(subscription.current_period_end).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null;
 
   return (
     <>
@@ -68,7 +96,26 @@ export default async function ProfilePage() {
             </div>
           </div>
 
-          <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6">
+          {/* Subscription details for premium users */}
+          {plan === "premium" && subscription ? (
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/35">Subscription</p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+                <span className="text-sm font-semibold text-white capitalize">
+                  {subscription.plan_interval} · {subscription.status.toLowerCase()}
+                </span>
+                {periodEnd ? (
+                  <span className="text-sm text-white/50">
+                    {subscription.cancel_at_period_end
+                      ? `Cancels on ${periodEnd}`
+                      : `Renews ${periodEnd}`}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-6">
             <p className="text-sm leading-7 text-white/65">
               {plan === "premium"
                 ? "Your premium account unlocks the Quo workspace with saved customers, document history, and multi-business tools."
@@ -110,6 +157,12 @@ export default async function ProfilePage() {
                 </button>
               </form>
             </div>
+
+            {plan === "premium" && subscription && !subscription.cancel_at_period_end ? (
+              <div className="mt-6 border-t border-white/8 pt-6">
+                <CancelSubscriptionButton />
+              </div>
+            ) : null}
           </div>
         </section>
       </main>

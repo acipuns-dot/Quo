@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { SiteHeaderServer } from "../../components/site/site-header-server";
+import { UpgradeButtons } from "./upgrade-buttons";
 
 const premiumBenefits = [
   "Multi-business workspace",
@@ -34,22 +34,7 @@ export default function UpgradePage() {
             ))}
           </div>
 
-          <div className="mt-10 rounded-2xl border border-[#d4901e]/20 bg-[#d4901e]/10 px-5 py-4 text-sm leading-7 text-[#f7d58f]">
-            Payments are the next piece being wired. This page is ready to become the checkout entry point once
-            PayPal is connected.
-          </div>
-
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Link href="/login" className="rounded-2xl bg-[#d4901e] px-5 py-3 text-sm font-bold text-[#111111]">
-              Sign in for Premium
-            </Link>
-            <Link
-              href="/invoice"
-              className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/75"
-            >
-              Keep using free
-            </Link>
-          </div>
+          <UpgradeButtons />
         </section>
       </main>
     </>
