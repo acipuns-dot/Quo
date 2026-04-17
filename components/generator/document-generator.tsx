@@ -1683,8 +1683,8 @@ function DocumentGenerator({
                           className="relative overflow-hidden bg-white"
                           style={{ aspectRatio: "4/2.6" }}
                         >
-                          {/* Full-width dark top info bar */}
-                          <div className="absolute top-0 left-0 right-0 h-[16px]" style={{ background: activeTheme.dark }} />
+                          {/* Full-width accent top info bar */}
+                          <div className="absolute top-0 left-0 right-0 h-[16px]" style={{ background: activeTheme.accent }} />
                           {/* Logo/name in bar */}
                           <div className="absolute top-[5px] left-2.5 h-[3px] w-[28px] rounded-sm bg-white/80" />
                           {/* Address dots in bar */}

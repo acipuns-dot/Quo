@@ -192,18 +192,18 @@ function CorporateBottom({
 
 export function PulseTemplate({ data }: { data: DocumentData }) {
   const theme = getThemeById(data.themeId);
-  const { accent, dark } = theme;
+  const { accent } = theme;
 
   const bleed = "clamp(1.25rem, 2.8vw, 2.5rem)";
 
-  // Full-width top info bar: dark bg, logo left, address lines right
+  // Full-width top info bar: accent bg, logo left, address lines right
   const topInfoBar = (
     <div
       style={{
         marginLeft: `calc(-1 * ${bleed})`,
         marginRight: `calc(-1 * ${bleed})`,
         marginTop: `calc(-1 * ${bleed})`,
-        background: dark,
+        background: accent,
         padding: `14px ${bleed}`,
         display: "flex",
         justifyContent: "space-between",
@@ -274,7 +274,7 @@ export function PulseTemplate({ data }: { data: DocumentData }) {
         marginLeft: `calc(-1 * ${bleed})`,
         marginRight: `calc(-1 * ${bleed})`,
         marginTop: `calc(-1 * ${bleed})`,
-        background: dark,
+        background: accent,
         padding: `12px ${bleed}`,
         marginBottom: 14,
         display: "flex",
