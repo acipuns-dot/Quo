@@ -19,6 +19,7 @@ export function CancelSubscriptionButton() {
 
       if (!res.ok) throw new Error(data.error ?? "Failed to cancel");
 
+      router.push("/profile?canceled=1");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

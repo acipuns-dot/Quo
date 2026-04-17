@@ -10,13 +10,13 @@ export async function POST() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Find active subscription for this user
+  // Find active subscription for this user — match status case-insensitively
   const { data: sub, error } = await supabase
     .from("billing_subscriptions")
     .select("provider_subscription_id, status")
     .eq("user_id", user.id)
     .eq("provider", "paypal")
-    .in("status", ["ACTIVE", "APPROVED"])
+    .eq("cancel_at_period_end", false)
     .order("created_at", { ascending: false })
     .limit(1)
     .single();
