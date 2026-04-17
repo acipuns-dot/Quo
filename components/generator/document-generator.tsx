@@ -15,7 +15,7 @@ import {
 } from "../../lib/documents/draft-storage";
 import { generateDocumentNumber } from "../../lib/documents/document-number";
 import { exportDocumentToPdf } from "../../lib/documents/pdf-export";
-import { getPaymentTermSummary } from "../../lib/documents/calculations";
+import { calculateDocumentTotals, getPaymentTermSummary } from "../../lib/documents/calculations";
 import { formatCurrency } from "../../lib/documents/format";
 import { BUILT_IN_LINE_ITEM_UNITS } from "../../lib/documents/line-items";
 import { getTemplatesForKind, THEMES } from "../../lib/documents/templates";
@@ -1158,6 +1158,15 @@ function DocumentGenerator({
 
     return () => window.clearTimeout(timeout);
   }, [currentKind, data, documentNumberAuto, persistenceMode, workspace?.userId]);
+
+  // Keep amountReceived in sync with calculated total for receipts
+  useEffect(() => {
+    if (currentKind !== "receipt") return;
+    const calculated = calculateDocumentTotals(data).total;
+    if (data.amountReceived !== calculated) {
+      setData((prev) => ({ ...prev, amountReceived: calculated }));
+    }
+  }, [currentKind, data.lineItems, data.additionalFees, data.applyTax, data.taxRate]);
 
   // ── progress dots ──────────────────────────────────────────────────────────
 

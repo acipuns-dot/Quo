@@ -33,7 +33,7 @@ export function createDefaultDocument(kind: DocumentKind): DocumentData {
     paymentTermLabel: "",
     notes: "",
     paymentMethod: "",
-    amountReceived: kind === "receipt" ? 250 : 0,
+    amountReceived: 0,
     logoDataUrl: null,
     lineItems: [
       {
