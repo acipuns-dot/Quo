@@ -25,6 +25,7 @@ async function getAccessToken(): Promise<string> {
 
 export async function createSubscription(
   planId: string,
+  userId: string,
   returnUrl: string,
   cancelUrl: string,
 ): Promise<{ id: string; approvalUrl: string }> {
@@ -38,6 +39,7 @@ export async function createSubscription(
     },
     body: JSON.stringify({
       plan_id: planId,
+      custom_id: userId,
       application_context: {
         brand_name: "Quo Documents",
         locale: "en-US",

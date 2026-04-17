@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const cancelUrl = `${origin}/upgrade?canceled=1`;
 
   try {
-    const { id, approvalUrl } = await createSubscription(planId, returnUrl, cancelUrl);
+    const { id, approvalUrl } = await createSubscription(planId, user.id, returnUrl, cancelUrl);
     return NextResponse.json({ subscriptionId: id, approvalUrl });
   } catch (err) {
     console.error("PayPal subscribe error:", err);

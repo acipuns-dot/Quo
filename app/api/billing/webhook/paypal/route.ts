@@ -63,22 +63,12 @@ async function handleSubscriptionActive(
 ) {
   const subscriptionId = resource.id as string;
 
-  // Fetch full subscription details to get subscriber email
+  // Fetch full subscription details to get custom_id (our user ID)
   const sub = await getSubscription(subscriptionId);
-  const email = sub.subscriber?.email_address as string | undefined;
+  const userId = sub.custom_id as string | undefined;
 
-  if (!email) {
-    console.error("No subscriber email in PayPal subscription", subscriptionId);
-    return;
-  }
-
-  // Look up user by email
-  const { data: { users }, error: userError } = await supabase.auth.admin.listUsers();
-  if (userError) throw userError;
-
-  const user = users.find((u) => u.email === email);
-  if (!user) {
-    console.error("No user found for PayPal subscriber email:", email);
+  if (!userId) {
+    console.error("No custom_id (userId) in PayPal subscription", subscriptionId);
     return;
   }
 
@@ -89,7 +79,7 @@ async function handleSubscriptionActive(
   // Upsert billing subscription row
   await supabase.from("billing_subscriptions").upsert(
     {
-      user_id: user.id,
+      user_id: userId,
       provider: "paypal",
       provider_subscription_id: subscriptionId,
       plan_interval: planInterval,
@@ -106,7 +96,7 @@ async function handleSubscriptionActive(
   await supabase
     .from("user_profiles")
     .update({ plan: "premium" })
-    .eq("user_id", user.id);
+    .eq("user_id", userId);
 }
 
 async function handleSubscriptionInactive(
