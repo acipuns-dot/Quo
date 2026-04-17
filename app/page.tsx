@@ -225,11 +225,11 @@ export default function HomePage() {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {/* Free */}
-            <div className="animate-scale-in delay-100 quo-plan-free rounded-2xl p-8 border">
+            <div className="animate-scale-in delay-100 quo-plan-free rounded-2xl p-8 border flex flex-col">
               <p className="quo-plan-label text-xs font-bold uppercase tracking-widest mb-1">Free</p>
               <p className="quo-plan-price text-4xl font-bold mb-1">$0</p>
               <p className="quo-plan-subdesc text-sm mb-7">Great for occasional use</p>
-              <ul className="space-y-2.5 mb-8">
+              <ul className="space-y-2.5 mb-8 flex-1">
                 {["Up to 10 exports per day", "Quotation, Invoice & Receipt", "Live PDF preview", "Ad-supported"].map((item) => (
                   <li key={item} className="quo-plan-item flex items-start gap-2.5 text-sm">
                     <svg className="flex-shrink-0 mt-0.5" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
@@ -240,12 +240,12 @@ export default function HomePage() {
               <Link href="/invoice" className="quo-plan-cta-free block text-center rounded-lg px-5 py-3 text-sm font-bold transition-all duration-150">Start free</Link>
             </div>
             {/* Paid */}
-            <div className="animate-scale-in delay-200 quo-plan-paid rounded-2xl p-8 border relative overflow-hidden">
+            <div className="animate-scale-in delay-200 quo-plan-paid rounded-2xl p-8 border relative overflow-hidden flex flex-col">
               <div className="quo-plan-badge absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full">Best for regular use</div>
               <p className="quo-plan-label-paid text-xs font-bold uppercase tracking-widest mb-1">Premium</p>
               <p className="quo-plan-price-paid text-4xl font-bold mb-1">$4.99<span className="text-base font-medium opacity-70"> / mo</span></p>
               <p className="quo-plan-subdesc-paid text-sm mb-7">or $49.90 / year &mdash; for businesses that run on Quo</p>
-              <ul className="space-y-2.5 mb-8">
+              <ul className="space-y-2.5 mb-8 flex-1">
                 {["Unlimited PDF exports", "No ads", "Multi-business workspace", "Saved customers", "Document history", "Item catalogue", "Full template library"].map((item) => (
                   <li key={item} className="quo-plan-item-paid flex items-start gap-2.5 text-sm">
                     <svg className="flex-shrink-0 mt-0.5" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
