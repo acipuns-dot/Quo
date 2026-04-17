@@ -40,9 +40,12 @@ export async function POST(req: NextRequest) {
         break;
       }
       case "BILLING.SUBSCRIPTION.CANCELLED":
-      case "BILLING.SUBSCRIPTION.EXPIRED":
       case "BILLING.SUBSCRIPTION.SUSPENDED": {
-        await handleSubscriptionInactive(supabase, resource, eventType);
+        await handleSubscriptionCancelled(supabase, resource);
+        break;
+      }
+      case "BILLING.SUBSCRIPTION.EXPIRED": {
+        await handleSubscriptionExpired(supabase, resource);
         break;
       }
       default:
@@ -99,24 +102,42 @@ async function handleSubscriptionActive(
     .eq("user_id", userId);
 }
 
-async function handleSubscriptionInactive(
+// Cancelled/suspended — mark the subscription but keep premium access until period ends
+async function handleSubscriptionCancelled(
   supabase: ReturnType<typeof getServiceClient>,
   resource: Record<string, unknown>,
-  eventType: string,
 ) {
   const subscriptionId = resource.id as string;
 
-  // Mark subscription as cancelled
   await supabase
     .from("billing_subscriptions")
     .update({
-      status: eventType === "BILLING.SUBSCRIPTION.EXPIRED" ? "EXPIRED" : "CANCELLED",
+      status: "CANCELLED",
+      cancel_at_period_end: true,
+      canceled_at: new Date().toISOString(),
+    })
+    .eq("provider_subscription_id", subscriptionId);
+
+  // Do NOT downgrade plan here — user keeps access until expiry
+}
+
+// Expired — period is over, downgrade to free now
+async function handleSubscriptionExpired(
+  supabase: ReturnType<typeof getServiceClient>,
+  resource: Record<string, unknown>,
+) {
+  const subscriptionId = resource.id as string;
+
+  await supabase
+    .from("billing_subscriptions")
+    .update({
+      status: "EXPIRED",
       cancel_at_period_end: false,
       canceled_at: new Date().toISOString(),
     })
     .eq("provider_subscription_id", subscriptionId);
 
-  // Downgrade user plan — find user_id from billing row
+  // Downgrade user plan
   const { data: subRow } = await supabase
     .from("billing_subscriptions")
     .select("user_id")
