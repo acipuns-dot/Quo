@@ -227,7 +227,7 @@ export default function HomePage() {
             <div className="animate-scale-in delay-100 quo-plan-free rounded-2xl p-8 border flex flex-col">
               <p className="quo-plan-label text-xs font-bold uppercase tracking-widest mb-1">Free</p>
               <p className="quo-plan-price text-4xl font-bold mb-1">$0</p>
-              <p className="quo-plan-subdesc text-sm mb-7">No account needed. Start right away.</p>
+              <p className="quo-plan-subdesc text-sm mb-7" style={{ minHeight: "2.5rem" }}>No account needed. Start right away.</p>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {["Unlimited PDF exports", "Quotation, Invoice & Receipt", "Live PDF preview", "Ad-supported"].map((item) => (
                   <li key={item} className="quo-plan-item flex items-start gap-2.5 text-sm">
@@ -243,7 +243,7 @@ export default function HomePage() {
               <div className="quo-plan-badge absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full">Best for regular use</div>
               <p className="quo-plan-label-paid text-xs font-bold uppercase tracking-widest mb-1">Premium</p>
               <p className="quo-plan-price-paid text-4xl font-bold mb-1">$4.99<span className="text-base font-medium opacity-70"> / mo</span></p>
-              <p className="quo-plan-subdesc-paid text-sm mb-7">or $49.90 / year &mdash; for businesses that run on Quo</p>
+              <p className="quo-plan-subdesc-paid text-sm mb-7" style={{ minHeight: "2.5rem" }}>or $49.90 / year &mdash; for businesses that run on Quo</p>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {["Unlimited PDF exports", "No ads", "Multi-business workspace", "Saved customers", "Document history", "Item catalogue", "Full template library"].map((item) => (
                   <li key={item} className="quo-plan-item-paid flex items-start gap-2.5 text-sm">
