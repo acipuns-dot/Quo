@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "../../lib/supabase/server";
+import { getWorkspaceAccountProfile } from "../../lib/workspace/account-profiles";
 import { SiteHeaderServer } from "../../components/site/site-header-server";
 import { UpgradeButtons } from "./upgrade-buttons";
 
@@ -8,7 +11,18 @@ const premiumBenefits = [
   "Continue work across devices",
 ];
 
-export default function UpgradePage() {
+export default async function UpgradePage() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const profile = await getWorkspaceAccountProfile(supabase, user.id);
+      if (profile?.plan === "premium") redirect("/workspace/invoice");
+    }
+  } catch {
+    // allow page to render if session check fails
+  }
+
   return (
     <>
       <SiteHeaderServer />
