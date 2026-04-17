@@ -161,6 +161,7 @@ export default async function WorkspaceKindPage({
           defaultTaxRate: activeBusiness.defaultTaxRate,
           applyTaxByDefault: activeBusiness.applyTaxByDefault,
           defaultPaymentTerms: activeBusiness.defaultPaymentTerms,
+          userId: user.id,
           apiBasePath: `/api/workspace/businesses/${activeBusiness.id}/documents`,
           customerOptions: customers.map((customer) => ({
             id: customer.id,

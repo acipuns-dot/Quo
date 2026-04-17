@@ -338,6 +338,7 @@ const TOTAL_SECTIONS = 5;
 
 type WorkspaceGeneratorContext = {
   businessId: string;
+  userId?: string;
   businessName: string;
   businessAddress: string;
   defaultCurrency: string;
@@ -464,7 +465,7 @@ function getInitialDraft(
   workspace?: WorkspaceGeneratorContext,
   persistenceMode: DraftPersistenceMode = "free",
 ): StoredDocumentDraft {
-  const initialDraft = getDraftOrDefault(initialKind, persistenceMode);
+  const initialDraft = getDraftOrDefault(initialKind, persistenceMode, workspace?.userId);
 
   if (!workspace) {
     return initialDraft;
@@ -482,7 +483,7 @@ function getWorkspaceAdjustedDraft(
   workspace?: WorkspaceGeneratorContext,
   selectedCustomer?: SelectedWorkspaceCustomer | null,
 ): StoredDocumentDraft {
-  const draft = getDraftOrDefault(kind, persistenceMode);
+  const draft = getDraftOrDefault(kind, persistenceMode, workspace?.userId);
 
   if (!workspace) {
     return draft;
@@ -890,7 +891,7 @@ function DocumentGenerator({
       kind: currentKind,
       documentNumberAuto,
       data,
-    });
+    }, workspace?.userId);
 
     const nextSelectedCustomer = resolveValidSelectedCustomer(
       (workspace ? loadSelectedWorkspaceCustomer(workspace.businessId) : null) ??
@@ -924,7 +925,7 @@ function DocumentGenerator({
   }
 
   function handleClearDraft() {
-    clearDraft(currentKind, persistenceMode);
+    clearDraft(currentKind, persistenceMode, workspace?.userId);
     skipAutosaveKindRef.current = currentKind;
 
     const nextSelectedCustomer = workspace ? restoreSelectedWorkspaceCustomer(workspace) : null;
@@ -1072,7 +1073,7 @@ function DocumentGenerator({
         kind: currentKind,
         documentNumberAuto,
         data: nextData,
-      });
+      }, workspace?.userId);
       onWorkspaceActionHandled?.(workspaceAction.id);
       return;
     }
@@ -1124,7 +1125,7 @@ function DocumentGenerator({
         kind: nextKind,
         documentNumberAuto: nextDocumentNumberAuto,
         data: restoredData,
-      });
+      }, workspace?.userId);
     } catch {
       // Ignore malformed saved payloads so the workspace stays usable.
     } finally {
@@ -1152,7 +1153,7 @@ function DocumentGenerator({
         kind: currentKind,
         documentNumberAuto,
         data,
-      });
+      }, workspace?.userId);
     }, 300);
 
     return () => window.clearTimeout(timeout);
