@@ -14,11 +14,13 @@ const featureCopy = {
 } as const;
 
 const premiumBenefits = [
+  "Unlimited PDF exports",
+  "No ads",
   "Multi-business workspace",
-  "Saved customers for repeat jobs",
-  "Document history for drafts and exports",
-  "Continue work across devices",
-  "4 exclusive premium templates",
+  "Saved customers",
+  "Document history",
+  "Item catalogue",
+  "Full template library",
 ] as const;
 
 export function PremiumUpsellModal({
@@ -48,6 +50,7 @@ export function PremiumUpsellModal({
         <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.03em] text-white">
           Unlock Quo Premium
         </h2>
+        <p className="mt-1 text-sm font-semibold text-[#d4901e]/80">$4.99 / month &nbsp;·&nbsp; $49.90 / year</p>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">{featureCopy[feature]}</p>
 
         <div className="mt-8 grid gap-3 md:grid-cols-2">
