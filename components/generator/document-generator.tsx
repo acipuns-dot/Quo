@@ -1961,26 +1961,28 @@ function SectionContent({
               onChange={(e) => update("validUntil", e.target.value)}
             />
           </label>
-          <label className="block">
-            <span className={labelClass}>Payment term preset</span>
-            <PaymentTermPresetDropdown
-              value={data.paymentTermPreset}
-              onSelect={(preset) => {
-                const presetPercentage = getPresetPercentage(preset);
+          {currentKind !== "receipt" ? (
+            <label className="block">
+              <span className={labelClass}>Payment term preset</span>
+              <PaymentTermPresetDropdown
+                value={data.paymentTermPreset}
+                onSelect={(preset) => {
+                  const presetPercentage = getPresetPercentage(preset);
 
-                update("paymentTermPreset", preset);
-                update(
-                  "paymentTermPercentage",
-                  preset === "custom"
-                    ? data.paymentTermPercentage ?? 50
-                    : presetPercentage,
-                );
-                if (preset !== "custom") {
-                  update("paymentTermLabel", "");
-                }
-              }}
-            />
-          </label>
+                  update("paymentTermPreset", preset);
+                  update(
+                    "paymentTermPercentage",
+                    preset === "custom"
+                      ? data.paymentTermPercentage ?? 50
+                      : presetPercentage,
+                  );
+                  if (preset !== "custom") {
+                    update("paymentTermLabel", "");
+                  }
+                }}
+              />
+            </label>
+          ) : null}
         </div>
         {showLineItems && data.paymentTermPreset === "custom" ? (
           <div className="grid grid-cols-2 gap-3">
