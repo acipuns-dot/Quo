@@ -1157,7 +1157,7 @@ function DocumentGenerator({
     }, 300);
 
     return () => window.clearTimeout(timeout);
-  }, [currentKind, data, documentNumberAuto, persistenceMode]);
+  }, [currentKind, data, documentNumberAuto, persistenceMode, workspace?.userId]);
 
   // ── progress dots ──────────────────────────────────────────────────────────
 
