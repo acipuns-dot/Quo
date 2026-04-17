@@ -43,7 +43,6 @@ export type ItemRecord = {
   businessId: string;
   name: string;
   description: string;
-  note: string;
   quantity: number;
   unit: string;
   customUnit: string;

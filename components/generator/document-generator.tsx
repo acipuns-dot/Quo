@@ -355,7 +355,6 @@ type WorkspaceItemOption = {
   id: string;
   name: string;
   description: string;
-  note: string;
   quantity: number;
   unit: LineItem["unit"];
   customUnit: string;
@@ -847,7 +846,7 @@ function DocumentGenerator({
         {
           id: nextLineItemId(nextLineItemIdRef.current++),
           description: item.description,
-          note: item.note,
+          note: "",
           quantity: item.quantity,
           unit: item.unit,
           customUnit: item.customUnit,

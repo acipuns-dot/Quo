@@ -70,7 +70,6 @@ export async function POST(
       business_id: businessId,
       name: body.name,
       description: body.description,
-      note: body.note,
       quantity: body.quantity,
       unit: body.unit,
       custom_unit: body.customUnit,

@@ -70,7 +70,6 @@ export function normalizeItemRow(row: Record<string, unknown>): ItemRecord {
     businessId: stringOrFallback(row.business_id, "unknown-business"),
     name: stringOrFallback(row.name, "Untitled item"),
     description: stringOrEmpty(row.description),
-    note: stringOrEmpty(row.note),
     quantity: numberOrFallback(row.quantity, 0),
     unit: stringOrEmpty(row.unit),
     customUnit: stringOrEmpty(row.custom_unit),

@@ -86,7 +86,6 @@ export function ItemsTab({
               </div>
               <div className="text-sm font-semibold text-[#faf9f7]">{item.name}</div>
               <div className="mt-0.5 text-xs text-white/40 line-clamp-1">{item.description}</div>
-              {item.note ? <div className="mt-0.5 text-xs text-white/30 line-clamp-1">{item.note}</div> : null}
               <div className="mt-0.5 text-xs text-white/30">{formatItemUnit(item)} | {item.unitPrice}</div>
               <div className="mt-4 flex gap-2">
                 <button

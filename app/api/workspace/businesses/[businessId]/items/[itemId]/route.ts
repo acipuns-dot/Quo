@@ -46,7 +46,6 @@ export async function PATCH(
     .update({
       name: body.name,
       description: body.description,
-      note: body.note,
       quantity: body.quantity,
       unit: body.unit,
       custom_unit: body.customUnit,

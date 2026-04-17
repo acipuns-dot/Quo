@@ -8,6 +8,18 @@ import {
   type HistoryCustomerFilter,
   type HistoryDateFilter,
 } from "../../lib/workspace/history-filters";
+import { ThemedDropdown } from "./themed-dropdown";
+
+const inputClass =
+  "w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white placeholder:text-white/25 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e]/50 focus:outline-none";
+
+const DATE_RANGE_OPTIONS: Array<{ value: HistoryDateFilter["mode"]; label: string }> = [
+  { value: "all", label: "All dates" },
+  { value: "last7", label: "Last 7 days" },
+  { value: "last30", label: "Last 30 days" },
+  { value: "thisMonth", label: "This month" },
+  { value: "custom", label: "Custom range" },
+];
 
 export function DocumentHistoryTab({
   documents,
@@ -73,11 +85,12 @@ export function DocumentHistoryTab({
       <div className="mb-6 grid gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 md:grid-cols-[220px_minmax(0,1fr)_auto]">
         <label className="text-sm text-white/75">
           <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-white/35">Date range</span>
-          <select
-            aria-label="Date range"
+          <ThemedDropdown
+            ariaLabel="Date range"
             value={dateFilter.mode}
-            onChange={(event) => {
-              const mode = event.target.value;
+            options={DATE_RANGE_OPTIONS}
+            buttonClassName={inputClass}
+            onSelect={(mode) => {
               if (mode === "custom") {
                 setDateFilter({ mode: "custom", startDate: "", endDate: "" });
                 return;
@@ -87,14 +100,7 @@ export function DocumentHistoryTab({
                 setDateFilter({ mode });
               }
             }}
-            className="w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white"
-          >
-            <option value="all">All dates</option>
-            <option value="last7">Last 7 days</option>
-            <option value="last30">Last 30 days</option>
-            <option value="thisMonth">This month</option>
-            <option value="custom">Custom range</option>
-          </select>
+          />
         </label>
 
         <div>
@@ -105,7 +111,7 @@ export function DocumentHistoryTab({
               value={customerSearch}
               onChange={(event) => setCustomerSearch(event.target.value)}
               placeholder="Search customers"
-              className="w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white placeholder:text-white/25"
+              className={inputClass}
             />
           </label>
           <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-white/10 bg-[#111111] p-2">
@@ -163,7 +169,9 @@ export function DocumentHistoryTab({
             <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-white/35">Start date</span>
             <input
               aria-label="Start date"
-              type="date"
+              type="text"
+              inputMode="numeric"
+              placeholder="YYYY-MM-DD"
               value={dateFilter.startDate}
               onChange={(event) =>
                 setDateFilter((current) =>
@@ -172,14 +180,16 @@ export function DocumentHistoryTab({
                     : current,
                 )
               }
-              className="w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white"
+              className={inputClass}
             />
           </label>
           <label className="text-sm text-white/75">
             <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-white/35">End date</span>
             <input
               aria-label="End date"
-              type="date"
+              type="text"
+              inputMode="numeric"
+              placeholder="YYYY-MM-DD"
               value={dateFilter.endDate}
               onChange={(event) =>
                 setDateFilter((current) =>
@@ -188,7 +198,7 @@ export function DocumentHistoryTab({
                     : current,
                 )
               }
-              className="w-full rounded-xl border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white"
+              className={inputClass}
             />
           </label>
         </div>

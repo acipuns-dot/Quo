@@ -8,12 +8,11 @@ import { LineItemUnitDropdown } from "../generator/line-item-unit-dropdown";
 import { ModalShell } from "./modal-shell";
 
 const inputClass =
-  "w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[#d4901e] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/20";
+  "w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/20";
 
 const emptyItemValues = {
   name: "",
   description: "",
-  note: "",
   quantity: 1,
   unit: "" as LineItem["unit"],
   customUnit: "",
@@ -48,7 +47,6 @@ export function ItemFormModal({
       setValues({
         name: initialItem.name,
         description: initialItem.description,
-        note: initialItem.note,
         quantity: initialItem.quantity,
         unit: initialItem.unit,
         customUnit: initialItem.customUnit,
@@ -94,8 +92,8 @@ export function ItemFormModal({
       title={mode === "create" ? "Add item" : "Edit item"}
       description="Save reusable line items for this business."
     >
-      <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
-        <label className="block md:col-span-2">
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <label className="block">
           <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
             Item name
           </span>
@@ -108,98 +106,90 @@ export function ItemFormModal({
             placeholder="Website copywriting"
           />
         </label>
-        <label className="block md:col-span-2">
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-            Description
-          </span>
-          <input
-            aria-label="Description"
-            required
-            value={values.description}
-            onChange={(event) => update("description", event.target.value)}
-            className={inputClass}
-            placeholder="Landing page copy"
-          />
-        </label>
-        <label className="block md:col-span-2">
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-            Note
-          </span>
-          <textarea
-            aria-label="Note"
-            rows={3}
-            value={values.note}
-            onChange={(event) => update("note", event.target.value)}
-            className={inputClass}
-            placeholder="Optional delivery or scope notes"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-            Quantity
-          </span>
-          <input
-            aria-label="Quantity"
-            type="number"
-            min="0"
-            step="0.01"
-            value={String(values.quantity)}
-            onChange={(event) => update("quantity", Number(event.target.value) || 0)}
-            className={inputClass}
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-            Unit
-          </span>
-          <LineItemUnitDropdown
-            ariaLabel="Unit"
-            value={values.unit}
-            onSelect={(value) => {
-              update("unit", value);
-              if (value !== "custom") {
-                update("customUnit", "");
-              }
-            }}
-            buttonClassName={inputClass}
-          />
-        </label>
-        {values.unit === "custom" ? (
+        <div className="rounded-lg border border-white/[0.08] bg-white/[0.04] p-3 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-white/35">
+              Item 1
+            </span>
+          </div>
           <label className="block">
-            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-              Custom unit
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-1">
+              Description
             </span>
             <input
-              aria-label="Custom unit"
-              value={values.customUnit}
-              onChange={(event) => update("customUnit", event.target.value)}
-              className={inputClass}
-              placeholder="Only when unit is custom"
+              aria-label="Description"
+              required
+              value={values.description}
+              onChange={(event) => update("description", event.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-[#faf9f7] placeholder:text-white/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e]/60 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/15"
             />
           </label>
-        ) : (
-          <div />
-        )}
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-            Unit price
-          </span>
-          <input
-            aria-label="Unit price"
-            type="number"
-            min="0"
-            step="0.01"
-            value={String(values.unitPrice)}
-            onChange={(event) => update("unitPrice", Number(event.target.value) || 0)}
-            className={inputClass}
-          />
-        </label>
+          <div className="grid grid-cols-3 gap-2.5">
+            <label className="block">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-1">
+                Qty
+              </span>
+              <input
+                aria-label="Quantity"
+                type="number"
+                min="0"
+                step="0.01"
+                value={String(values.quantity)}
+                onChange={(event) => update("quantity", Number(event.target.value) || 0)}
+                className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-[#faf9f7] placeholder:text-white/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e]/60 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/15"
+              />
+            </label>
+            <label className="block">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-1">
+                Unit
+              </span>
+              <LineItemUnitDropdown
+                ariaLabel="Unit"
+                value={values.unit}
+                onSelect={(value) => {
+                  update("unit", value);
+                  if (value !== "custom") {
+                    update("customUnit", "");
+                  }
+                }}
+                buttonClassName="w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-[#faf9f7] placeholder:text-white/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e]/60 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/15"
+              />
+            </label>
+            <label className="block">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-1">
+                Unit price
+              </span>
+              <input
+                aria-label="Unit price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={String(values.unitPrice)}
+                onChange={(event) => update("unitPrice", Number(event.target.value) || 0)}
+                className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-[#faf9f7] placeholder:text-white/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e]/60 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/15"
+              />
+            </label>
+          </div>
+          {values.unit === "custom" ? (
+            <label className="block">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40 mb-1">
+                Custom unit
+              </span>
+              <input
+                aria-label="Custom unit"
+                value={values.customUnit}
+                onChange={(event) => update("customUnit", event.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-[#faf9f7] placeholder:text-white/20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#d4901e]/60 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/15"
+              />
+            </label>
+          ) : null}
+        </div>
         {error ? (
-          <div className="md:col-span-2 rounded-2xl border border-[#dc2626]/30 bg-[#dc2626]/10 px-4 py-3 text-sm text-[#fecaca]">
+          <div className="rounded-2xl border border-[#dc2626]/30 bg-[#dc2626]/10 px-4 py-3 text-sm text-[#fecaca]">
             {error}
           </div>
         ) : null}
-        <div className="md:col-span-2 flex justify-end gap-3">
+        <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
