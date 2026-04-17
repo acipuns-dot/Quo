@@ -6,6 +6,7 @@ const links = [
   { label: "Documents", value: "documents" },
   { label: "Customers", value: "customers" },
   { label: "Businesses", value: "businesses" },
+  { label: "Items", value: "items" },
   { label: "History", value: "history" },
 ] as const;
 

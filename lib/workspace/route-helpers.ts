@@ -25,6 +25,26 @@ export const customerPayloadSchema = z.object({
   notes: z.string().max(500),
 });
 
+export const itemPayloadSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+    description: z.string().trim().min(1).max(200),
+    note: z.string().max(300),
+    quantity: z.number().min(0),
+    unit: z.string().max(40),
+    customUnit: z.string().max(20),
+    unitPrice: z.number().min(0),
+  })
+  .superRefine((item, ctx) => {
+    if (item.unit === "custom" && !item.customUnit.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["customUnit"],
+        message: "Custom unit is required.",
+      });
+    }
+  });
+
 export function normalizeBusinessPayload(input: z.input<typeof businessPayloadSchema>) {
   return businessPayloadSchema.parse({
     ...input,
@@ -42,6 +62,17 @@ export function normalizeCustomerPayload(input: z.input<typeof customerPayloadSc
   });
 }
 
+export function normalizeItemPayload(input: z.input<typeof itemPayloadSchema>) {
+  return itemPayloadSchema.parse({
+    ...input,
+    name: input.name.trim(),
+    description: input.description.trim(),
+    note: input.note ?? "",
+    unit: input.unit ?? "",
+    customUnit: input.customUnit?.trim() ?? "",
+  });
+}
+
 export async function userOwnsBusiness(
   userId: string,
   businessId: string,
@@ -52,6 +83,25 @@ export async function userOwnsBusiness(
     .select("id")
     .eq("id", businessId)
     .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return Boolean(data);
+}
+
+export async function itemBelongsToBusiness(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  businessId: string,
+  itemId: string,
+) {
+  const { data, error } = await supabase
+    .from("items")
+    .select("id")
+    .eq("id", itemId)
+    .eq("business_id", businessId)
     .maybeSingle();
 
   if (error) {

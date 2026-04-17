@@ -10,9 +10,10 @@ import type { DocumentKind } from "../../../../lib/documents/types";
 import { listBusinessesForUser, resolveActiveBusiness } from "../../../../lib/workspace/businesses";
 import { listCustomersForBusiness } from "../../../../lib/workspace/customers";
 import { listDocumentsForBusiness } from "../../../../lib/workspace/documents";
+import { listItemsForBusiness } from "../../../../lib/workspace/items";
 import { getWorkspaceAccountProfile } from "../../../../lib/workspace/account-profiles";
 import { resolveWorkspaceAccess } from "../../../../lib/workspace/session";
-import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../../../lib/workspace/types";
+import type { BusinessRecord, CustomerRecord, ItemRecord, SavedDocumentRecord } from "../../../../lib/workspace/types";
 
 const validKinds: DocumentKind[] = ["quotation", "invoice", "receipt"];
 
@@ -44,7 +45,7 @@ export default async function WorkspaceKindPage({
 }) {
   const { kind } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const validTabs: WorkspaceTab[] = ["documents", "businesses", "customers", "history"];
+  const validTabs: WorkspaceTab[] = ["documents", "businesses", "customers", "items", "history"];
   const requestedTab = resolvedSearchParams?.tab ?? "documents";
 
   if (!validKinds.includes(kind as DocumentKind)) {
@@ -61,6 +62,7 @@ export default async function WorkspaceKindPage({
 
   if (!hasSupabaseEnv) {
     const customers: CustomerRecord[] = [];
+    const items: ItemRecord[] = [];
     const documents: SavedDocumentRecord[] = [];
 
     return (
@@ -68,6 +70,7 @@ export default async function WorkspaceKindPage({
         activeBusiness={fallbackBusiness}
         businesses={[fallbackBusiness]}
         customers={customers}
+        items={items}
         documents={documents}
         activeTab={activeTab}
         kind={kind as DocumentKind}
@@ -87,6 +90,7 @@ export default async function WorkspaceKindPage({
             defaultPaymentTerms: fallbackBusiness.defaultPaymentTerms,
             apiBasePath: `/api/workspace/businesses/${fallbackBusiness.id}/documents`,
             customerOptions: [],
+            itemOptions: [],
             persistenceMode: "workspace",
           }}
         />
@@ -128,8 +132,9 @@ export default async function WorkspaceKindPage({
     return <FirstBusinessOnboarding kind={kind as DocumentKind} />;
   }
 
-  const [customers, documents] = await Promise.all([
+  const [customers, items, documents] = await Promise.all([
     listCustomersForBusiness(supabase, activeBusiness.id),
+    listItemsForBusiness(supabase, activeBusiness.id),
     listDocumentsForBusiness(supabase, activeBusiness.id),
   ]);
 
@@ -138,6 +143,7 @@ export default async function WorkspaceKindPage({
       activeBusiness={activeBusiness}
       businesses={businesses}
       customers={customers}
+      items={items}
       documents={documents}
       activeTab={activeTab}
       kind={kind as DocumentKind}
@@ -160,6 +166,16 @@ export default async function WorkspaceKindPage({
             id: customer.id,
             name: customer.name,
             address: customer.address,
+          })),
+          itemOptions: items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            note: item.note,
+            quantity: item.quantity,
+            unit: item.unit,
+            customUnit: item.customUnit,
+            unitPrice: item.unitPrice,
           })),
           persistenceMode: "workspace",
         }}

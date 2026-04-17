@@ -38,6 +38,20 @@ export type CustomerRecord = {
   updatedAt: string;
 };
 
+export type ItemRecord = {
+  id: string;
+  businessId: string;
+  name: string;
+  description: string;
+  note: string;
+  quantity: number;
+  unit: string;
+  customUnit: string;
+  unitPrice: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type SavedDocumentRecord = {
   id: string;
   businessId: string;

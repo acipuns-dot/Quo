@@ -4,7 +4,7 @@ import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { DocumentKind } from "../../lib/documents/types";
-import type { BusinessRecord, CustomerRecord, SavedDocumentRecord } from "../../lib/workspace/types";
+import type { BusinessRecord, CustomerRecord, ItemRecord, SavedDocumentRecord } from "../../lib/workspace/types";
 import type { WorkspaceDocumentAction, WorkspaceSidebarAction } from "../../lib/workspace/sidebar-actions";
 import { BusinessPanel } from "./business-panel";
 import { ConfirmWorkspaceActionModal } from "./confirm-workspace-action-modal";
@@ -14,11 +14,13 @@ import { WorkspaceSidebar, type WorkspaceTab } from "./workspace-sidebar";
 import { BusinessesTab } from "./businesses-tab";
 import { CustomersTab } from "./customers-tab";
 import { DocumentHistoryTab } from "./document-history-tab";
+import { ItemsTab } from "./items-tab";
 
 type WorkspaceShellProps = {
   activeBusiness: BusinessRecord;
   businesses: BusinessRecord[];
   customers: CustomerRecord[];
+  items?: ItemRecord[];
   documents: SavedDocumentRecord[];
   activeTab: WorkspaceTab;
   kind: DocumentKind;
@@ -39,6 +41,7 @@ export function WorkspaceShell({
   activeBusiness,
   businesses,
   customers,
+  items = [],
   documents,
   activeTab,
   kind,
@@ -269,6 +272,9 @@ export function WorkspaceShell({
           )}
           {currentTab === "customers" && (
             <CustomersTab customers={customers} businessId={activeBusiness.id} />
+          )}
+          {currentTab === "items" && (
+            <ItemsTab items={items} businessId={activeBusiness.id} />
           )}
           {currentTab === "history" && (
             <DocumentHistoryTab documents={documents} customers={customers} kind={kind} />

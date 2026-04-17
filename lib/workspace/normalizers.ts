@@ -2,6 +2,7 @@ import type { WorkspaceAccountProfile } from "./account-profiles";
 import type {
   BusinessRecord,
   CustomerRecord,
+  ItemRecord,
   SavedDocumentRecord,
 } from "./types";
 
@@ -58,6 +59,22 @@ export function normalizeCustomerRow(row: Record<string, unknown>): CustomerReco
     phone: stringOrEmpty(row.phone),
     taxNumber: stringOrEmpty(row.tax_number),
     notes: stringOrEmpty(row.notes),
+    createdAt: timestampOrFallback(row.created_at),
+    updatedAt: timestampOrFallback(row.updated_at),
+  };
+}
+
+export function normalizeItemRow(row: Record<string, unknown>): ItemRecord {
+  return {
+    id: stringOrFallback(row.id, "unknown-item"),
+    businessId: stringOrFallback(row.business_id, "unknown-business"),
+    name: stringOrFallback(row.name, "Untitled item"),
+    description: stringOrEmpty(row.description),
+    note: stringOrEmpty(row.note),
+    quantity: numberOrFallback(row.quantity, 0),
+    unit: stringOrEmpty(row.unit),
+    customUnit: stringOrEmpty(row.custom_unit),
+    unitPrice: numberOrFallback(row.unit_price, 0),
     createdAt: timestampOrFallback(row.created_at),
     updatedAt: timestampOrFallback(row.updated_at),
   };

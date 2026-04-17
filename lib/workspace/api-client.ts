@@ -30,6 +30,16 @@ type CustomerPayload = {
   notes: string;
 };
 
+type ItemPayload = {
+  name: string;
+  description: string;
+  note: string;
+  quantity: number;
+  unit: string;
+  customUnit: string;
+  unitPrice: number;
+};
+
 async function jsonRequest(
   url: string,
   method: "POST" | "PATCH" | "DELETE",
@@ -119,6 +129,25 @@ export function updateCustomer(
 export function deleteCustomer(businessId: string, customerId: string) {
   return jsonRequest(
     `/api/workspace/businesses/${businessId}/customers/${customerId}`,
+    "DELETE",
+  );
+}
+
+export function createItem(businessId: string, input: ItemPayload) {
+  return jsonRequest(`/api/workspace/businesses/${businessId}/items`, "POST", input);
+}
+
+export function updateItem(businessId: string, itemId: string, input: ItemPayload) {
+  return jsonRequest(
+    `/api/workspace/businesses/${businessId}/items/${itemId}`,
+    "PATCH",
+    input,
+  );
+}
+
+export function deleteItem(businessId: string, itemId: string) {
+  return jsonRequest(
+    `/api/workspace/businesses/${businessId}/items/${itemId}`,
     "DELETE",
   );
 }

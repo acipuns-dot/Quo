@@ -442,7 +442,19 @@ type WorkspaceGeneratorContext = {
   defaultPaymentTerms: string;
   apiBasePath?: string;
   customerOptions?: CustomerOption[];
+  itemOptions?: WorkspaceItemOption[];
   persistenceMode?: "workspace";
+};
+
+type WorkspaceItemOption = {
+  id: string;
+  name: string;
+  description: string;
+  note: string;
+  quantity: number;
+  unit: LineItem["unit"];
+  customUnit: string;
+  unitPrice: number;
 };
 
 function getWorkspacePaymentTermState(defaultPaymentTerms: string) {
@@ -917,6 +929,24 @@ function DocumentGenerator({
           unit: "",
           customUnit: "",
           unitPrice: 0,
+        },
+      ],
+    }));
+  }
+
+  function addCatalogueLineItem(item: WorkspaceItemOption) {
+    setData((prev) => ({
+      ...prev,
+      lineItems: [
+        ...prev.lineItems,
+        {
+          id: nextLineItemId(nextLineItemIdRef.current++),
+          description: item.description,
+          note: item.note,
+          quantity: item.quantity,
+          unit: item.unit,
+          customUnit: item.customUnit,
+          unitPrice: item.unitPrice,
         },
       ],
     }));
@@ -1419,9 +1449,11 @@ function DocumentGenerator({
                 currentKind={currentKind}
                 logoError={logoError}
                 customerOptions={matchingCustomerOptions}
+                itemOptions={workspace?.itemOptions}
                 update={update}
                 updateLineItem={updateLineItem}
                 addLineItem={addLineItem}
+                addCatalogueLineItem={addCatalogueLineItem}
                 removeLineItem={removeLineItem}
                 updateAdditionalFee={updateAdditionalFee}
                 addAdditionalFee={addAdditionalFee}
@@ -1669,112 +1701,118 @@ function DocumentGenerator({
                           <div className="absolute bottom-[6px] left-2.5 w-[36%] h-[12px] rounded-sm" style={{ border: `1px solid #ddd` }} />
                         </div>
                       ) : template.thumbnailVariant === "studio" ? (
+                        /* Wave template: dark full-bleed header with SVG wave bottom, large INVOICE right, alternating rows */
                         <div
                           className="relative overflow-hidden bg-white"
                           style={{ aspectRatio: "4/2.6" }}
                         >
-                          {/* Top accent stripe */}
-                          <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: activeTheme.accent }} />
-                          {/* Left spine — vertical label */}
-                          <div className="absolute left-2.5 top-[6px] bottom-[18px] w-[3px] rounded-full" style={{ background: activeTheme.accent, opacity: 0.3 }} />
-                          {/* Business name + doc# top */}
-                          <div className="absolute top-[8px] left-[10px] right-2.5 flex justify-between">
-                            <div className="h-[5px] rounded-sm w-2/5 bg-[#111]" style={{ marginLeft: 6 }} />
-                            <div className="h-[4px] rounded-sm w-[22px] bg-[#aaa]" />
+                          {/* Dark header */}
+                          <div className="absolute top-0 left-0 right-0 h-[28px]" style={{ background: activeTheme.dark }} />
+                          {/* Wave SVG at bottom of header */}
+                          <svg style={{ position: "absolute", top: 20, left: 0, right: 0, width: "100%" }} viewBox="0 0 200 8" preserveAspectRatio="none" fill="none">
+                            <path d="M0 8 C50 0 150 8 200 0 L200 8 Z" fill={activeTheme.accent} opacity="0.9" />
+                            <path d="M0 8 C50 2 150 8 200 2 L200 8 Z" fill={activeTheme.accent} />
+                          </svg>
+                          {/* Business name in header */}
+                          <div className="absolute top-[8px] left-2.5 h-[4px] w-[32px] rounded-sm bg-white/80" />
+                          {/* Address in header */}
+                          <div className="absolute top-[15px] left-2.5 h-[2px] w-[22px] rounded-sm" style={{ background: "rgba(255,255,255,0.4)" }} />
+                          {/* Large INVOICE text right */}
+                          <div className="absolute top-[32px] right-2.5 h-[6px] w-[38px] rounded-sm bg-[#111]" />
+                          {/* Customer block left */}
+                          <div className="absolute top-[34px] left-2.5 flex flex-col gap-[2px]">
+                            <div className="h-[2px] w-[14px] rounded-sm bg-[#aaa]" />
+                            <div className="h-[3px] w-[28px] rounded-sm bg-[#222]" />
                           </div>
-                          {/* Two party boxes */}
-                          <div className="absolute top-[18px] left-[10px] right-2.5 flex gap-2" style={{ marginLeft: 6 }}>
-                            <div className="flex-1 flex flex-col gap-[2px]">
-                              <div className="h-[2px] rounded-sm w-[16px]" style={{ background: activeTheme.accent }} />
-                              <div className="h-[3px] rounded-sm bg-[#222] w-[28px]" />
-                            </div>
-                            <div className="flex-1 flex flex-col gap-[2px]">
-                              <div className="h-[2px] rounded-sm w-[16px]" style={{ background: activeTheme.accent }} />
-                              <div className="h-[3px] rounded-sm bg-[#222] w-[28px]" />
-                            </div>
+                          {/* Doc detail rows right */}
+                          <div className="absolute top-[44px] right-2.5 flex flex-col gap-[2px]">
+                            <div className="h-[2px] w-[40px] rounded-sm bg-[#ccc]" />
+                            <div className="h-[2px] w-[32px] rounded-sm bg-[#ccc]" />
                           </div>
-                          {/* Table separator */}
-                          <div className="absolute top-[34px] left-[10px] right-2.5 h-[1px] bg-[#ede9e4]" style={{ marginLeft: 6 }} />
-                          {/* Rows */}
-                          <div className="absolute top-[38px] left-[10px] right-2.5 space-y-[3px]" style={{ marginLeft: 6 }}>
-                            <div className="h-[3px] rounded-sm bg-[#f0ede9] w-full" />
-                            <div className="h-[3px] rounded-sm bg-[#f7f6f5] w-5/6" />
-                            <div className="h-[3px] rounded-sm bg-[#f0ede9] w-full" />
+                          {/* Table header dark */}
+                          <div className="absolute top-[54px] left-2.5 right-2.5 h-[5px] rounded-sm" style={{ background: activeTheme.dark }} />
+                          {/* Alternating rows */}
+                          <div className="absolute top-[62px] left-2.5 right-2.5 space-y-[2px]">
+                            <div className="h-[3px] rounded-sm bg-white w-full" />
+                            <div className="h-[3px] rounded-sm bg-[#f5f5f5] w-full" />
+                            <div className="h-[3px] rounded-sm bg-white w-full" />
                           </div>
-                          {/* Total line */}
-                          <div className="absolute bottom-[8px] right-2.5 flex items-center gap-1.5">
-                            <div className="h-[2px] rounded-sm w-[20px]" style={{ background: activeTheme.accent }} />
-                            <div className="h-[5px] rounded-sm w-[30px] bg-[#111]" />
-                          </div>
+                          {/* Total accent box bottom-right */}
+                          <div className="absolute bottom-[6px] right-2.5 h-[5px] w-[35%] rounded-sm" style={{ background: activeTheme.accent }} />
                         </div>
                       ) : template.thumbnailVariant === "slate" ? (
+                        /* Gradient template: minimal white header, billing left + gradient accent info block right */
                         <div
                           className="relative overflow-hidden bg-white"
                           style={{ aspectRatio: "4/2.6" }}
                         >
-                          {/* Split header: dark left, light right */}
-                          <div
-                            className="absolute top-0 left-0 w-1/2 h-[36px]"
-                            style={{ background: activeTheme.dark, printColorAdjust: "exact" } as React.CSSProperties}
-                          />
-                          <div
-                            className="absolute top-0 right-0 w-1/2 h-[36px] bg-[#f5f3f0]"
-                            style={{ borderBottom: `2px solid ${activeTheme.accent}` }}
-                          />
-                          {/* Left: business name */}
-                          <div className="absolute top-[9px] left-2.5 h-[4px] w-[30px] rounded-sm bg-white/80" />
-                          {/* Right: doc# */}
-                          <div className="absolute top-[9px] right-2.5 h-[4px] w-[24px] rounded-sm bg-[#333]" />
-                          {/* Table header accent */}
-                          <div className="absolute top-[36px] left-0 right-0 h-[1px]" style={{ background: activeTheme.accent, opacity: 0.4 }} />
-                          {/* Rows */}
-                          <div className="absolute top-[40px] left-2.5 right-2.5 space-y-[3px]">
-                            <div className="h-[3px] rounded-sm bg-[#f8f7f6] w-full" />
-                            <div className="h-[3px] rounded-sm bg-white w-full" />
-                            <div className="h-[3px] rounded-sm bg-[#f8f7f6] w-full" />
+                          {/* Top row: logo/business name + separator */}
+                          <div className="absolute top-[6px] left-2.5 h-[5px] w-[38px] rounded-sm bg-[#111]" />
+                          <div className="absolute top-[14px] left-2.5 right-2.5 h-[1px] bg-[#e4e8f0]" />
+                          {/* Billing block left */}
+                          <div className="absolute top-[19px] left-2.5 flex flex-col gap-[2px]">
+                            <div className="h-[2px] w-[16px] rounded-sm bg-[#aaa]" />
+                            <div className="h-[4px] w-[30px] rounded-sm bg-[#111]" />
+                            <div className="h-[2px] w-[24px] rounded-sm bg-[#999]" />
                           </div>
-                          {/* Total accent box */}
-                          <div className="absolute bottom-[8px] right-2.5 h-[7px] w-[40%] rounded-sm" style={{ background: activeTheme.accent }} />
+                          {/* Right: large INVOICE + gradient accent block */}
+                          <div className="absolute top-[18px] right-2.5 flex flex-col items-end gap-[3px]">
+                            <div className="h-[6px] w-[28px] rounded-sm bg-[#111]" />
+                            <div className="rounded-sm px-[4px] py-[3px] flex flex-col gap-[2px]" style={{ background: activeTheme.gradient, minWidth: 44 }}>
+                              <div className="h-[2px] w-full rounded-sm" style={{ background: "rgba(255,255,255,0.5)" }} />
+                              <div className="h-[2px] w-4/5 rounded-sm" style={{ background: "rgba(255,255,255,0.5)" }} />
+                              <div className="h-[2px] w-full rounded-sm" style={{ background: "rgba(255,255,255,0.5)" }} />
+                            </div>
+                          </div>
+                          {/* Table: alternating rows */}
+                          <div className="absolute top-[52px] left-2.5 right-2.5 space-y-[2px]">
+                            <div className="h-[3px] rounded-sm bg-white w-full" />
+                            <div className="h-[3px] rounded-sm bg-[#f5f7fb] w-full" />
+                            <div className="h-[3px] rounded-sm bg-white w-full" />
+                          </div>
+                          {/* Total accent box right */}
+                          <div className="absolute bottom-[6px] right-2.5 h-[6px] w-[38%] rounded-sm" style={{ background: activeTheme.gradient }} />
                         </div>
                       ) : template.thumbnailVariant === "pulse" ? (
+                        /* Corporate template: dark top info bar full-width, INVOICE TO left + big INVOICE + accent-border doc rows right, bordered table */
                         <div
                           className="relative overflow-hidden bg-white"
                           style={{ aspectRatio: "4/2.6" }}
                         >
-                          {/* Geometric corner cut */}
-                          <svg style={{ position: "absolute", top: 0, right: 0, width: 40, height: 40 }} viewBox="0 0 40 40" fill="none">
-                            <polygon points="40,0 40,40 0,0" fill={activeTheme.accent} opacity="0.12" />
-                            <polygon points="40,0 40,24 16,0" fill={activeTheme.accent} opacity="0.4" />
-                            <polygon points="40,0 40,12 28,0" fill={activeTheme.accent} />
-                          </svg>
-                          {/* Business name */}
-                          <div className="absolute top-[7px] left-2.5 h-[5px] w-2/5 rounded-sm bg-[#111]" />
-                          {/* Two party boxes with left-border */}
-                          <div className="absolute top-[18px] left-2.5 right-2.5 flex gap-2">
-                            <div className="flex-1 flex gap-1">
-                              <div className="w-[2px] h-[12px] rounded-full" style={{ background: activeTheme.accent }} />
-                              <div className="flex flex-col gap-[2px]">
-                                <div className="h-[2px] rounded-sm bg-[#222] w-[22px]" />
-                                <div className="h-[2px] rounded-sm bg-[#ccc] w-[16px]" />
-                              </div>
-                            </div>
-                            <div className="flex-1 flex gap-1">
-                              <div className="w-[2px] h-[12px] rounded-full" style={{ background: activeTheme.accent }} />
-                              <div className="flex flex-col gap-[2px]">
-                                <div className="h-[2px] rounded-sm bg-[#222] w-[22px]" />
-                                <div className="h-[2px] rounded-sm bg-[#ccc] w-[16px]" />
-                              </div>
-                            </div>
+                          {/* Full-width dark top info bar */}
+                          <div className="absolute top-0 left-0 right-0 h-[16px]" style={{ background: activeTheme.dark }} />
+                          {/* Logo/name in bar */}
+                          <div className="absolute top-[5px] left-2.5 h-[3px] w-[28px] rounded-sm bg-white/80" />
+                          {/* Address dots in bar */}
+                          <div className="absolute top-[5px] right-2.5 flex gap-1.5">
+                            <div className="h-[3px] w-[18px] rounded-sm" style={{ background: "rgba(255,255,255,0.4)" }} />
+                            <div className="h-[3px] w-[14px] rounded-sm" style={{ background: "rgba(255,255,255,0.4)" }} />
                           </div>
-                          {/* Accent table header */}
-                          <div className="absolute top-[34px] left-2.5 right-2.5 h-[5px] rounded-sm" style={{ background: activeTheme.accent }} />
-                          {/* Rows */}
-                          <div className="absolute top-[43px] left-2.5 right-2.5 space-y-[3px]">
-                            <div className="h-[3px] rounded-sm bg-[#f8f7f6] w-full" />
-                            <div className="h-[3px] rounded-sm bg-white w-5/6" />
+                          {/* Left: INVOICE TO + customer */}
+                          <div className="absolute top-[20px] left-2.5 flex flex-col gap-[2px]">
+                            <div className="h-[2px] w-[20px] rounded-sm bg-[#555]" />
+                            <div className="h-[4px] w-[30px] rounded-sm bg-[#111]" />
+                            <div className="h-[2px] w-[22px] rounded-sm bg-[#aaa]" />
                           </div>
-                          {/* Accent footer */}
-                          <div className="absolute bottom-0 left-0 right-0 h-[8px]" style={{ background: activeTheme.accent }} />
+                          {/* Right: big INVOICE + accent left-border doc rows */}
+                          <div className="absolute top-[18px] right-2.5 flex flex-col items-end gap-[3px]">
+                            <div className="h-[6px] w-[28px] rounded-sm bg-[#111]" />
+                            {[28, 22, 26].map((w, i) => (
+                              <div key={i} className="flex items-center gap-[2px]">
+                                <div className="w-[2px] h-[5px] rounded-full" style={{ background: activeTheme.accent }} />
+                                <div className="h-[3px] rounded-sm bg-[#ddd]" style={{ width: w }} />
+                              </div>
+                            ))}
+                          </div>
+                          {/* Bordered table */}
+                          <div className="absolute top-[50px] left-2.5 right-2.5 space-y-[2px]">
+                            <div className="h-[4px] rounded-sm bg-[#e0e0e0]" style={{ border: "1px solid #d0d0d0" }} />
+                            <div className="h-[3px] rounded-sm bg-white" style={{ border: "1px solid #d0d0d0" }} />
+                            <div className="h-[3px] rounded-sm bg-[#f9f9f9]" style={{ border: "1px solid #d0d0d0" }} />
+                          </div>
+                          {/* Bottom: payment box left, accent total right */}
+                          <div className="absolute bottom-[6px] left-2.5 w-[30%] h-[8px] rounded-sm" style={{ border: "1px solid #d0d0d0" }} />
+                          <div className="absolute bottom-[6px] right-2.5 h-[8px] w-[30%] rounded-sm" style={{ background: activeTheme.accent }} />
                         </div>
                       ) : null}
                       {/* Lock overlay for premium templates */}
@@ -1842,9 +1880,11 @@ type SectionContentProps = {
   currentKind: DocumentKind;
   logoError: string | null;
   customerOptions: CustomerOption[];
+  itemOptions?: WorkspaceItemOption[];
   update: <K extends keyof DocumentData>(key: K, value: DocumentData[K]) => void;
   updateLineItem: (index: number, key: keyof LineItem, value: LineItem[keyof LineItem]) => void;
   addLineItem: () => void;
+  addCatalogueLineItem: (item: WorkspaceItemOption) => void;
   removeLineItem: (index: number) => void;
   updateAdditionalFee: (
     index: number,
@@ -1866,9 +1906,11 @@ function SectionContent({
   currentKind,
   logoError,
   customerOptions,
+  itemOptions,
   update,
   updateLineItem,
   addLineItem,
+  addCatalogueLineItem,
   removeLineItem,
   updateAdditionalFee,
   addAdditionalFee,
@@ -1880,6 +1922,7 @@ function SectionContent({
 }: SectionContentProps) {
   const showLineItems = currentKind !== "receipt";
   const paymentTermSummary = getPaymentTermSummary(data);
+  const [catalogueOpen, setCatalogueOpen] = useState(false);
 
   // ── Section 1: Your business ───────────────────────────────────────────────
   if (n === 1) {
@@ -2159,6 +2202,55 @@ function SectionContent({
   if (n === 4) {
     return (
       <div className="space-y-3">
+        {itemOptions ? (
+          <div className="space-y-3 rounded-lg border border-white/[0.08] bg-white/[0.03] p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-white/35">
+                  Item catalogue
+                </p>
+                <p className="mt-1 text-xs text-white/30">
+                  {itemOptions.length
+                    ? "Insert a saved item, then edit it like any other line item."
+                    : "No saved items yet. Add them from the Items tab."}
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Insert from catalogue"
+                disabled={itemOptions.length === 0}
+                onClick={() => setCatalogueOpen((open) => !open)}
+                className="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/80 transition-all disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Insert from catalogue
+              </button>
+            </div>
+            {catalogueOpen ? (
+              <div className="space-y-2">
+                {itemOptions.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      addCatalogueLineItem(item);
+                      setCatalogueOpen(false);
+                    }}
+                    className="flex w-full items-start justify-between rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-left transition-all hover:border-[#d4901e]/30 hover:bg-[#d4901e]/[0.05]"
+                  >
+                    <span>
+                      <span className="block text-sm font-semibold text-[#faf9f7]">{item.name}</span>
+                      <span className="mt-0.5 block text-xs text-white/40">{item.description}</span>
+                    </span>
+                    <span className="text-xs text-white/35">
+                      {formatCurrency(item.unitPrice, data.currency)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         {data.lineItems.map((item, index) => (
           <div
             key={item.id}
