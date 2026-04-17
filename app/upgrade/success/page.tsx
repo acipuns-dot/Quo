@@ -1,7 +1,28 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { SiteHeaderServer } from "../../../components/site/site-header-server";
+import { createSupabaseServerClient } from "../../../lib/supabase/server";
+import { getWorkspaceAccountProfile } from "../../../lib/workspace/account-profiles";
+import { UpgradeSuccessRedirect } from "./upgrade-success-redirect";
 
-export default function UpgradeSuccessPage() {
+export default async function UpgradeSuccessPage() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const profile = await getWorkspaceAccountProfile(supabase, user.id);
+
+      if (profile?.plan === "premium") {
+        redirect("/workspace/invoice");
+      }
+    }
+  } catch {
+    // Keep the success page usable even if account reconciliation is still in flight.
+  }
+
   return (
     <>
       <SiteHeaderServer />
@@ -19,8 +40,9 @@ export default function UpgradeSuccessPage() {
             Welcome to Quo Premium
           </h1>
           <p className="mt-4 text-base leading-7 text-white/60">
-            Your subscription is being activated. This usually takes a few seconds. Head to your workspace and everything should be ready.
+            Your subscription is being activated. We will send you to the premium workspace as soon as your account finishes syncing.
           </p>
+          <UpgradeSuccessRedirect />
 
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link

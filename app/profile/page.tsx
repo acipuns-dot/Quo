@@ -91,7 +91,7 @@ export default async function ProfilePage() {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/35">Access</p>
               <p className="mt-3 text-lg font-semibold text-white">
-                {plan === "premium" ? "Workspace access enabled" : "Free document flow"}
+                {plan === "premium" ? "Premium" : "Free"}
               </p>
             </div>
           </div>
