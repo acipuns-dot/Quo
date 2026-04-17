@@ -41,14 +41,14 @@ export function PremiumUpsellModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Unlock Quo Premium"
+        aria-label="Unlock Quodo Premium"
         className="w-full max-w-2xl rounded-[28px] border border-[#d4901e]/20 bg-[#18120d] p-8 text-[#faf9f7] shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
       >
         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#d4901e]">
           Premium workspace
         </p>
         <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.03em] text-white">
-          Unlock Quo Premium
+          Unlock Quodo Premium
         </h2>
         <p className="mt-1 text-sm font-semibold text-[#d4901e]/80">$4.99 / month &nbsp;·&nbsp; $49.90 / year</p>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">{featureCopy[feature]}</p>

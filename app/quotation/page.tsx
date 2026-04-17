@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { getWorkspaceAccountProfile } from "../../lib/workspace/account-profiles";
 
 export const metadata: Metadata = {
-  title: "Quotation Generator | QUO Documents",
+  title: "Quotation Generator | Quodo",
   description:
     "Create a clean online quotation with two template styles, printable output, and PDF download.",
 };

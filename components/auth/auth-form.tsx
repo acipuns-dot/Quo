@@ -103,7 +103,7 @@ export function AuthForm({
       </div>
 
       <h1 className="text-3xl font-extrabold tracking-[-0.03em] text-white">
-        Sign in to Quo Premium
+        Sign in to Quodo Premium
       </h1>
       <p className="mt-3 max-w-md text-sm leading-6 text-white/58">
         Save businesses, customers, and document history across devices with the same polished workflow as the main site.

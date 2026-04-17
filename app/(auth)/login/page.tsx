@@ -48,7 +48,7 @@ export default async function LoginPage() {
             </em>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-8 text-white/58">
-            Sign in to keep your businesses, customers, and document history in one premium workspace while preserving the same fast Quo editing flow.
+            Sign in to keep your businesses, customers, and document history in one premium workspace while preserving the same fast Quodo editing flow.
           </p>
           <div className="mt-8 flex flex-wrap gap-6 text-sm text-white/45">
             <span>Unlimited exports</span>

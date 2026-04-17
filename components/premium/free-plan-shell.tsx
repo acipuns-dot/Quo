@@ -42,7 +42,7 @@ export function FreePlanShell({
                 Free plan
               </span>
               <p className="text-sm leading-6 text-white/78">
-                Upgrade to Quo Premium to save repeat customer details, reopen document history, and manage multiple
+                Upgrade to Quodo Premium to save repeat customer details, reopen document history, and manage multiple
                 businesses in one workflow.
               </p>
             </div>

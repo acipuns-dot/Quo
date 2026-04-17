@@ -25,7 +25,7 @@ export function SiteHeader({ account }: { account: SiteHeaderAccount }) {
     <header className="quo-site-header sticky top-0 z-10 border-b">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         <Link href="/" className="quo-logo rounded-md px-2 py-1 text-base font-bold text-white transition-opacity hover:opacity-80">
-          QUO
+          QUODO
         </Link>
         <nav className="hidden md:flex gap-1 text-sm font-medium">
           {links.map((link) => {

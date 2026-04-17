@@ -117,7 +117,7 @@ export function BusinessFormModal({
             value={values.name}
             onChange={(event) => update("name", event.target.value)}
             className={inputClass}
-            placeholder="Quo Studio"
+            placeholder="Quodo Studio"
           />
         </label>
         <label className="block md:col-span-2">

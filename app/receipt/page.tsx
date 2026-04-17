@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { getWorkspaceAccountProfile } from "../../lib/workspace/account-profiles";
 
 export const metadata: Metadata = {
-  title: "Receipt Generator | QUO Documents",
+  title: "Receipt Generator | Quodo",
   description:
     "Create a professional receipt online with two template styles, payment details, and PDF download.",
 };

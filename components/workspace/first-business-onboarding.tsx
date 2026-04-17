@@ -76,7 +76,7 @@ export function FirstBusinessOnboarding({ kind }: FirstBusinessOnboardingProps) 
           Set up your first business
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-8 text-white/58">
-          Add your business details once so Quo Premium can save customers, documents, and
+          Add your business details once so Quodo Premium can save customers, documents, and
           defaults inside your workspace.
         </p>
 
@@ -91,7 +91,7 @@ export function FirstBusinessOnboarding({ kind }: FirstBusinessOnboardingProps) 
               value={values.name}
               onChange={(event) => update("name", event.target.value)}
               className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-[#d4901e] focus:outline-none focus:ring-2 focus:ring-[#d4901e]/20"
-              placeholder="Quo Studio"
+              placeholder="Quodo Studio"
             />
           </label>
 

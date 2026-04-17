@@ -36,7 +36,7 @@ export default async function UpgradeSuccessPage() {
 
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#d4901e]">Success</p>
           <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.03em] text-white md:text-4xl">
-            Welcome to Quo Premium
+            Welcome to Quodo Premium
           </h1>
           <p className="mt-4 text-base leading-7 text-white/60">
             Your subscription is being activated. We will send you to the premium workspace as soon as your account finishes syncing.

@@ -16,7 +16,7 @@ export default function UpgradePage() {
         <section className="mx-auto max-w-4xl rounded-[32px] border border-[#d4901e]/20 bg-[#18120d] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)] md:p-12">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#d4901e]">Upgrade</p>
           <h1 className="mt-4 text-4xl font-extrabold tracking-[-0.04em] text-white md:text-5xl">
-            Quo Premium keeps your document workflow organized.
+            Quodo Premium keeps your document workflow organized.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-white/68">
             Unlock the full premium workspace to manage multiple businesses, save repeat customer details, and

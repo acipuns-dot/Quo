@@ -41,7 +41,7 @@ export async function createSubscription(
       plan_id: planId,
       custom_id: userId,
       application_context: {
-        brand_name: "Quo Documents",
+        brand_name: "Quodo",
         locale: "en-US",
         shipping_preference: "NO_SHIPPING",
         user_action: "SUBSCRIBE_NOW",

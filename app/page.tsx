@@ -53,7 +53,7 @@ const reasons = [
   },
   {
     title: "Not accounting software",
-    description: "Quo does one thing well: simple client documents. No ledgers, no dashboards, no bloat.",
+    description: "Quodo does one thing well: simple client documents. No ledgers, no dashboards, no bloat.",
     icon: <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>,
   },
 ];
@@ -169,7 +169,7 @@ export default function HomePage() {
       <section className="quo-why-section">
         <div className="max-w-5xl mx-auto px-6 py-20">
           <div className="animate-slide-up mb-12">
-            <p className="quo-eyebrow-inv text-xs font-semibold uppercase tracking-widest mb-2">Why Quo</p>
+            <p className="quo-eyebrow-inv text-xs font-semibold uppercase tracking-widest mb-2">Why Quodo</p>
             <h2 className="quo-heading-light text-3xl font-bold">Built for busy owners,<br />not accountants</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -243,7 +243,7 @@ export default function HomePage() {
               <div className="quo-plan-badge absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full">Best for regular use</div>
               <p className="quo-plan-label-paid text-xs font-bold uppercase tracking-widest mb-1">Premium</p>
               <p className="quo-plan-price-paid text-4xl font-bold mb-1">$4.99<span className="text-base font-medium opacity-70"> / mo</span></p>
-              <p className="quo-plan-subdesc-paid text-sm mb-7" style={{ minHeight: "2.5rem" }}>or $49.90 / year &mdash; for businesses that run on Quo</p>
+              <p className="quo-plan-subdesc-paid text-sm mb-7" style={{ minHeight: "2.5rem" }}>or $49.90 / year &mdash; for businesses that run on Quodo</p>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {["Unlimited PDF exports", "No ads", "Multi-business workspace", "Saved customers", "Document history", "Item catalogue", "Full template library"].map((item) => (
                   <li key={item} className="quo-plan-item-paid flex items-start gap-2.5 text-sm">
@@ -321,7 +321,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="quo-footer border-t py-8 text-center text-xs">
-        QUO · Free business document generator · Your data stays in your browser.
+        QUODO · Free business document generator · Your data stays in your browser.
       </footer>
     </>
   );

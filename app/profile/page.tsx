@@ -77,10 +77,10 @@ export default async function ProfilePage() {
           </div>
 
           <h1 className="mt-8 text-4xl font-extrabold tracking-[-0.04em] text-white md:text-5xl">
-            Your Quo profile
+            Your Quodo profile
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-white/58">
-            Keep track of your account access and jump back into the right Quo experience for your plan.
+            Keep track of your account access and jump back into the right Quodo experience for your plan.
           </p>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -118,8 +118,8 @@ export default async function ProfilePage() {
           <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-6">
             <p className="text-sm leading-7 text-white/65">
               {plan === "premium"
-                ? "Your premium account unlocks the Quo workspace with saved customers, document history, and multi-business tools."
-                : "You can keep using Quo for free, or upgrade when you want the full workspace with saved customers, history, and multi-business tools."}
+                ? "Your premium account unlocks the Quodo workspace with saved customers, document history, and multi-business tools."
+                : "You can keep using Quodo for free, or upgrade when you want the full workspace with saved customers, history, and multi-business tools."}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">

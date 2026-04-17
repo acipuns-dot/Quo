@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { getWorkspaceAccountProfile } from "../../lib/workspace/account-profiles";
 
 export const metadata: Metadata = {
-  title: "Invoice Generator | QUO Documents",
+  title: "Invoice Generator | Quodo",
   description:
     "Create a modern invoice online with two template styles, live preview, and printable PDF output.",
 };
