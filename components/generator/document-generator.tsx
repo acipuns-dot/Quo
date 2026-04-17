@@ -1948,20 +1948,20 @@ function SectionContent({
             <FieldError msg={errors.documentDate} />
           </label>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <label className="block">
-            <span className={labelClass}>Valid until</span>
-            <input
-              aria-label="Valid until"
-              type="text"
-              inputMode="numeric"
-              placeholder="YYYY-MM-DD"
-              className={inputClass}
-              value={data.validUntil}
-              onChange={(e) => update("validUntil", e.target.value)}
-            />
-          </label>
-          {currentKind !== "receipt" ? (
+        {currentKind !== "receipt" ? (
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className={labelClass}>Valid until</span>
+              <input
+                aria-label="Valid until"
+                type="text"
+                inputMode="numeric"
+                placeholder="YYYY-MM-DD"
+                className={inputClass}
+                value={data.validUntil}
+                onChange={(e) => update("validUntil", e.target.value)}
+              />
+            </label>
             <label className="block">
               <span className={labelClass}>Payment term preset</span>
               <PaymentTermPresetDropdown
@@ -1982,8 +1982,8 @@ function SectionContent({
                 }}
               />
             </label>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         {showLineItems && data.paymentTermPreset === "custom" ? (
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
