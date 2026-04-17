@@ -171,7 +171,6 @@ export default async function WorkspaceKindPage({
             id: item.id,
             name: item.name,
             description: item.description,
-            note: item.note,
             quantity: item.quantity,
             unit: item.unit,
             customUnit: item.customUnit,
