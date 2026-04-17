@@ -59,9 +59,8 @@ const reasons = [
 ];
 
 const faqs = [
-  { q: "What does the free plan include?", a: "Up to 10 document exports per day across invoices, quotations, and receipts. All core features are available on the free plan." },
-  { q: "What happens after 10 exports?", a: "You can still create and preview documents — you just can't export more PDFs until the next day. Upgrading removes the limit entirely." },
-  { q: "What do paid members get?", a: "Unlimited exports, no ads, and early access to new features as we build them out." },
+  { q: "What does the free plan include?", a: "Unlimited document exports across invoices, quotations, and receipts — no account required. All core features are available on the free plan." },
+  { q: "What do paid members get?", a: "Everything in free, plus no ads, multi-business workspace, saved customers, document history, item catalogue, and the full template library." },
   { q: "Are ads shown on paid plans?", a: "No. Ads are only shown on the free plan, and only within the app — never inside your exported documents." },
   { q: "Do I need to create an account?", a: "No account is needed to start. Sign up is optional and only required if you want to save documents or access a paid plan." },
 ];
@@ -316,7 +315,7 @@ export default function HomePage() {
               </svg>
             </Link>
           </div>
-          <p className="animate-fade-in delay-400 quo-final-note text-xs mt-5">10 free exports per day · No credit card required</p>
+          <p className="animate-fade-in delay-400 quo-final-note text-xs mt-5">Free forever · No account required · No credit card</p>
         </div>
       </section>
 
