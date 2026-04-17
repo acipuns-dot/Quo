@@ -1,6 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { SiteHeaderServer } from "../components/site/site-header-server";
+import { createSupabaseServerClient } from "../lib/supabase/server";
+import { getWorkspaceAccountProfile, resolvePostAuthPath } from "../lib/workspace/account-profiles";
+
 
 const docTypes = [
   {
@@ -65,7 +68,20 @@ const faqs = [
   { q: "Do I need to create an account?", a: "No account is needed to start. Sign up is optional and only required if you want to save documents or access a paid plan." },
 ];
 
-export default function HomePage() {
+async function resolveStartHref(): Promise<string> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return "/invoice";
+    const profile = await getWorkspaceAccountProfile(supabase, user.id);
+    return resolvePostAuthPath(profile?.plan ?? "free", "invoice");
+  } catch {
+    return "/invoice";
+  }
+}
+
+export default async function HomePage() {
+  const startHref = await resolveStartHref();
   return (
     <>
       <SiteHeaderServer />
@@ -93,7 +109,7 @@ export default function HomePage() {
 
           {/* CTAs */}
           <div className="animate-slide-up delay-300 flex items-center justify-center gap-3 flex-wrap mb-12">
-            <Link href="/invoice" className="quo-cta-btn inline-flex items-center gap-2.5 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95">
+            <Link href={startHref} className="quo-cta-btn inline-flex items-center gap-2.5 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all duration-200 active:scale-95">
               Start free
               <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -236,7 +252,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/invoice" className="quo-plan-cta-free block text-center rounded-lg px-5 py-3 text-sm font-bold transition-all duration-150">Start free</Link>
+              <Link href={startHref} className="quo-plan-cta-free block text-center rounded-lg px-5 py-3 text-sm font-bold transition-all duration-150">Start free</Link>
             </div>
             {/* Paid */}
             <div className="animate-scale-in delay-200 quo-plan-paid rounded-2xl p-8 border relative overflow-hidden flex flex-col">
@@ -308,7 +324,7 @@ export default function HomePage() {
           </h2>
           <p className="animate-slide-up delay-100 quo-final-sub text-lg mb-9 leading-relaxed">Start free. No account needed. Upgrade later if you need more.</p>
           <div className="animate-slide-up delay-200">
-            <Link href="/invoice" className="quo-cta-btn inline-flex items-center gap-2.5 rounded-lg px-7 py-3.5 text-sm font-bold text-white transition-all duration-200 active:scale-95">
+            <Link href={startHref} className="quo-cta-btn inline-flex items-center gap-2.5 rounded-lg px-7 py-3.5 text-sm font-bold text-white transition-all duration-200 active:scale-95">
               Start free
               <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
