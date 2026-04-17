@@ -228,9 +228,9 @@ export default function HomePage() {
             <div className="animate-scale-in delay-100 quo-plan-free rounded-2xl p-8 border flex flex-col">
               <p className="quo-plan-label text-xs font-bold uppercase tracking-widest mb-1">Free</p>
               <p className="quo-plan-price text-4xl font-bold mb-1">$0</p>
-              <p className="quo-plan-subdesc text-sm mb-7">Great for occasional use</p>
+              <p className="quo-plan-subdesc text-sm mb-7">No account needed. Start right away.</p>
               <ul className="space-y-2.5 mb-8 flex-1">
-                {["Up to 10 exports per day", "Quotation, Invoice & Receipt", "Live PDF preview", "Ad-supported"].map((item) => (
+                {["Unlimited PDF exports", "Quotation, Invoice & Receipt", "Live PDF preview", "Ad-supported"].map((item) => (
                   <li key={item} className="quo-plan-item flex items-start gap-2.5 text-sm">
                     <svg className="flex-shrink-0 mt-0.5" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                     {item}
