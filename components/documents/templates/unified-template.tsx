@@ -59,8 +59,8 @@ export function UnifiedTemplate({ data }: { data: DocumentData }) {
             width: 160,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
+            alignItems: "flex-end",
+            textAlign: "right",
             flexShrink: 0,
           }}
         >
