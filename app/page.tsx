@@ -325,7 +325,7 @@ export default async function HomePage() {
           </div>
           <div className="space-y-3">
             <a
-              href="mailto:quo.support@gmail.com"
+              href="mailto:support@quodo.app"
               className="animate-scale-in quo-faq-item rounded-xl p-6 border flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5"
             >
               <div className="quo-reason-icon w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -336,11 +336,11 @@ export default async function HomePage() {
               </div>
               <div>
                 <p className="quo-faq-q font-bold text-sm mb-0.5">Email support</p>
-                <p className="quo-faq-a text-sm">quo.support@gmail.com</p>
+                <p className="quo-faq-a text-sm">support@quodo.app</p>
               </div>
             </a>
             <a
-              href="https://discord.gg/5Kv5NXQQcz"
+              href="https://discord.gg/rHjSC2cJpm"
               target="_blank"
               rel="noopener noreferrer"
               className="animate-scale-in quo-faq-item rounded-xl p-6 border flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5"
