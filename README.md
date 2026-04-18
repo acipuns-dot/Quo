@@ -9,7 +9,7 @@ Live preview, instant PDF — no setup, no learning curve, no bloat.
 
 &nbsp;
 
-[![QUO Official Website](https://img.shields.io/badge/QUO_Official_Website-D4901E?style=for-the-badge&logoColor=111111)](https://quo-omega.vercel.app)
+[![QUO Official Website](https://img.shields.io/badge/QUO_Official_Website-D4901E?style=for-the-badge&logoColor=111111)](https://quodo.app)
 [![Private](https://img.shields.io/badge/repo-private-111111?style=for-the-badge&logoColor=FAF9F7)](https://github.com)
 [![Next.js](https://img.shields.io/badge/Next.js_15-111111?style=for-the-badge&logo=next.js&logoColor=D4901E)](https://nextjs.org)
 [![Discord](https://img.shields.io/badge/Discord-111111?style=for-the-badge&logo=discord&logoColor=D4901E)](https://discord.gg/placeholder)
