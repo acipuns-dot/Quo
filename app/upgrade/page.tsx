@@ -9,6 +9,7 @@ const premiumBenefits = [
   "Saved customers for repeat jobs",
   "Document history for drafts and exports",
   "Continue work across devices",
+  "All document templates available",
 ];
 
 export default async function UpgradePage() {
