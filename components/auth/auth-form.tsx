@@ -171,7 +171,7 @@ export function AuthForm({
             Back to sign in
           </button>
           <h2 className="mt-4 text-xl font-bold text-white">Reset your password</h2>
-          <p className="mt-1 text-sm text-white/50">Enter your email and we'll send you a reset link.</p>
+          <p className="mt-1 text-sm text-white/50">Enter your email and we&apos;ll send you a reset link.</p>
         </div>
       )}
 
