@@ -12,15 +12,21 @@ const premiumBenefits = [
 ];
 
 export default async function UpgradePage() {
+  let shouldRedirectToWorkspace = false;
+
   try {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const profile = await getWorkspaceAccountProfile(supabase, user.id);
-      if (profile?.plan === "premium") redirect("/workspace/invoice");
+      shouldRedirectToWorkspace = profile?.plan === "premium";
     }
   } catch {
     // allow page to render if session check fails
+  }
+
+  if (shouldRedirectToWorkspace) {
+    redirect("/workspace/invoice");
   }
 
   return (

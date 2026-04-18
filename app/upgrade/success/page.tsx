@@ -5,6 +5,8 @@ import { getWorkspaceAccountProfile } from "../../../lib/workspace/account-profi
 import { UpgradeSuccessRedirect } from "./upgrade-success-redirect";
 
 export default async function UpgradeSuccessPage() {
+  let shouldRedirectToWorkspace = false;
+
   try {
     const supabase = await createSupabaseServerClient();
     const {
@@ -14,12 +16,14 @@ export default async function UpgradeSuccessPage() {
     if (user) {
       const profile = await getWorkspaceAccountProfile(supabase, user.id);
 
-      if (profile?.plan === "premium") {
-        redirect("/workspace/invoice");
-      }
+      shouldRedirectToWorkspace = profile?.plan === "premium";
     }
   } catch {
     // Keep the success page usable even if account reconciliation is still in flight.
+  }
+
+  if (shouldRedirectToWorkspace) {
+    redirect("/workspace/invoice");
   }
 
   return (
