@@ -6,6 +6,7 @@ import { normalizeWorkspaceAccountProfileRow } from "./normalizers";
 export type WorkspaceAccountProfile = {
   userId: string;
   plan: WorkspacePlan;
+  shortId: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -13,6 +14,7 @@ export type WorkspaceAccountProfile = {
 type UserProfileRow = {
   user_id: string;
   plan: WorkspacePlan;
+  short_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -32,7 +34,7 @@ export async function getWorkspaceAccountProfile(
   const [profileResult, billingResult] = await Promise.all([
     supabase
       .from("user_profiles")
-      .select("user_id, plan, created_at, updated_at")
+      .select("user_id, plan, short_id, created_at, updated_at")
       .eq("user_id", userId)
       .maybeSingle(),
     supabase
@@ -70,7 +72,7 @@ export async function getWorkspaceAccountProfile(
   const { data: syncedProfile, error: syncError } = await supabase
     .from("user_profiles")
     .upsert({ user_id: userId, plan: resolvedPlan }, { onConflict: "user_id" })
-    .select("user_id, plan, created_at, updated_at")
+    .select("user_id, plan, short_id, created_at, updated_at")
     .single();
 
   if (syncError) {
@@ -93,7 +95,7 @@ export async function ensureWorkspaceAccountProfile(
   const { data, error } = await supabase
     .from("user_profiles")
     .insert({ user_id: user.id, plan: "free" })
-    .select("user_id, plan, created_at, updated_at")
+    .select("user_id, plan, short_id, created_at, updated_at")
     .single();
 
   if (error) {

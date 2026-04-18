@@ -10,6 +10,7 @@ import { CopyUserId } from "./copy-user-id";
 export default async function ProfilePage() {
   let user: { id: string; email?: string | null } | null = null;
   let plan: "free" | "premium" = "free";
+  let shortId: string | null = null;
   let subscription: {
     plan_interval: string;
     status: string;
@@ -30,6 +31,7 @@ export default async function ProfilePage() {
     user = authedUser;
     const profile = await getWorkspaceAccountProfile(supabase, authedUser.id);
     plan = profile?.plan ?? "free";
+    shortId = profile?.shortId ?? null;
 
     if (plan === "premium") {
       const { data } = await supabase
@@ -95,7 +97,7 @@ export default async function ProfilePage() {
                 {plan === "premium" ? "Premium" : "Free"}
               </p>
             </div>
-            <CopyUserId userId={user?.id ?? ""} />
+            <CopyUserId shortId={shortId} />
             <a
               href="https://discord.gg/rHjSC2cJpm"
               target="_blank"

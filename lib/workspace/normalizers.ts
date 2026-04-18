@@ -106,6 +106,7 @@ export function normalizeWorkspaceAccountProfileRow(
   return {
     userId: stringOrFallback(row.user_id, "unknown-user"),
     plan: row.plan === "premium" ? "premium" : "free",
+    shortId: typeof row.short_id === "string" ? row.short_id : null,
     createdAt: timestampOrFallback(row.created_at),
     updatedAt: timestampOrFallback(row.updated_at),
   };
