@@ -14,7 +14,6 @@ const featureCopy = {
 } as const;
 
 const premiumBenefits = [
-  "Unlimited PDF exports",
   "No ads",
   "Multi-business workspace",
   "Saved customers",

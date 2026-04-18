@@ -5,7 +5,6 @@ import { SiteHeaderServer } from "../../components/site/site-header-server";
 import { UpgradeButtons } from "./upgrade-buttons";
 
 const premiumBenefits = [
-  "Unlimited PDF exports",
   "No ads",
   "Multi-business workspace",
   "Saved customers",

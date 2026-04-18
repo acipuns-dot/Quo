@@ -261,7 +261,7 @@ export default async function HomePage() {
               <p className="quo-plan-price-paid text-4xl font-bold mb-1">$4.99<span className="text-base font-medium opacity-70"> / mo</span></p>
               <p className="quo-plan-subdesc-paid text-sm mb-7" style={{ minHeight: "2.5rem" }}>or $49.90 / year &mdash; for businesses that run on Quodo</p>
               <ul className="space-y-2.5 mb-8 flex-1">
-                {["Unlimited PDF exports", "No ads", "Multi-business workspace", "Saved customers", "Document history", "Item catalogue", "Full template library"].map((item) => (
+                {["No ads", "Multi-business workspace", "Saved customers", "Document history", "Item catalogue", "Full template library"].map((item) => (
                   <li key={item} className="quo-plan-item-paid flex items-start gap-2.5 text-sm">
                     <svg className="flex-shrink-0 mt-0.5" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                     {item}
