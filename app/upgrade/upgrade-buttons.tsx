@@ -156,7 +156,7 @@ export function UpgradeButtons() {
       </a>
 
       <p className="text-center text-[11px] text-white/25">
-        Sandbox mode — no real charges. Cancel anytime.{" "}
+        Cancel anytime.{" "}
         <a
           href="https://discord.gg/rHjSC2cJpm"
           target="_blank"
