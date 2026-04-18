@@ -5,11 +5,13 @@ import { SiteHeaderServer } from "../../components/site/site-header-server";
 import { UpgradeButtons } from "./upgrade-buttons";
 
 const premiumBenefits = [
+  "Unlimited PDF exports",
+  "No ads",
   "Multi-business workspace",
-  "Saved customers for repeat jobs",
-  "Document history for drafts and exports",
-  "Continue work across devices",
-  "All document templates available",
+  "Saved customers",
+  "Document history",
+  "Item catalogue",
+  "Full template library",
 ];
 
 export default async function UpgradePage() {

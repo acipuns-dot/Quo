@@ -51,9 +51,9 @@ export default async function LoginPage() {
             Sign in to keep your businesses, customers, and document history in one premium workspace while preserving the same fast Quodo editing flow.
           </p>
           <div className="mt-8 flex flex-wrap gap-6 text-sm text-white/45">
-            <span>Unlimited exports</span>
-            <span>Reusable customers</span>
-            <span>Business switching</span>
+            <span>Multi-business workspace</span>
+            <span>Saved customers</span>
+            <span>Document history</span>
           </div>
         </section>
 
