@@ -5,6 +5,7 @@ import { SiteHeader } from "../../components/site/site-header";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { getWorkspaceAccountProfile, resolvePostAuthPath } from "../../lib/workspace/account-profiles";
 import { CancelSubscriptionButton } from "./cancel-subscription-button";
+import { CopyUserId } from "./copy-user-id";
 
 export default async function ProfilePage() {
   let user: { id: string; email?: string | null } | null = null;
@@ -94,6 +95,7 @@ export default async function ProfilePage() {
                 {plan === "premium" ? "Premium" : "Free"}
               </p>
             </div>
+            <CopyUserId userId={user?.id ?? ""} />
             <a
               href="https://discord.gg/rHjSC2cJpm"
               target="_blank"
