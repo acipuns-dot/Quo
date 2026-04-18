@@ -5,9 +5,9 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { getWorkspaceAccountProfile } from "../../lib/workspace/account-profiles";
 
 export const metadata: Metadata = {
-  title: "Receipt Generator | Quodo",
+  title: "Free Receipt Generator — No Sign Up | Quodo",
   description:
-    "Create a professional receipt online with two template styles, payment details, and PDF download.",
+    "Create a professional receipt online for free. No account needed, no watermark. Fill in your details and download your PDF instantly.",
 };
 
 export default async function ReceiptPage({

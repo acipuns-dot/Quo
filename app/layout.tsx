@@ -19,9 +19,9 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Quodo - Business Documents in Under 2 Minutes",
+  title: "Quodo — Free Invoice, Quotation & Receipt Generator",
   description:
-    "Create professional quotations, invoices, and receipts online. Live preview, instant PDF - free, no sign-up required.",
+    "Create professional invoices, quotations, and receipts online for free. No sign-up, no watermark, instant PDF download.",
   metadataBase: new URL("https://quodo.app"),
   alternates: {
     canonical: "/",

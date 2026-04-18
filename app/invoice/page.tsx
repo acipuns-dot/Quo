@@ -5,9 +5,9 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
 import { getWorkspaceAccountProfile } from "../../lib/workspace/account-profiles";
 
 export const metadata: Metadata = {
-  title: "Invoice Generator | Quodo",
+  title: "Free Invoice Generator — No Sign Up | Quodo",
   description:
-    "Create a modern invoice online with two template styles, live preview, and printable PDF output.",
+    "Create a professional invoice online for free. No account needed, no watermark. Choose a template, fill in your details, download PDF instantly.",
 };
 
 export default async function InvoicePage({
