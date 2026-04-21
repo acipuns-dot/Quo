@@ -32,7 +32,7 @@ export function ModalShell({
             <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-white">{title}</h2>
             {description ? <p className="mt-2 text-sm leading-6 text-white/60">{description}</p> : null}
           </div>
-          <button type="button" onClick={onClose} className="text-sm font-semibold text-white/60">
+          <button type="button" onClick={onClose} className="text-sm font-semibold text-white/60 min-h-[44px] min-w-[44px] flex items-center justify-end">
             Close
           </button>
         </div>

@@ -46,7 +46,7 @@ export function SiteHeader({ account }: { account: SiteHeaderAccount }) {
           {isAuthenticated ? (
             <Link
               href="/profile"
-              className="quo-header-login rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-150 active:scale-95"
+              className="quo-header-login rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-150 active:scale-95 min-h-[44px] flex items-center"
             >
               Profile
             </Link>
@@ -54,13 +54,13 @@ export function SiteHeader({ account }: { account: SiteHeaderAccount }) {
             <>
               <Link
                 href="/login"
-                className="quo-header-login rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-150 active:scale-95"
+                className="quo-header-login rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-150 active:scale-95 min-h-[44px] flex items-center"
               >
                 Login
               </Link>
               <Link
                 href="/invoice"
-                className="quo-header-cta rounded-lg px-4 py-2 text-sm font-bold transition-all duration-150 hover:brightness-110 active:scale-95"
+                className="quo-header-cta rounded-lg px-4 py-2 text-sm font-bold transition-all duration-150 hover:brightness-110 active:scale-95 min-h-[44px] flex items-center"
               >
                 Start free
               </Link>
