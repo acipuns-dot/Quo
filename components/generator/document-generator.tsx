@@ -1191,6 +1191,19 @@ function DocumentGenerator({
 
   // ─── render ────────────────────────────────────────────────────────────────
 
+  const [activeTab, setActiveTab] = React.useState<"form" | "preview">("form");
+  const touchStartX = React.useRef<number | null>(null);
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (delta < -50) setActiveTab("preview");
+    if (delta > 50) setActiveTab("form");
+  }
+
   return (
     <>
     <div className="flex flex-1 flex-col overflow-hidden min-h-0">
@@ -1217,8 +1230,8 @@ function DocumentGenerator({
           })}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2">
+        {/* Actions (desktop only) */}
+        <div className="hidden md:flex items-center gap-2">
           <button
             type="button"
             onClick={handleClearDraft}
@@ -1255,10 +1268,64 @@ function DocumentGenerator({
         </div>
       </div>
 
+      {/* Mobile pinned action bar */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 flex items-center gap-2 border-t border-white/[0.07] bg-[#111111] px-4 py-3 no-print">
+        <button
+          type="button"
+          onClick={handleClearDraft}
+          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] py-2.5 text-sm font-semibold text-white/60 min-h-[44px]"
+        >
+          Clear
+        </button>
+        {workspace?.apiBasePath ? (
+          <button
+            type="button"
+            onClick={() => void saveCurrentWorkspaceDraft()}
+            disabled={saveState === "saving"}
+            className="flex-1 rounded-lg border border-white/10 bg-white/[0.04] py-2.5 text-sm font-semibold text-white min-h-[44px] disabled:opacity-60"
+          >
+            {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Error" : "Save"}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={handleDownloadPdf}
+          className="flex-1 rounded-lg bg-[#d4901e] py-2.5 text-sm font-semibold text-[#111111] min-h-[44px]"
+        >
+          Download PDF
+        </button>
+      </div>
+
+      {/* Mobile tab bar */}
+      <div className="md:hidden flex border-b border-white/[0.07] bg-[#111111] flex-shrink-0 no-print">
+        <button
+          type="button"
+          onClick={() => setActiveTab("form")}
+          className={`flex-1 py-3 text-sm font-semibold transition-colors min-h-[44px] ${
+            activeTab === "form" ? "text-[#faf9f7] border-b-2 border-[#d4901e]" : "text-white/40"
+          }`}
+        >
+          Form
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("preview")}
+          className={`flex-1 py-3 text-sm font-semibold transition-colors min-h-[44px] ${
+            activeTab === "preview" ? "text-[#faf9f7] border-b-2 border-[#d4901e]" : "text-white/40"
+          }`}
+        >
+          Preview
+        </button>
+      </div>
+
       {/* Main layout */}
-      <div className="grid grid-cols-[400px_1fr] flex-1 min-h-0 overflow-hidden">
+      <div
+        className="md:grid md:grid-cols-[400px_1fr] flex-1 min-h-0 overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* LEFT: form panel */}
-        <div className="bg-[#111111] border-r border-white/[0.07] overflow-y-auto flex flex-col no-print">
+        <div className={`bg-[#111111] border-r border-white/[0.07] overflow-y-auto flex flex-col no-print pb-[60px] md:pb-0 ${activeTab === "preview" ? "hidden md:flex" : "flex"}`}>
           {/* Progress dots */}
           <div className="flex gap-2 items-center px-5 py-3 border-b border-white/[0.06] flex-shrink-0">
             <div className="flex gap-1.5 items-center flex-1">
@@ -1404,7 +1471,7 @@ function DocumentGenerator({
         </div>
 
         {/* RIGHT: preview + template strip */}
-        <div className="grid grid-cols-[1fr_180px] min-h-0 overflow-hidden">
+        <div className={`md:grid md:grid-cols-[1fr_180px] min-h-0 overflow-hidden ${activeTab === "form" ? "hidden md:grid" : "flex flex-col"}`}>
           {/* Preview main */}
           <div className="flex flex-col p-5 pl-7 min-h-0 overflow-hidden bg-[#0d0d0d]">
             <div className="no-print mb-3 flex flex-shrink-0 flex-wrap items-center gap-2">
@@ -1433,7 +1500,7 @@ function DocumentGenerator({
           </div>
 
           {/* Template & colour panel */}
-          <div className="border-l border-white/[0.07] bg-[#111111] flex flex-col gap-5 py-5 px-4 overflow-y-auto no-print w-[180px] shrink-0">
+          <div className="md:border-l border-t border-white/[0.07] bg-[#111111] flex flex-col gap-5 py-5 px-4 overflow-y-auto no-print md:w-[180px] md:shrink-0 pb-[60px] md:pb-5">
 
             {/* Template picker */}
             <div className="flex flex-col gap-3">
