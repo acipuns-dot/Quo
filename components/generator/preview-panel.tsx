@@ -2,12 +2,14 @@ import React from "react";
 import { paginateDocument } from "../../lib/documents/pagination";
 import type { DocumentData } from "../../lib/documents/types";
 import { getTemplatesForKind } from "../../lib/documents/templates";
+import { useMobilePreviewScale } from "../../hooks/use-mobile-preview-scale";
 
 export function PreviewPanel({ data }: { data: DocumentData }) {
   const templates = getTemplatesForKind(data.kind);
   const template =
     templates.find((candidate) => candidate.id === data.templateId) ??
     templates[0];
+  const scale = useMobilePreviewScale();
 
   if (!template) {
     return null;
@@ -24,6 +26,11 @@ export function PreviewPanel({ data }: { data: DocumentData }) {
       className={`flex flex-col items-center ${
         isMultipage ? "gap-8" : "gap-4"
       }`}
+      style={
+        scale !== null
+          ? { transform: `scale(${scale})`, transformOrigin: "top center" }
+          : undefined
+      }
     >
       {renderedPages}
     </div>
