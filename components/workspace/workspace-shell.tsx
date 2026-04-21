@@ -15,6 +15,7 @@ import { BusinessesTab } from "./businesses-tab";
 import { CustomersTab } from "./customers-tab";
 import { DocumentHistoryTab } from "./document-history-tab";
 import { ItemsTab } from "./items-tab";
+import { MobileBottomNav } from "./mobile-bottom-nav";
 
 type WorkspaceShellProps = {
   activeBusiness: BusinessRecord;
@@ -230,8 +231,8 @@ export function WorkspaceShell({
           </div>
         </div>
       </header>
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        <aside className="flex w-[220px] flex-shrink-0 flex-col gap-3 overflow-y-auto border-r border-white/[0.07] p-4">
+      <div className="flex flex-1 min-h-0 overflow-hidden pb-[56px] md:pb-0">
+        <aside className="hidden md:flex w-[220px] flex-shrink-0 flex-col gap-3 overflow-y-auto border-r border-white/[0.07] p-4">
           <WorkspaceSidebar activeTab={currentTab} onTabChange={setCurrentTab} />
           <BusinessPanel
             businesses={businesses}
@@ -322,6 +323,7 @@ export function WorkspaceShell({
           executeSidebarAction(action);
         }}
       />
+      <MobileBottomNav active={currentTab} onChange={setCurrentTab} />
       {isSwitchingBusiness ? (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#111111]/70 backdrop-blur-sm">
           <div className="rounded-2xl border border-white/10 bg-[#171717] px-6 py-5 text-center shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
