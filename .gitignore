@@ -9,10 +9,14 @@
 !app/**
 !components/
 !components/**
+!hooks/
+!hooks/**
 !lib/
 !lib/**
 !types/
 !types/**
+!public/
+!public/**
 
 # Keep web project config and package metadata.
 !package.json
